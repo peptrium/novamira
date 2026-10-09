@@ -108,6 +108,37 @@ function sp_versand_address_lines($order) {
     return array_values($lines);
 }
 
+/**
+ * Lieferadresse in die Felder des DHL-Formulars (Online-Frankierung) zerlegen.
+ * Strasse und Hausnummer werden getrennt ("Olvenstedter Chaussee22" ->
+ * "Olvenstedter Chaussee" + "22", "Hauptstrasse 26/2/4" -> "Hauptstrasse" + "26/2/4").
+ */
+function sp_versand_dhl_fields($order) {
+    $use_shipping = $order->has_shipping_address();
+    $g = function ($field) use ($order, $use_shipping) {
+        $m = ($use_shipping ? 'get_shipping_' : 'get_billing_') . $field;
+        return trim((string) $order->$m());
+    };
+    $street = $g('address_1');
+    $number = '';
+    if (preg_match('/^(.*?)[\s,]*(\d+\s*[a-zA-Z]?(?:\s*[-\/]\s*\d+\s*[a-zA-Z]?)*)$/u', $street, $m) && trim($m[1]) !== '') {
+        $street = trim($m[1]);
+        $number = preg_replace('/\s+/', '', $m[2]);
+    }
+    $extra = trim($g('company') . ' ' . $g('address_2'));
+    $country = $g('country');
+    $fields = array(
+        'Name' => trim($g('first_name') . ' ' . $g('last_name')),
+        'Adresszusatz' => $extra,
+        'Straße' => $street,
+        'Hausnummer' => $number,
+        'PLZ' => $g('postcode'),
+        'Ort' => $g('city'),
+        'Land' => $country && $country !== 'DE' ? (WC()->countries->get_countries()[$country] ?? $country) : '',
+    );
+    return array_filter($fields, function ($v) { return $v !== ''; });
+}
+
 function sp_versand_paid_date($order) {
     $d = $order->get_date_paid() ?: $order->get_date_created();
     return $d ? $d->date_i18n('d.m.Y') : '';
@@ -214,6 +245,19 @@ function sp_versand_cards_html($orders, $with_links = true) {
           <div style="font-size:16px;font-weight:800;line-height:1.35;"><?php echo esc_html($addr[0] ?? ''); ?></div>
           <div style="font-size:14.5px;line-height:1.5;color:#1d2327;"><?php echo implode('<br>', array_map('esc_html', array_slice($addr, 1))); ?></div>
           <div style="font-size:12.5px;color:#4B5157;margin-top:6px;">✉ <?php echo esc_html($order->get_billing_email()); ?><?php if ($order->get_billing_phone()) : ?> &nbsp;·&nbsp; ☎ <?php echo esc_html($order->get_billing_phone()); ?><?php endif; ?></div>
+          <?php if ($with_links) : $dhl = sp_versand_dhl_fields($order); ?>
+            <div class="sp-dhl" style="margin-top:10px;background:#FFFBEA;border:1px solid #F5DFA0;border-radius:10px;padding:8px 10px;">
+              <div style="font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:#996800;font-weight:700;margin-bottom:6px;">Für DHL – Feld anklicken zum Kopieren</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                <?php foreach ($dhl as $label => $value) : ?>
+                  <button type="button" class="sp-copy" data-copy="<?php echo esc_attr($value); ?>" style="display:inline-flex;flex-direction:column;align-items:flex-start;background:#fff;border:1px solid #DCDEE0;border-radius:8px;padding:4px 9px;cursor:pointer;text-align:left;">
+                    <span style="font-size:10px;color:#8A9099;font-weight:700;"><?php echo esc_html($label); ?></span>
+                    <span style="font-size:13.5px;color:#0D0F12;font-weight:600;"><?php echo esc_html($value); ?></span>
+                  </button>
+                <?php endforeach; ?>
+              </div>
+            </div>
+          <?php endif; ?>
 
           <div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8A9099;font-weight:700;margin:14px 0 6px;">Inhalt</div>
           <?php foreach ($items as $it) : ?>
@@ -326,6 +370,17 @@ function sp_versand_render_page() {
         </div>
 
         <?php echo sp_versand_cards_html($orders, true); ?>
+        <script>
+        (function(){
+          function done(btn){ var o = btn.style.borderColor, b = btn.style.background; btn.style.borderColor = '#1F7A4D'; btn.style.background = '#E7F6EC'; setTimeout(function(){ btn.style.borderColor = o; btn.style.background = b; }, 900); }
+          document.addEventListener('click', function(e){
+            var btn = e.target.closest('.sp-copy'); if (!btn) { return; }
+            var text = btn.getAttribute('data-copy');
+            if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(text).then(function(){ done(btn); }); }
+            else { var t = document.createElement('textarea'); t.value = text; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); done(btn); }
+          });
+        })();
+        </script>
 
         <details style="margin-top:24px;max-width:760px;">
           <summary style="cursor:pointer;font-weight:600;">Optional: Gesamtmengen aller offenen Bestellungen</summary>
