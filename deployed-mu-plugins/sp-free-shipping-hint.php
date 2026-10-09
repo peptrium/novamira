@@ -88,6 +88,13 @@ add_action('wp_footer', function () {
     $topup = function_exists('sp_wallet_get_topup_product_id') ? (int) sp_wallet_get_topup_product_id() : 729;
     ?>
     <style>
+      /* Handy: die Kasse hatte 3 verschachtelte Seitenraender (Astra-Container 16 px +
+         entry-content 16 px + Checkout-Block 16 px - 20 px) = 28 px je Seite, die Spalte
+         war nur 294 px breit. Jetzt nur noch der Container-Rand (16 px) -> 358 px. */
+      @media (max-width:781px){
+        body.woocommerce-checkout .entry-content{padding-left:0 !important;padding-right:0 !important}
+        body.woocommerce-checkout .wp-block-woocommerce-checkout.wc-block-checkout{margin-left:0 !important;margin-right:0 !important;padding-left:0 !important;padding-right:0 !important}
+      }
       #sp-fsh-top{background:#F4F5F6;border:1px solid #E2E4E8;border-radius:12px;padding:10px 14px;margin:0 0 18px;font-family:Sora,sans-serif;color:#0D0F12}
       #sp-fsh-top .t{font-size:13px;line-height:1.4;margin:0 0 7px;display:flex;justify-content:space-between;gap:10px;align-items:baseline}
       #sp-fsh-top .t a{font-size:12px;color:#0D0F12;font-weight:600;white-space:nowrap;text-decoration:underline}
@@ -95,14 +102,15 @@ add_action('wp_footer', function () {
       #sp-fsh-top.ok .t{margin:0;color:#0B6B3A}
       .sp-fsh-bar{height:6px;border-radius:99px;background:#DCDEE2;overflow:hidden}
       .sp-fsh-bar span{display:block;height:100%;border-radius:99px;background:#0D0F12;transition:width .4s ease}
-      .sp-fsh-box{margin:14px 0 6px;padding:12px;border-radius:12px;background:#fff;border:1px solid #E2E4E8;font-family:Sora,sans-serif;color:#0D0F12;scroll-margin-top:90px}
-      .sp-fsh-box .h{font-size:13px;line-height:1.4;margin:0 0 8px}
-      .sp-fsh-box .it{display:flex;align-items:center;gap:10px;background:#F7F8F9;border:1px solid #E9EBEE;border-radius:11px;padding:8px 10px;margin-top:8px}
-      .sp-fsh-box .it img{width:38px;height:38px;object-fit:cover;border-radius:8px;flex:none;background:#F2F3F4}
-      .sp-fsh-box .it .n{flex:1;min-width:0;font-size:13px;font-weight:600;line-height:1.3;word-break:normal;overflow-wrap:normal;hyphens:auto}
-      .sp-fsh-box .it .n small{display:block;font-weight:500;color:#5B6169;font-size:12px;margin-top:1px}
-      .sp-fsh-box .it .n em{display:inline-block;font-style:normal;font-size:11px;font-weight:700;color:#0B6B3A;background:#E3F5EA;border-radius:99px;padding:1px 7px;margin-top:3px}
-      .sp-fsh-box .it button,.sp-oi-ctl button{border:0;border-radius:9px;background:#0D0F12;color:#fff;font:600 12px Sora,sans-serif;padding:8px 10px;cursor:pointer;white-space:nowrap;flex:none}
+      .sp-fsh-box{margin:16px 0 14px;padding:14px 14px 6px;border-radius:12px;background:#fff;border:1px solid #E2E4E8;font-family:Sora,sans-serif;color:#0D0F12;scroll-margin-top:90px}
+      .sp-fsh-box .h{font-size:14px;line-height:1.4;margin:0 0 4px}
+      .sp-fsh-box .it{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid #EEF0F2}
+      .sp-fsh-box .h+.it{border-top:0}
+      .sp-fsh-box .it img{width:44px;height:44px;object-fit:cover;border-radius:9px;flex:none;background:#F2F3F4}
+      .sp-fsh-box .it .n{flex:1;min-width:0;font-size:13px;font-weight:600;line-height:1.35}
+      .sp-fsh-box .it .n small{display:block;font-weight:500;color:#5B6169;font-size:12px;margin-top:2px}
+      .sp-fsh-box .it .n small b{color:#0B6B3A;font-weight:700}
+      .sp-oi-ctl button{border:0;border-radius:9px;background:#0D0F12;color:#fff;font:600 12px Sora,sans-serif;padding:8px 10px;cursor:pointer;white-space:nowrap;flex:none}
       .sp-fsh-box button[disabled],.sp-oi-ctl button[disabled]{opacity:.5;cursor:default}
       .sp-oi-ctl{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px;font-family:Sora,sans-serif;max-width:100%;min-width:0}
       /* Theme-Button-Stile (Astra/Elementor) gezielt ueberschreiben */
@@ -157,6 +165,7 @@ add_action('wp_footer', function () {
       }
       var QS='style="all:unset;box-sizing:border-box;display:inline-flex !important;align-items:center;justify-content:center;width:28px !important;height:28px !important;min-height:0 !important;padding:0 !important;border:1px solid #DCDEE2 !important;border-radius:8px !important;background:#fff !important;color:#0D0F12 !important;font:600 16px/1 Sora,sans-serif !important;box-shadow:none !important;cursor:pointer"';
       var RS='style="all:unset;cursor:pointer;margin-left:8px !important;padding:0 !important;min-height:0 !important;color:#8A9099 !important;background:none !important;border:0 !important;box-shadow:none !important;font:500 12px Sora,sans-serif !important;text-decoration:underline !important;width:auto !important;height:auto !important;white-space:nowrap !important"';
+      var PS='style="all:unset;box-sizing:border-box;flex:none;display:inline-flex !important;align-items:center;justify-content:center;width:36px !important;height:36px !important;min-height:0 !important;padding:0 !important;border:0 !important;border-radius:50% !important;background:#0D0F12 !important;color:#fff !important;font:500 22px/1 Sora,sans-serif !important;box-shadow:none !important;cursor:pointer"';
       function setHTML(el,html){if(el.getAttribute('data-k')!==html){el.setAttribute('data-k',html);el.innerHTML=html;}}
       function renderControls(s){
         document.querySelectorAll('.wc-block-components-order-summary').forEach(function(sum){
@@ -173,6 +182,7 @@ add_action('wp_footer', function () {
       }
       function render(){
         var s=state();if(!s)return;
+        document.querySelectorAll('.sp-fsh-box').forEach(function(b){var p=b.previousElementSibling;if(!p||!p.classList.contains('wp-block-woocommerce-checkout-order-summary-block')){b.remove();}});
         renderControls(s);
         var main=document.querySelector('.wc-block-checkout__main'),top=document.getElementById('sp-fsh-top');
         var show=MIN>0&&s.goods>0&&(!s.country||s.country==='DE');
@@ -188,17 +198,20 @@ add_action('wp_footer', function () {
         }
         var boxHTML='';
         if(!reached&&sug.length){
-          boxHTML='<p class="h">🚚 Noch <b>'+money(rest,s.totals)+'</b> bis zum Gratisversand (ab '+money(MIN,s.totals)+'):</p><div class="sp-fsh-bar"><span style="width:'+pct+'%"></span></div>';
+          boxHTML='<p class="h">🚚 Für <b>Gratisversand</b> fehlen noch <b>'+money(rest,s.totals)+'</b></p>';
           sug.forEach(function(x){
-            boxHTML+='<div class="it">'+(x.img?'<img src="'+esc(x.img)+'" alt="">':'')+'<div class="n">'+esc(x.name)+'<small>'+(x.kind==='more'?'+ ':'')+money(x.price,s.totals)+'</small>'+(x.price>=rest?'<em>damit Gratisversand</em>':'')+'</div><button type="button" '+(x.kind==='more'?'data-more="'+esc(x.key)+'" data-qty="'+x.qty+'"':'data-add="'+x.id+'"')+(busy?' disabled':'')+'>+ Dazu</button></div>';
+            boxHTML+='<div class="it">'+(x.img?'<img src="'+esc(x.img)+'" alt="">':'')+'<div class="n">'+esc(x.name)+'<small>'+(x.kind==='more'?'+ ':'')+money(x.price,s.totals)+(x.price>=rest?' · <b>✓ Gratisversand</b>':'')+'</small></div><button type="button" '+PS+' aria-label="Hinzufügen" '+(x.kind==='more'?'data-more="'+esc(x.key)+'" data-qty="'+x.qty+'"':'data-add="'+x.id+'"')+(busy?' disabled':'')+'>+</button></div>';
           });
         }
+        var seen=[];
         document.querySelectorAll('.wc-block-components-order-summary').forEach(function(sum){
-          var anchor=sum.querySelector('.wp-block-woocommerce-checkout-order-summary-cart-items-block')||sum.querySelector('.wc-block-components-order-summary');
-          var box=sum.querySelector('.sp-fsh-box');
+          var block=sum.closest('.wp-block-woocommerce-checkout-order-summary-block')||sum;
+          if(seen.indexOf(block)>-1)return;seen.push(block);
+          var anchor=sum.closest('.wp-block-woocommerce-checkout-order-summary-block')||sum;
+          var box=anchor.nextElementSibling&&anchor.nextElementSibling.classList.contains('sp-fsh-box')?anchor.nextElementSibling:null;
           if(!boxHTML){if(box)box.remove();return;}
           if(!box){box=document.createElement('div');box.className='sp-fsh-box';box.lang='de';}
-          if(anchor&&box.previousSibling!==anchor){anchor.parentNode.insertBefore(box,anchor.nextSibling);}else if(!anchor&&box.parentNode!==sum){sum.appendChild(box);}
+          if(box.previousSibling!==anchor){anchor.parentNode.insertBefore(box,anchor.nextSibling);}
           setHTML(box,boxHTML);
         });
       }
