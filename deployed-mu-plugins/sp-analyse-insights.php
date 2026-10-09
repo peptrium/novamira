@@ -120,7 +120,7 @@ add_action('wp_footer', function () {
           document.querySelectorAll('.wc-block-components-validation-error').forEach(function(el){
             var w=el.closest('.has-error')||el.parentElement,l=w&&w.querySelector('label'),lt=l?clean(l.textContent):'';
             // Bei Haekchen (AGB, Alter) ist das Label ein ganzer Satz - dann nur die Meldung.
-            send('kasse','pflichtfeld',(lt&&lt.length<=40&&!el.closest('.wc-block-components-checkbox')?lt+': ':'')+el.textContent);
+            var mt=clean(el.textContent);send('kasse','pflichtfeld',(lt&&lt.length<=40&&!el.closest('.wc-block-components-checkbox')&&mt.indexOf(lt)===-1?lt+': ':'')+mt);
           });
         },800);
       },true);

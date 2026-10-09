@@ -279,6 +279,15 @@ function sp_versand_cards_html($orders, $mode = 'admin') {
           <?php if ($order->get_customer_note()) : ?>
             <div style="margin-top:10px;background:#FFF8E5;border:1px solid #F5DFA0;border-radius:10px;padding:9px 12px;font-size:13.5px;"><strong>Hinweis vom Kunden:</strong> <?php echo esc_html($order->get_customer_note()); ?></div>
           <?php endif; ?>
+          <?php if ($mode === 'admin') : ?>
+            <form method="post" onsubmit="return confirm('Sendungsnummer ' + this.sp_versand_tracking.value + ' speichern?\n\nDie Bestellung wird abgeschlossen und der Kunde bekommt die Versandmail mit DHL-Link.');" style="margin:14px 0 0;padding-top:12px;border-top:1px solid #F2F3F4;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+              <?php wp_nonce_field('sp_versand_track'); ?>
+              <input type="hidden" name="sp_versand_track_order" value="<?php echo (int) $order->get_id(); ?>">
+              <input type="text" name="sp_versand_tracking" required placeholder="DHL-Sendungsnummer eintragen" autocomplete="off" style="flex:1;min-width:210px;font-size:14px;padding:6px 10px;border:1px solid #DCDEE0;border-radius:8px;">
+              <button type="submit" class="button button-primary">✓ Versendet</button>
+            </form>
+            <div style="font-size:11.5px;color:#8A9099;margin-top:5px;">Speichert die Nummer, schließt die Bestellung ab und schickt dem Kunden die Versandmail mit DHL-Link.</div>
+          <?php endif; ?>
         </div>
       </div>
       <?php endforeach; ?>
@@ -393,8 +402,25 @@ function sp_versand_render_page() {
     if (!current_user_can('manage_woocommerce')) {
         wp_die('Keine Berechtigung.');
     }
-    $orders = sp_versand_get_orders();
     $notice = '';
+    // Sendungsnummer direkt aus der Karte: gleiche Logik wie das Feld in der Bestellung
+    // (sp_tracking_set_number(): speichern + "Abgeschlossen" + Versandmail mit DHL-Link).
+    if (!empty($_POST['sp_versand_track_order']) && check_admin_referer('sp_versand_track')) {
+        $t_order = wc_get_order(absint($_POST['sp_versand_track_order']));
+        $tn = preg_replace('/\s+/', '', sanitize_text_field(wp_unslash($_POST['sp_versand_tracking'] ?? '')));
+        if (!$t_order || !function_exists('sp_tracking_set_number')) {
+            $notice = '<div class="notice notice-error"><p>Bestellung nicht gefunden.</p></div>';
+        } elseif (!preg_match('/^[A-Za-z0-9]{8,40}$/', $tn)) {
+            $notice = '<div class="notice notice-error"><p>Die Sendungsnummer sieht nicht gültig aus (8–40 Buchstaben/Ziffern, ohne Sonderzeichen). Nichts gespeichert.</p></div>';
+        } else {
+            $res = sp_tracking_set_number($t_order, $tn);
+            $link = '<a href="' . esc_url($t_order->get_edit_order_url()) . '">Bestellung #' . esc_html($t_order->get_order_number()) . '</a>';
+            $notice = $res === 'set'
+                ? '<div class="notice notice-success"><p>✓ ' . $link . ' als versendet markiert (Sendungsnummer ' . esc_html($tn) . '). Der Kunde hat die Versandmail mit DHL-Link bekommen. Tippfehler? In der Bestellung korrigieren.</p></div>'
+                : '<div class="notice notice-info"><p>' . $link . ': Diese Sendungsnummer war schon hinterlegt – nichts geändert.</p></div>';
+        }
+    }
+    $orders = sp_versand_get_orders();
     if (!empty($_POST['sp_versand_send']) && check_admin_referer('sp_versand_send')) {
         $to = sanitize_email(wp_unslash($_POST['sp_versand_to'] ?? ''));
         if (!is_email($to)) {
@@ -414,7 +440,7 @@ function sp_versand_render_page() {
     <div class="wrap">
       <h1>Versand vorbereiten</h1>
       <?php echo $notice; ?>
-      <p style="max-width:760px;color:#50575e;">Alle bezahlten Bestellungen ohne Sendungsnummer &ndash; bei jedem Öffnen aktuell. Neue Bestellungen erscheinen automatisch, versendete (mit Sendungsnummer) verschwinden. Guthaben-Aufladungen und Testbestellungen sind ausgenommen. Sendungsnummern wie gewohnt eintragen (einzeln oder per <a href="<?php echo esc_url(admin_url('admin.php?page=sp-tracking-import')); ?>">Excel-Import</a>).</p>
+      <p style="max-width:760px;color:#50575e;">Alle bezahlten Bestellungen ohne Sendungsnummer &ndash; bei jedem Öffnen aktuell. Neue Bestellungen erscheinen automatisch, versendete (mit Sendungsnummer) verschwinden. Guthaben-Aufladungen und Testbestellungen sind ausgenommen. Sendungsnummer einfach unten in der jeweiligen Karte eintragen und „Versendet“ klicken &ndash; oder viele auf einmal per <a href="<?php echo esc_url(admin_url('admin.php?page=sp-tracking-import')); ?>">Excel-Import</a>.</p>
 
       <?php if (!$orders) : ?>
         <div class="notice notice-success inline"><p><strong>Alles versendet</strong> &ndash; aktuell nichts zu packen.</p></div>
