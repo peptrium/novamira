@@ -19,6 +19,7 @@ the live server* through a custom ability — see below.
 - Header menu: **built** — hamburger drawer (header template 316) using the WP menu "Hauptmenü" + Abo entry via `sp-abo-nav.php`. (Older notes calling it a placeholder are outdated.)
 - Payments: Vorkasse, Krypto (NOWPayments), Guthaben (`sp_wallet`). The user confirms payments and ships **manually himself** — no third party; WP-Cron timing is fine, no server cron wanted.
 - Customers 17, 41, 90 and their orders/abos (e.g. top-up #3244) are **test data**, not real customers.
+- **Formats switched to German on 2026-10-09:** prices `woocommerce_price_decimal_sep` = `,`, `woocommerce_price_thousand_sep` = `.` (was `.`/`,` → "169.90 €"), WP `date_format` = `j. F Y` (was `F j, Y` → "Oktober 8, 2026" in e-mails), `time_format` = `H:i`. Old values saved in option `sp_format_backup_20261009`. Nothing parsed the old dot format (the Pen pages' `parsePrice()` already assumed German format and was actually wrong before); Store API now reports `,`/`.` separators, which `sp-free-shipping-hint.php` picks up automatically.
 - Genuinely still open: **no Impressum page exists** (and "Über uns" claims one), §312k cancellation button only behind login. (Abo/Guthaben UX improvements: done 2026-10-09, `sp-abo-wallet-ux.php`.) BPC-157/TB-500/Semax/Selank were removed from the Zubehör category on request.
 
 ## How to connect / operate on the live site
