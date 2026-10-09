@@ -1019,6 +1019,8 @@ function sp_an_render_tab($range) {
       <?php endif; ?>
     </div>
 
+    <?php do_action('sp_an_render_insights', $start, $end, $since); ?>
+
     <div class="sp-dash-card">
       <h2>Herkunft – welcher Kanal bringt Umsatz?</h2>
       <?php if (empty($src)): ?>
