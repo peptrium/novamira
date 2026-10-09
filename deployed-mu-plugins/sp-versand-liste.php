@@ -11,8 +11,9 @@
  *
  *  - Pickliste: was insgesamt aus dem Lager geholt werden muss (summiert pro
  *    Produkt/Variante, Gratis-Geschenke inklusive).
- *  - Packzettel: pro Bestellung Adresse + Inhalt, druckfertig (eine Seite je
- *    Bestellung).
+ *  - Karten-Ansicht pro Bestellung (Empfaenger, Kontakt, Inhalt) - zum Lesen
+ *    am Bildschirm, als eigene Seite, und per "Liste per E-Mail senden"
+ *    (gleiche Ansicht im Mailtext + Excel im Anhang; letzte Adresse wird gemerkt).
  *  - Excel: Pickliste und Packliste als .xlsx (nutzt sp_vorkasse_build_xlsx()
  *    aus sp-vorkasse-overview.php).
  *
@@ -170,47 +171,102 @@ add_action('admin_init', function () {
     }
 });
 
+/* ---------------------------------------------------------------------
+ * Karten-Ansicht (Bildschirm, eigenstaendige Ansicht und E-Mail).
+ * Nur Inline-Styles, damit sie in E-Mail-Programmen genauso aussieht.
+ * ------------------------------------------------------------------- */
+
+function sp_versand_tag($label, $bg, $color) {
+    return '<span style="display:inline-block;background:' . $bg . ';color:' . $color . ';border-radius:999px;padding:1px 8px;font-size:11px;font-weight:700;letter-spacing:.02em;margin-left:6px;vertical-align:middle;">' . esc_html($label) . '</span>';
+}
+
+function sp_versand_cards_html($orders, $with_links = true) {
+    $font = "font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;";
+    $units = 0;
+    foreach ($orders as $o) {
+        foreach (sp_versand_order_items($o) as $it) {
+            $units += $it['qty'];
+        }
+    }
+    ob_start();
+    ?>
+    <div style="<?php echo $font; ?>color:#0D0F12;max-width:760px;">
+      <div style="background:#0D0F12;color:#fff;border-radius:14px;padding:16px 20px;margin:0 0 16px;">
+        <div style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#A8B0B9;font-weight:700;">Versandliste &middot; <?php echo esc_html(current_time('d.m.Y, H:i')); ?> Uhr</div>
+        <div style="font-size:22px;font-weight:800;margin-top:4px;"><?php echo count($orders); ?> Paket<?php echo count($orders) === 1 ? '' : 'e'; ?> &middot; <?php echo (int) $units; ?> Artikel</div>
+        <div style="font-size:12.5px;color:#C7CCD1;margin-top:4px;">Bezahlt, noch nicht versendet &ndash; älteste Zahlung zuerst.</div>
+      </div>
+      <?php foreach ($orders as $i => $order) :
+          $addr = sp_versand_address_lines($order);
+          $items = sp_versand_order_items($order);
+          $is_abo = (bool) array_filter($items, function ($it) { return $it['abo']; });
+      ?>
+      <div style="background:#fff;border:1px solid #DCDEE0;border-radius:14px;margin:0 0 14px;overflow:hidden;">
+        <div style="background:#F2F3F4;padding:10px 16px;border-bottom:1px solid #DCDEE0;">
+          <span style="display:inline-block;background:#0D0F12;color:#fff;border-radius:8px;padding:2px 9px;font-weight:800;font-size:13px;"><?php echo (int) ($i + 1); ?></span>
+          <?php if ($with_links) : ?><a href="<?php echo esc_url($order->get_edit_order_url()); ?>" style="color:#0D0F12;font-weight:800;font-size:16px;text-decoration:none;margin-left:8px;">Bestellung #<?php echo esc_html($order->get_order_number()); ?></a>
+          <?php else : ?><span style="font-weight:800;font-size:16px;margin-left:8px;">Bestellung #<?php echo esc_html($order->get_order_number()); ?></span><?php endif; ?>
+          <span style="color:#4B5157;font-size:12.5px;margin-left:8px;">bezahlt <?php echo esc_html(sp_versand_paid_date($order)); ?></span>
+          <?php if ($is_abo) { echo sp_versand_tag('ABO', '#FFF1EA', '#E5342B'); } ?>
+        </div>
+        <div style="padding:14px 16px;">
+          <div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8A9099;font-weight:700;margin-bottom:4px;">Empfänger</div>
+          <div style="font-size:16px;font-weight:800;line-height:1.35;"><?php echo esc_html($addr[0] ?? ''); ?></div>
+          <div style="font-size:14.5px;line-height:1.5;color:#1d2327;"><?php echo implode('<br>', array_map('esc_html', array_slice($addr, 1))); ?></div>
+          <div style="font-size:12.5px;color:#4B5157;margin-top:6px;">✉ <?php echo esc_html($order->get_billing_email()); ?><?php if ($order->get_billing_phone()) : ?> &nbsp;·&nbsp; ☎ <?php echo esc_html($order->get_billing_phone()); ?><?php endif; ?></div>
+
+          <div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8A9099;font-weight:700;margin:14px 0 6px;">Inhalt</div>
+          <?php foreach ($items as $it) : ?>
+            <div style="padding:7px 0;border-top:1px solid #F2F3F4;font-size:15px;">
+              <span style="display:inline-block;min-width:34px;text-align:center;background:#0D0F12;color:#fff;border-radius:6px;padding:1px 6px;font-weight:800;margin-right:8px;"><?php echo (int) $it['qty']; ?>×</span><?php echo esc_html($it['name']); ?><?php if ($it['gift']) { echo sp_versand_tag('GRATIS', '#E7F6EC', '#1F7A4D'); } ?>
+            </div>
+          <?php endforeach; ?>
+          <?php if ($order->get_customer_note()) : ?>
+            <div style="margin-top:10px;background:#FFF8E5;border:1px solid #F5DFA0;border-radius:10px;padding:9px 12px;font-size:13.5px;"><strong>Hinweis vom Kunden:</strong> <?php echo esc_html($order->get_customer_note()); ?></div>
+          <?php endif; ?>
+        </div>
+      </div>
+      <?php endforeach; ?>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+
+/** Eigenstaendige Ansicht (neuer Tab, ohne WP-Admin-Rahmen) - gut zum Lesen auf Handy/Tablet. */
 function sp_versand_render_print($mode, $orders) {
     nocache_headers();
     ?><!doctype html>
-<html lang="de"><head><meta charset="utf-8"><title><?php echo $mode === 'print_pick' ? 'Pickliste' : 'Packzettel'; ?> <?php echo esc_html(current_time('d.m.Y')); ?></title>
-<style>
-  body{font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#111;margin:24px}
-  h1{font-size:20px;margin:0 0 4px} .sub{color:#555;font-size:12px;margin:0 0 16px}
-  table{border-collapse:collapse;width:100%} th,td{border:1px solid #bbb;padding:8px 10px;text-align:left;font-size:14px;vertical-align:top}
-  th{background:#f2f2f2} td.num{text-align:center;font-weight:700;font-size:16px;width:70px} td.box{width:60px}
-  .slip{page-break-after:always;padding-bottom:12px} .slip:last-child{page-break-after:auto}
-  .slip-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #111;padding-bottom:10px;margin-bottom:12px}
-  .addr{font-size:16px;line-height:1.45} .meta{text-align:right;font-size:13px;color:#333}
-  .tag{display:inline-block;border:1px solid #111;border-radius:4px;padding:0 6px;font-size:11px;font-weight:700;margin-left:6px}
-  .note{margin-top:10px;padding:8px 10px;border:1px dashed #888;font-size:13px}
-  .noprint{margin-bottom:16px} @media print{.noprint{display:none} body{margin:10mm}}
-</style></head><body>
-<div class="noprint"><button onclick="window.print()" style="font-size:15px;padding:8px 16px;cursor:pointer">🖨 Drucken</button></div>
-<?php if ($mode === 'print_pick') : $pick = sp_versand_pick_list($orders); ?>
-  <h1>Pickliste</h1>
-  <p class="sub"><?php echo count($orders); ?> Bestellung(en) · erstellt <?php echo esc_html(current_time('d.m.Y H:i')); ?></p>
-  <table><thead><tr><th>Produkt</th><th>Menge</th><th>Bestellungen</th><th>✓</th></tr></thead><tbody>
-  <?php foreach ($pick as $p) : ?>
-    <tr><td><?php echo esc_html($p['name']); ?></td><td class="num"><?php echo (int) $p['qty']; ?></td><td><?php echo (int) $p['orders']; ?></td><td class="box"></td></tr>
-  <?php endforeach; ?>
-  </tbody></table>
-<?php else : foreach ($orders as $order) : $addr = sp_versand_address_lines($order); ?>
-  <div class="slip">
-    <div class="slip-head">
-      <div class="addr"><?php echo implode('<br>', array_map('esc_html', $addr)); ?></div>
-      <div class="meta"><strong style="font-size:18px">#<?php echo esc_html($order->get_order_number()); ?></strong><br>bezahlt <?php echo esc_html(sp_versand_paid_date($order)); ?><br><?php echo esc_html($order->get_billing_phone()); ?></div>
-    </div>
-    <table><thead><tr><th>Produkt</th><th>Menge</th><th>✓</th></tr></thead><tbody>
-    <?php foreach (sp_versand_order_items($order) as $it) : ?>
-      <tr><td><?php echo esc_html($it['name']); ?><?php if ($it['gift']) : ?><span class="tag">GRATIS</span><?php endif; ?><?php if ($it['abo']) : ?><span class="tag">ABO</span><?php endif; ?></td><td class="num"><?php echo (int) $it['qty']; ?></td><td class="box"></td></tr>
-    <?php endforeach; ?>
-    </tbody></table>
-    <?php if ($order->get_customer_note()) : ?><div class="note"><strong>Kundenhinweis:</strong> <?php echo esc_html($order->get_customer_note()); ?></div><?php endif; ?>
-  </div>
-<?php endforeach; endif; ?>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Versandliste <?php echo esc_html(current_time('d.m.Y')); ?></title></head>
+<body style="margin:0;padding:18px 14px;background:#F7F8F9;">
+<?php echo sp_versand_cards_html($orders, false); ?>
 </body></html>
     <?php
+}
+
+/** Versandliste per Mail: Karten-Ansicht im Mailtext + Excel-Datei im Anhang. */
+function sp_versand_send_mail($to, $orders) {
+    $subject = 'Versandliste ' . current_time('d.m.Y') . ' – ' . count($orders) . ' Paket' . (count($orders) === 1 ? '' : 'e');
+    $mailer = WC()->mailer();
+    $message = $mailer->wrap_message('Versandliste', sp_versand_cards_html($orders, false));
+    $attachments = array();
+    if (function_exists('sp_vorkasse_build_xlsx')) {
+        $header = array('Nr', 'Bestellnummer', 'Bezahlt am', 'Name', 'Adresse', 'Produkt', 'Menge', 'Hinweis', 'E-Mail', 'Telefon');
+        $rows = array();
+        foreach ($orders as $i => $order) {
+            $addr = sp_versand_address_lines($order);
+            foreach (sp_versand_order_items($order) as $it) {
+                $rows[] = array($i + 1, $order->get_order_number(), sp_versand_paid_date($order), $addr[0] ?? '', implode(', ', array_slice($addr, 1)), $it['name'], $it['qty'], trim(($it['gift'] ? 'Gratis ' : '') . ($it['abo'] ? 'Abo ' : '') . $order->get_customer_note()), $order->get_billing_email(), $order->get_billing_phone());
+            }
+        }
+        $file = trailingslashit(get_temp_dir()) . 'versandliste-' . current_time('Y-m-d') . '.xlsx';
+        file_put_contents($file, sp_vorkasse_build_xlsx($header, $rows));
+        $attachments[] = $file;
+    }
+    $ok = $mailer->send($to, $subject, $message, "Content-Type: text/html\r\n", $attachments);
+    foreach ($attachments as $f) {
+        @unlink($f);
+    }
+    return $ok;
 }
 
 /* ---------------------------------------------------------------------
@@ -230,52 +286,49 @@ function sp_versand_render_page() {
         wp_die('Keine Berechtigung.');
     }
     $orders = sp_versand_get_orders();
+    $notice = '';
+    if (!empty($_POST['sp_versand_send']) && check_admin_referer('sp_versand_send')) {
+        $to = sanitize_email(wp_unslash($_POST['sp_versand_to'] ?? ''));
+        if (!is_email($to)) {
+            $notice = '<div class="notice notice-error"><p>Bitte eine gültige E-Mail-Adresse eingeben.</p></div>';
+        } elseif (!$orders) {
+            $notice = '<div class="notice notice-warning"><p>Keine offenen Bestellungen &ndash; es wurde nichts gesendet.</p></div>';
+        } elseif (sp_versand_send_mail($to, $orders)) {
+            update_option('sp_versand_last_email', $to, false);
+            $notice = '<div class="notice notice-success"><p>Versandliste mit ' . count($orders) . ' Bestellung(en) an <strong>' . esc_html($to) . '</strong> gesendet (inkl. Excel-Datei).</p></div>';
+        } else {
+            $notice = '<div class="notice notice-error"><p>Senden fehlgeschlagen &ndash; bitte später erneut versuchen.</p></div>';
+        }
+    }
+    $last_to = get_option('sp_versand_last_email', '');
     $pick = sp_versand_pick_list($orders);
-    $units = array_sum(array_column($pick, 'qty'));
     ?>
     <div class="wrap">
       <h1>Versand vorbereiten</h1>
-      <p style="max-width:900px;color:#50575e;">Alle bezahlten Bestellungen ohne Sendungsnummer, älteste Zahlung zuerst &ndash; die Liste ist bei jedem Öffnen aktuell, neue Bestellungen erscheinen automatisch, versendete (mit Sendungsnummer) verschwinden. Guthaben-Aufladungen und Testbestellungen sind ausgenommen. Diese Seite ändert nichts an den Bestellungen &ndash; Sendungsnummern danach wie gewohnt eintragen (einzeln oder per <a href="<?php echo esc_url(admin_url('admin.php?page=sp-tracking-import')); ?>">Excel-Import</a>).</p>
+      <?php echo $notice; ?>
+      <p style="max-width:760px;color:#50575e;">Alle bezahlten Bestellungen ohne Sendungsnummer &ndash; bei jedem Öffnen aktuell. Neue Bestellungen erscheinen automatisch, versendete (mit Sendungsnummer) verschwinden. Guthaben-Aufladungen und Testbestellungen sind ausgenommen. Sendungsnummern wie gewohnt eintragen (einzeln oder per <a href="<?php echo esc_url(admin_url('admin.php?page=sp-tracking-import')); ?>">Excel-Import</a>).</p>
 
       <?php if (!$orders) : ?>
         <div class="notice notice-success inline"><p><strong>Alles versendet</strong> &ndash; aktuell nichts zu packen.</p></div>
       <?php else : ?>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin:14px 0;">
-          <div style="background:#fff;border:1px solid #dcdcde;border-radius:8px;padding:10px 16px;"><div style="font-size:12px;color:#50575e;">Zu versenden</div><div style="font-size:22px;font-weight:700;"><?php echo count($orders); ?> Bestellung<?php echo count($orders) === 1 ? '' : 'en'; ?></div></div>
-          <div style="background:#fff;border:1px solid #dcdcde;border-radius:8px;padding:10px 16px;"><div style="font-size:12px;color:#50575e;">Artikel gesamt</div><div style="font-size:22px;font-weight:700;"><?php echo (int) $units; ?> Stück</div></div>
+        <div style="max-width:760px;background:#fff;border:1px solid #dcdcde;border-radius:12px;padding:14px 16px;margin:14px 0 18px;">
+          <form method="post" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0;">
+            <?php wp_nonce_field('sp_versand_send'); ?>
+            <strong style="margin-right:4px;">✉ Liste per E-Mail senden an</strong>
+            <input type="email" name="sp_versand_to" value="<?php echo esc_attr($last_to); ?>" placeholder="name@beispiel.de" required style="min-width:240px;">
+            <button type="submit" name="sp_versand_send" value="1" class="button button-primary">Senden</button>
+          </form>
+          <div style="font-size:12px;color:#50575e;margin-top:6px;">Die Mail enthält genau diese Ansicht plus die Liste als Excel-Datei im Anhang. Absender: Peptrium &lt;info@peptrium.com&gt;.</div>
+          <div style="margin-top:10px;">
+            <a class="button" target="_blank" href="<?php echo esc_url(sp_versand_out_url('print_pack')); ?>">↗ Als eigene Seite öffnen</a>
+            <a class="button" href="<?php echo esc_url(sp_versand_out_url('xlsx_pack')); ?>">📥 Excel herunterladen</a>
+          </div>
         </div>
 
-        <p>
-          <a class="button button-primary" target="_blank" href="<?php echo esc_url(sp_versand_out_url('print_pack')); ?>">🖨 Alle Packzettel drucken (1 Seite je Bestellung)</a>
-          <a class="button" href="<?php echo esc_url(sp_versand_out_url('xlsx_pack')); ?>">📥 Liste als Excel</a>
-        </p>
+        <?php echo sp_versand_cards_html($orders, true); ?>
 
-        <table class="widefat striped" style="max-width:1250px;">
-          <thead><tr><th style="width:95px;">Bestellung</th><th style="width:85px;">Bezahlt</th><th>Kunde &amp; Lieferadresse</th><th>Kontakt</th><th>Was rein muss</th><th style="width:105px;"></th></tr></thead>
-          <tbody>
-          <?php foreach ($orders as $order) : $addr = sp_versand_address_lines($order); ?>
-            <tr>
-              <td><a href="<?php echo esc_url($order->get_edit_order_url()); ?>" style="font-weight:700;font-size:14px;">#<?php echo esc_html($order->get_order_number()); ?></a></td>
-              <td><?php echo esc_html(sp_versand_paid_date($order)); ?></td>
-              <td><strong><?php echo esc_html($addr[0] ?? ''); ?></strong><br><?php echo implode('<br>', array_map('esc_html', array_slice($addr, 1))); ?></td>
-              <td style="font-size:12.5px;"><?php echo esc_html($order->get_billing_email()); ?><?php if ($order->get_billing_phone()) : ?><br><?php echo esc_html($order->get_billing_phone()); ?><?php endif; ?></td>
-              <td>
-                <?php foreach (sp_versand_order_items($order) as $it) : ?>
-                  <div><strong><?php echo (int) $it['qty']; ?>×</strong> <?php echo esc_html($it['name']); ?>
-                    <?php if ($it['gift']) : ?><span style="background:#E7F6EC;color:#1F7A4D;border-radius:999px;padding:0 7px;font-size:11px;font-weight:700;">Gratis</span><?php endif; ?>
-                    <?php if ($it['abo']) : ?><span style="background:#FFF1EA;color:#E5342B;border-radius:999px;padding:0 7px;font-size:11px;font-weight:700;">Abo</span><?php endif; ?>
-                  </div>
-                <?php endforeach; ?>
-                <?php if ($order->get_customer_note()) : ?><div style="margin-top:4px;color:#996800;">💬 <?php echo esc_html($order->get_customer_note()); ?></div><?php endif; ?>
-              </td>
-              <td><a class="button button-small" target="_blank" href="<?php echo esc_url(sp_versand_out_url('print_pack', array($order->get_id()))); ?>">🖨 Packzettel</a></td>
-            </tr>
-          <?php endforeach; ?>
-          </tbody>
-        </table>
-
-        <details style="margin-top:28px;max-width:700px;">
-          <summary style="cursor:pointer;font-weight:600;">Optional: Gesamtmengen aller offenen Bestellungen anzeigen</summary>
+        <details style="margin-top:24px;max-width:760px;">
+          <summary style="cursor:pointer;font-weight:600;">Optional: Gesamtmengen aller offenen Bestellungen</summary>
           <table class="widefat striped" style="margin-top:10px;">
             <thead><tr><th>Produkt</th><th style="width:90px;">Menge</th><th style="width:120px;">in Bestellungen</th></tr></thead>
             <tbody>
