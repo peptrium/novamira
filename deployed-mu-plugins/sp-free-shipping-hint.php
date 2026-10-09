@@ -104,7 +104,7 @@ add_action('wp_footer', function () {
       .sp-fsh-box .it .n em{display:inline-block;font-style:normal;font-size:11px;font-weight:700;color:#0B6B3A;background:#E3F5EA;border-radius:99px;padding:1px 7px;margin-top:3px}
       .sp-fsh-box .it button,.sp-oi-ctl button{border:0;border-radius:9px;background:#0D0F12;color:#fff;font:600 12px Sora,sans-serif;padding:8px 10px;cursor:pointer;white-space:nowrap;flex:none}
       .sp-fsh-box button[disabled],.sp-oi-ctl button[disabled]{opacity:.5;cursor:default}
-      .sp-oi-ctl{display:flex;align-items:center;gap:6px;margin-top:8px;font-family:Sora,sans-serif}
+      .sp-oi-ctl{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px;font-family:Sora,sans-serif;max-width:100%;min-width:0}
       /* Theme-Button-Stile (Astra/Elementor) gezielt ueberschreiben */
       .sp-oi-ctl button.sp-q{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border:1px solid #DCDEE2 !important;border-radius:8px;background:#fff !important;color:#0D0F12 !important;font:600 16px/1 Sora,sans-serif;cursor:pointer}
       .sp-oi-ctl button.sp-q[disabled]{opacity:.35;cursor:default}
