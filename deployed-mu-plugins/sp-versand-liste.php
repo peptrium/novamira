@@ -211,7 +211,8 @@ function sp_versand_tag($label, $bg, $color) {
     return '<span style="display:inline-block;background:' . $bg . ';color:' . $color . ';border-radius:999px;padding:1px 8px;font-size:11px;font-weight:700;letter-spacing:.02em;margin-left:6px;vertical-align:middle;">' . esc_html($label) . '</span>';
 }
 
-function sp_versand_cards_html($orders, $with_links = true) {
+function sp_versand_cards_html($orders, $mode = 'admin') {
+    $with_links = ($mode === 'admin');
     $font = "font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;";
     $units = 0;
     foreach ($orders as $o) {
@@ -245,9 +246,19 @@ function sp_versand_cards_html($orders, $with_links = true) {
           <div style="font-size:16px;font-weight:800;line-height:1.35;"><?php echo esc_html($addr[0] ?? ''); ?></div>
           <div style="font-size:14.5px;line-height:1.5;color:#1d2327;"><?php echo implode('<br>', array_map('esc_html', array_slice($addr, 1))); ?></div>
           <div style="font-size:12.5px;color:#4B5157;margin-top:6px;">✉ <?php echo esc_html($order->get_billing_email()); ?><?php if ($order->get_billing_phone()) : ?> &nbsp;·&nbsp; ☎ <?php echo esc_html($order->get_billing_phone()); ?><?php endif; ?></div>
-          <?php if ($with_links) : $dhl = sp_versand_dhl_fields($order); ?>
+          <?php $dhl = sp_versand_dhl_fields($order); ?>
             <div class="sp-dhl" style="margin-top:10px;background:#FFFBEA;border:1px solid #F5DFA0;border-radius:10px;padding:8px 10px;">
-              <div style="font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:#996800;font-weight:700;margin-bottom:6px;">Für DHL – Feld anklicken zum Kopieren</div>
+              <div style="font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:#996800;font-weight:700;margin-bottom:6px;"><?php echo $mode === 'email' ? 'Für DHL – Wert lange drücken zum Kopieren' : 'Für DHL – Feld anklicken zum Kopieren'; ?></div>
+              <?php if ($mode === 'email') : ?>
+                <table cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #F0E3B5;border-radius:8px;">
+                <?php foreach ($dhl as $label => $value) : ?>
+                  <tr>
+                    <td style="padding:6px 10px;border-bottom:1px solid #F7EFD2;font-size:11px;color:#8A9099;font-weight:700;width:110px;white-space:nowrap;"><?php echo esc_html($label); ?></td>
+                    <td style="padding:6px 10px;border-bottom:1px solid #F7EFD2;font-size:14px;color:#0D0F12;font-weight:600;-webkit-user-select:all;user-select:all;"><?php echo esc_html($value); ?></td>
+                  </tr>
+                <?php endforeach; ?>
+                </table>
+              <?php else : ?>
               <div style="display:flex;flex-wrap:wrap;gap:6px;">
                 <?php foreach ($dhl as $label => $value) : ?>
                   <button type="button" class="sp-copy" data-copy="<?php echo esc_attr($value); ?>" style="display:inline-flex;flex-direction:column;align-items:flex-start;background:#fff;border:1px solid #DCDEE0;border-radius:8px;padding:4px 9px;cursor:pointer;text-align:left;">
@@ -256,8 +267,8 @@ function sp_versand_cards_html($orders, $with_links = true) {
                   </button>
                 <?php endforeach; ?>
               </div>
+              <?php endif; ?>
             </div>
-          <?php endif; ?>
 
           <div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8A9099;font-weight:700;margin:14px 0 6px;">Inhalt</div>
           <?php foreach ($items as $it) : ?>
@@ -276,22 +287,75 @@ function sp_versand_cards_html($orders, $with_links = true) {
     return ob_get_clean();
 }
 
-/** Eigenstaendige Ansicht (neuer Tab, ohne WP-Admin-Rahmen) - gut zum Lesen auf Handy/Tablet. */
+function sp_versand_copy_script() {
+    ?>
+    <script>
+    (function(){
+      function done(btn){ var o = btn.style.borderColor, b = btn.style.background; btn.style.borderColor = '#1F7A4D'; btn.style.background = '#E7F6EC'; setTimeout(function(){ btn.style.borderColor = o; btn.style.background = b; }, 900); }
+      document.addEventListener('click', function(e){
+        var btn = e.target.closest('.sp-copy'); if (!btn) { return; }
+        var text = btn.getAttribute('data-copy');
+        if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(text).then(function(){ done(btn); }); }
+        else { var t = document.createElement('textarea'); t.value = text; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); done(btn); }
+      });
+    })();
+    </script>
+    <?php
+}
+
+/** Eigenstaendige Ansicht (ohne WP-Admin-Rahmen) mit Kopier-Buttons - auch fuer den Link aus der Mail. */
 function sp_versand_render_print($mode, $orders) {
     nocache_headers();
+    header('X-Robots-Tag: noindex, nofollow');
     ?><!doctype html>
-<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Versandliste <?php echo esc_html(current_time('d.m.Y')); ?></title></head>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Versandliste <?php echo esc_html(current_time('d.m.Y')); ?></title></head>
 <body style="margin:0;padding:18px 14px;background:#F7F8F9;">
-<?php echo sp_versand_cards_html($orders, false); ?>
+<?php echo sp_versand_cards_html($orders, 'web'); ?>
+<?php sp_versand_copy_script(); ?>
 </body></html>
     <?php
 }
+
+/* ---------------------------------------------------------------------
+ * Geheimer Link aus der Mail: Web-Ansicht mit Kopier-Buttons ohne Login.
+ * Zufaelliger Token, 7 Tage gueltig, zeigt genau die Bestellungen, die beim
+ * Senden der Mail offen waren (bereits versendete werden ausgeblendet).
+ * ------------------------------------------------------------------- */
+
+define('SP_VERSAND_LINK_DAYS', 7);
+
+function sp_versand_create_share_link($orders) {
+    $token = wp_generate_password(32, false, false);
+    set_transient('sp_versand_share_' . $token, array_map(function ($o) { return $o->get_id(); }, $orders), SP_VERSAND_LINK_DAYS * DAY_IN_SECONDS);
+    return add_query_arg('sp_versandliste', $token, home_url('/'));
+}
+
+add_action('template_redirect', function () {
+    if (empty($_GET['sp_versandliste'])) {
+        return;
+    }
+    $token = preg_replace('/[^A-Za-z0-9]/', '', (string) $_GET['sp_versandliste']);
+    $ids = strlen($token) === 32 ? get_transient('sp_versand_share_' . $token) : false;
+    if (!$ids) {
+        status_header(404);
+        nocache_headers();
+        echo '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><p style="font-family:sans-serif;padding:24px">Dieser Link ist abgelaufen oder ungültig. Bitte eine neue Versandliste anfordern.</p>';
+        exit;
+    }
+    $open = sp_versand_get_orders();
+    $orders = array_values(array_filter($open, function ($o) use ($ids) { return in_array($o->get_id(), $ids, true); }));
+    // Eigenstaendige Seite, Ausgabe vor dem Theme - Altersabfrage/Cookie-Banner (wp_head/wp_footer) greifen hier nicht.
+    sp_versand_render_print('web', $orders);
+    exit;
+}, 1);
 
 /** Versandliste per Mail: Karten-Ansicht im Mailtext + Excel-Datei im Anhang. */
 function sp_versand_send_mail($to, $orders) {
     $subject = 'Versandliste ' . current_time('d.m.Y') . ' – ' . count($orders) . ' Paket' . (count($orders) === 1 ? '' : 'e');
     $mailer = WC()->mailer();
-    $message = $mailer->wrap_message('Versandliste', sp_versand_cards_html($orders, false));
+    $link = sp_versand_create_share_link($orders);
+    $button = '<p style="margin:0 0 18px;"><a href="' . esc_url($link) . '" style="display:inline-block;background:#0D0F12;color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 20px;border-radius:9px;">Ansicht mit Kopier-Buttons öffnen &rarr;</a><br><span style="font-size:12px;color:#4B5157;">Im Browser: Feld antippen = kopiert. Link gilt ' . (int) SP_VERSAND_LINK_DAYS . ' Tage.</span></p>';
+    $message = $mailer->wrap_message('Versandliste', $button . sp_versand_cards_html($orders, 'email'));
     $attachments = array();
     if (function_exists('sp_vorkasse_build_xlsx')) {
         $header = array('Nr', 'Bestellnummer', 'Bezahlt am', 'Name', 'Adresse', 'Produkt', 'Menge', 'Hinweis', 'E-Mail', 'Telefon');
@@ -369,18 +433,8 @@ function sp_versand_render_page() {
           </div>
         </div>
 
-        <?php echo sp_versand_cards_html($orders, true); ?>
-        <script>
-        (function(){
-          function done(btn){ var o = btn.style.borderColor, b = btn.style.background; btn.style.borderColor = '#1F7A4D'; btn.style.background = '#E7F6EC'; setTimeout(function(){ btn.style.borderColor = o; btn.style.background = b; }, 900); }
-          document.addEventListener('click', function(e){
-            var btn = e.target.closest('.sp-copy'); if (!btn) { return; }
-            var text = btn.getAttribute('data-copy');
-            if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(text).then(function(){ done(btn); }); }
-            else { var t = document.createElement('textarea'); t.value = text; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); done(btn); }
-          });
-        })();
-        </script>
+        <?php echo sp_versand_cards_html($orders, 'admin'); ?>
+        <?php sp_versand_copy_script(); ?>
 
         <details style="margin-top:24px;max-width:760px;">
           <summary style="cursor:pointer;font-weight:600;">Optional: Gesamtmengen aller offenen Bestellungen</summary>
