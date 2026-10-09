@@ -153,6 +153,37 @@ add_action('wp_footer', function () {
       // Tick: verwaiste Hinweise (ohne noch lebenden Passwort-Wrapper direkt
       // davor) entfernen, dann genau einen frischen Hinweis je aktuell
       // sichtbarem Passwort-Wrapper sicherstellen.
+      // Auge zum Ein-/Ausblenden des Passworts (wie beim Login auf /mein-konto/).
+      // Der Button sitzt im React-Wrapper; geht er bei einem Re-Render verloren,
+      // setzt der naechste Tick ihn neu.
+      var EYE = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+      var EYE_OFF = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 19c-6.5 0-10-7-10-7a18.5 18.5 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c6.5 0 10 7 10 7a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="2" y1="2" x2="22" y2="22"/></svg>';
+      function addEye(pwWrap){
+        var input = pwWrap.querySelector('input');
+        if (!input) { return; }
+        var btn = pwWrap.querySelector('.sp-checkout-pw-eye');
+        if (!btn) {
+          btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'sp-checkout-pw-eye';
+          btn.setAttribute('aria-label', 'Passwort anzeigen');
+          btn.innerHTML = EYE;
+          btn.style.cssText = 'position:absolute;right:6px;top:0;width:40px;padding:0;margin:0;border:0;background:transparent;box-shadow:none;color:#8A9099;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2';
+          btn.addEventListener('click', function(e){
+            e.preventDefault();
+            var field = pwWrap.querySelector('input');
+            if (!field) { return; }
+            var show = field.type === 'password';
+            field.type = show ? 'text' : 'password';
+            btn.innerHTML = show ? EYE_OFF : EYE;
+            btn.setAttribute('aria-label', show ? 'Passwort verbergen' : 'Passwort anzeigen');
+          });
+          pwWrap.appendChild(btn);
+        }
+        input.style.paddingRight = '46px';
+        btn.style.top = input.offsetTop + 'px';
+        btn.style.height = (input.offsetHeight || 50) + 'px';
+      }
       function tick(){
         var wraps = document.querySelectorAll('.wc-block-components-address-form__password');
         var validHints = [];
@@ -161,11 +192,19 @@ add_action('wp_footer', function () {
           if (!hint || !hint.classList.contains('sp-checkout-pw-hint')) {
             hint = document.createElement('span');
             hint.className = 'sp-checkout-pw-hint';
-            hint.textContent = 'Mind. 6 Zeichen';
+            // WooCommerce prueft die Passwort-Staerke (nicht nur die Laenge):
+            // "Geheim123" wird z. B. abgelehnt, "Sommer-Wiese7" angenommen.
+            hint.textContent = 'Mind. 8 Zeichen, z. B. Wörter + Zahl';
             hint.style.cssText = 'display:block;margin:-10px 0 16px;font-size:12px;color:#8A9099;font-family:Sora,sans-serif';
             pwWrap.insertAdjacentElement('afterend', hint);
           }
+          // Steht eine Fehlermeldung oder der Staerke-Balken unter dem Feld,
+          // Hinweis nicht darueberschieben.
+          var meter = pwWrap.querySelector('.wc-block-components-password-strength');
+          var below = pwWrap.classList.contains('has-error') || (meter && !meter.classList.contains('hidden'));
+          hint.style.marginTop = below ? '6px' : '-10px';
           validHints.push(pwWrap.nextElementSibling);
+          addEye(pwWrap);
         });
         document.querySelectorAll('.sp-checkout-pw-hint').forEach(function(hint){
           if (validHints.indexOf(hint) === -1) {
@@ -174,7 +213,7 @@ add_action('wp_footer', function () {
         });
       }
       var observer = new MutationObserver(tick);
-      observer.observe(document.body, {childList:true, subtree:true});
+      observer.observe(document.body, {childList:true, subtree:true, attributes:true, attributeFilter:['class']});
       tick();
     })();
     </script>
