@@ -48,43 +48,100 @@ function sp_fsh_threshold() {
     return 0.0;
 }
 
-/** Zubehoer-Vorschlaege: Produkt-ID => nur zeigen, wenn eines dieser Produkte im Warenkorb ist (leer = immer). */
-function sp_fsh_suggestions() {
-    return array(
-        74 => array(),                // Bac Water
-        80 => array(),                // Insulinspritze 10er Pack
-        908 => array(393, 395, 396),  // Pen Nadeln - nur wenn ein Peptrium-Pen im Warenkorb ist
+define('SP_FSH_ACCESSORY_CAT', 20);
+define('SP_FSH_PEN_IDS', '393,395,396');
+define('SP_FSH_SKIP_IDS', '729,745,817'); // Aufladung, reine Geschenk-Produkte
+
+/**
+ * Vorschlags-Katalog: alle kaufbaren Produkte mit Varianten/Preis, Kategorie-Infos,
+ * Kombinationen (gepflegt in sp_crosssell_map() + echte Kaufdaten) und Mengenrabatt.
+ * 12 h zwischengespeichert; die Kaufdaten aendern sich nur langsam.
+ */
+function sp_fsh_catalog() {
+    $cached = get_transient('sp_fsh_catalog_v1');
+    if (is_array($cached)) {
+        return $cached;
+    }
+    $skip = array_map('intval', explode(',', SP_FSH_SKIP_IDS));
+    $pens = array_map('intval', explode(',', SP_FSH_PEN_IDS));
+    $products = array();
+    $var2parent = array();
+    foreach (wc_get_products(array('status' => 'publish', 'limit' => -1)) as $p) {
+        $pid = $p->get_id();
+        if (in_array($pid, $skip, true) || !$p->is_purchasable() || !$p->is_in_stock()) {
+            continue;
+        }
+        $vars = array();
+        if ($p->is_type('variable')) {
+            foreach ($p->get_children() as $vid) {
+                $v = wc_get_product($vid);
+                if (!$v || !$v->is_purchasable() || !$v->is_in_stock()) {
+                    continue;
+                }
+                $vars[] = array('id' => $vid, 'price' => (float) wc_get_price_to_display($v), 'label' => implode(' ', array_filter(array_values($v->get_variation_attributes()))));
+                $var2parent[$vid] = $pid;
+            }
+            if (!$vars) {
+                continue;
+            }
+        } else {
+            $vars[] = array('id' => $pid, 'price' => (float) wc_get_price_to_display($p), 'label' => '');
+        }
+        $img = wp_get_attachment_image_url($p->get_image_id(), 'thumbnail');
+        $products[$pid] = array(
+            'name' => html_entity_decode($p->get_name(), ENT_QUOTES, 'UTF-8'),
+            'img' => $img ?: '',
+            'vars' => $vars,
+            'acc' => has_term(SP_FSH_ACCESSORY_CAT, 'product_cat', $pid),
+            'pen' => in_array($pid, $pens, true),
+        );
+    }
+    // Kombinationen: gepflegte Paare (Gewicht 3, Rueckrichtung 2) + gemeinsam gekauft (je Bestellung +1).
+    $comp = array();
+    $add = function ($a, $b, $w) use (&$comp, $products) {
+        if ($a === $b || !isset($products[$a], $products[$b]) || $products[$a]['acc'] || $products[$b]['acc']) {
+            return;
+        }
+        $comp[$a][$b] = ($comp[$a][$b] ?? 0) + $w;
+    };
+    if (function_exists('sp_crosssell_map')) {
+        foreach (sp_crosssell_map() as $a => $b) {
+            $add((int) $a, (int) $b, 3);
+            $add((int) $b, (int) $a, 2);
+        }
+    }
+    foreach (wc_get_orders(array('limit' => 300, 'status' => array('processing', 'completed'), 'orderby' => 'date', 'order' => 'DESC', 'return' => 'objects')) as $o) {
+        $ids = array();
+        foreach ($o->get_items() as $item) {
+            if (!$item->get_meta('Geschenk') && (float) $item->get_total() > 0) {
+                $ids[(int) $item->get_product_id()] = true;
+            }
+        }
+        $ids = array_keys($ids);
+        foreach ($ids as $a) {
+            foreach ($ids as $b) {
+                $add($a, $b, 1);
+            }
+        }
+    }
+    $qty = array(
+        'ids' => function_exists('sp_quantity_discount_product_ids') ? array_map('intval', sp_quantity_discount_product_ids()) : array(),
+        'tiers' => function_exists('sp_quantity_discount_tiers') ? sp_quantity_discount_tiers() : array(),
     );
+    $data = array('products' => $products, 'var2parent' => $var2parent, 'comp' => $comp, 'qty' => $qty);
+    set_transient('sp_fsh_catalog_v1', $data, 12 * HOUR_IN_SECONDS);
+    return $data;
 }
+add_action('woocommerce_update_product', function () {
+    delete_transient('sp_fsh_catalog_v1');
+});
 
 add_action('wp_footer', function () {
     if (!function_exists('is_checkout') || !is_checkout() || is_order_received_page()) {
         return;
     }
     $min = sp_fsh_threshold();
-    $products = array();
-    foreach (sp_fsh_suggestions() as $pid => $requires) {
-        $p = wc_get_product($pid);
-        if (!$p || $p->get_status() !== 'publish' || !$p->is_purchasable() || !$p->is_in_stock()) {
-            continue;
-        }
-        $req = array();
-        foreach ($requires as $rid) {
-            $req[] = $rid;
-            $rp = wc_get_product($rid);
-            if ($rp) {
-                $req = array_merge($req, $rp->get_children());
-            }
-        }
-        $img = wp_get_attachment_image_url($p->get_image_id(), 'thumbnail');
-        $products[] = array(
-            'id' => $pid,
-            'name' => $p->get_name(),
-            'price' => (float) wc_get_price_to_display($p),
-            'img' => $img ?: '',
-            'requires' => array_map('intval', $req),
-        );
-    }
+    $cat = sp_fsh_catalog();
     $topup = function_exists('sp_wallet_get_topup_product_id') ? (int) sp_wallet_get_topup_product_id() : 729;
     ?>
     <style>
@@ -122,7 +179,8 @@ add_action('wp_footer', function () {
     </style>
     <script>
     (function(){
-      var MIN=<?php echo wp_json_encode($min); ?>,TOPUP=<?php echo (int) $topup; ?>,PRODUCTS=<?php echo wp_json_encode($products); ?>,busy=false;
+      var MIN=<?php echo wp_json_encode($min); ?>,TOPUP=<?php echo (int) $topup; ?>,CAT=<?php echo wp_json_encode($cat); ?>,busy=false;
+      var P=CAT.products||{},V2P=CAT.var2parent||{},COMP=CAT.comp||{},QTY=CAT.qty||{ids:[],tiers:[]};
       function sel(){return window.wp&&wp.data&&wp.data.select&&wp.data.select('wc/store/cart');}
       function act(){return wp.data.dispatch('wc/store/cart');}
       var dec=document.createElement('textarea');function txt(h){dec.innerHTML=h||'';return dec.value;}
@@ -147,22 +205,57 @@ add_action('wp_footer', function () {
         var free=false;(c.shippingRates||[]).forEach(function(p){(p.shipping_rates||[]).forEach(function(r){if(r.method_id==='free_shipping')free=true;});});
         return {c:c,u:u,basis:Math.max(0,basis),goods:goods,ids:ids,free:free,country:(c.shippingAddress&&c.shippingAddress.country)||'',totals:t};
       }
+      function parentOf(id){return V2P[id]?+V2P[id]:+id;}
+      /* Zeilenpreis mit Mengenrabatt (wie sp-quantity-discount.php: nur die Stueck im groessten erreichten Paket rabattiert) */
+      function lineTotal(pid,unit,q){
+        if(QTY.ids.indexOf(pid)===-1)return unit*q;
+        for(var k=0;k<QTY.tiers.length;k++){var t=QTY.tiers[k];if(q>=t.size){return Math.round(unit*(1-t.percent/100)*100)/100*t.size+unit*(q-t.size);}}
+        return unit*q;
+      }
+      function tierAt(pid,q){if(QTY.ids.indexOf(pid)===-1)return null;for(var k=0;k<QTY.tiers.length;k++){if(QTY.tiers[k].size===q)return QTY.tiers[k];}return null;}
+      function pickVar(prod,rest){var vs=prod.vars.slice().sort(function(a,b){return a.price-b.price;});for(var k=0;k<vs.length;k++){if(vs[k].price>=rest)return vs[k];}return vs[0];}
       function suggestions(s,rest){
-        var cands=[];
+        var inCart={},cands={},vial=false,pen=false,names={};
+        s.c.items.forEach(function(i){var pp=parentOf(i.id);inCart[pp]=1;names[pp]=txt(i.name);if(P[pp]&&!P[pp].acc){if(P[pp].pen)pen=true;else vial=true;}});
+        function put(c){if(c.price>rest+150)return;var k=c.kind+':'+(c.key||c.id);if(!cands[k]||cands[k].rel<c.rel)cands[k]=c;}
+        /* 1) Noch 1x vom selben Produkt - mit echtem Mehrpreis inkl. Mengenrabatt */
         s.c.items.forEach(function(i){
-          var unit=(+i.prices.price||0)/s.u,lim=i.quantity_limits||{};
-          if(unit<=0||i.id===TOPUP||i.sold_individually||lim.editable===false||i.quantity+1>(lim.maximum||9999)||isAbo(i))return;
+          var unit=(+i.prices.regular_price||+i.prices.price||0)/s.u,lim=i.quantity_limits||{},pp=parentOf(i.id);
+          if((+i.prices.price||0)<=0||i.id===TOPUP||i.sold_individually||lim.editable===false||i.quantity+1>(lim.maximum||9999)||isAbo(i))return;
+          var now=((+i.totals.line_subtotal||0)+(+i.totals.line_subtotal_tax||0))/s.u,extra=Math.max(0,lineTotal(pp,unit,i.quantity+1)-now),t=tierAt(pp,i.quantity+1);
+          /* Rabatt-Hinweis nur, wenn das zusaetzliche Stueck wirklich guenstiger ist als sein normaler Preis
+             (sp-quantity-discount.php rechnet vom regulaeren Preis - bei Angebotspreisen kann das teurer werden) */
+          if(t&&extra>=(+i.prices.price||0)/s.u-0.005)t=null;
           var v=(i.variation||[]).map(function(x){return x.value;}).join(' ');
-          cands.push({kind:'more',key:i.key,qty:i.quantity,price:unit,name:'Noch 1× '+txt(i.name)+(v?' '+v:''),img:(i.images&&i.images[0]&&i.images[0].thumbnail)||''});
+          put({kind:'more',key:i.key,qty:i.quantity,price:extra,name:'Noch 1× '+txt(i.name)+(v?' '+v:''),img:(i.images&&i.images[0]&&i.images[0].thumbnail)||'',why:t?('ab '+t.size+' Stück −'+t.percent+' %'):'',rel:t?42:15});
         });
-        PRODUCTS.forEach(function(p){
-          if(s.ids[p.id])return;
-          if(p.requires.length&&!p.requires.some(function(r){return s.ids[r];}))return;
-          cands.push({kind:'add',id:p.id,price:p.price,name:p.name,img:p.img});
+        /* 2) Passende Ergaenzung (gepflegte Kombinationen + gemeinsam gekauft) */
+        Object.keys(inCart).forEach(function(pp){
+          var m=COMP[pp]||{};
+          Object.keys(m).forEach(function(q){
+            q=+q;if(inCart[q]||!P[q]||m[q]<2)return; /* Einzelfall (1x zusammen gekauft) ist kein Muster */
+            var vr=pickVar(P[q],rest);
+            put({kind:'add',id:vr.id,price:vr.price,name:P[q].name+(vr.label?' '+vr.label:''),img:P[q].img,why:'Oft zusammen mit '+(names[pp]||'deiner Bestellung')+' gekauft',rel:30+Math.min(30,m[q]*3)});
+          });
         });
-        var closing=cands.filter(function(x){return x.price>=rest;}).sort(function(a,b){return a.price-b.price;});
-        var other=cands.filter(function(x){return x.price<rest;}).sort(function(a,b){return b.price-a.price;});
-        return closing.slice(0,2).concat(other).slice(0,2);
+        /* 3) Zubehoer, das zur Bestellung gehoert */
+        var need=[];if(vial){need.push([74,'Zum Anmischen'],[80,'Passendes Zubehör']);}if(pen){need.push([908,'Passend zum Pen']);}
+        need.forEach(function(n){if(inCart[n[0]]||!P[n[0]])return;var vr=P[n[0]].vars[0];put({kind:'add',id:vr.id,price:vr.price,name:P[n[0]].name,img:P[n[0]].img,why:n[1],rel:n[0]===74?40:35}); /* Bac Water ist bei Flaeschchen fast immer dabei */});
+        var list=Object.keys(cands).map(function(k){var c=cands[k];c.closes=c.price>=rest-0.005;c.score=c.closes?100+c.rel-(c.price-rest)/4:c.rel+10*c.price/rest;return c;});
+        list.sort(function(a,b){return b.score-a.score;});
+        var out=list.slice(0,1),pair=false;
+        if(out.length&&out[0].closes){
+          /* Erster Vorschlag reicht schon - als zweiten den inhaltlich passendsten statt einer zweiten teuren Alternative */
+          var restList=list.slice(1).sort(function(a,b){return b.rel-a.rel||a.price-b.price;});
+          if(restList.length)out.push(restList[0]);
+        }else{out=list.slice(0,2);}
+        if(out.length===2&&!out[0].closes&&!out[1].closes&&out[0].price+out[1].price>=rest)pair=true;
+        if(!out.length||(!out[0].closes&&!pair)){
+          /* Kein Einzelartikel reicht: zwei passende, die zusammen reichen? */
+          var nc=list.filter(function(c){return !c.closes;});
+          outer:for(var a=0;a<nc.length;a++){for(var b=a+1;b<nc.length;b++){if(nc[a].price+nc[b].price>=rest&&nc[a].id!==nc[b].id){out=[nc[a],nc[b]];pair=true;break outer;}}}
+        }
+        return {items:out,pair:pair};
       }
       var QS='style="all:unset;box-sizing:border-box;display:inline-flex !important;align-items:center;justify-content:center;width:28px !important;height:28px !important;min-height:0 !important;padding:0 !important;border:1px solid #DCDEE2 !important;border-radius:8px !important;background:#fff !important;color:#0D0F12 !important;font:600 16px/1 Sora,sans-serif !important;box-shadow:none !important;cursor:pointer"';
       var RS='style="all:unset;cursor:pointer;margin-left:8px !important;padding:0 !important;min-height:0 !important;color:#8A9099 !important;background:none !important;border:0 !important;box-shadow:none !important;font:500 12px Sora,sans-serif !important;text-decoration:underline !important;width:auto !important;height:auto !important;white-space:nowrap !important"';
@@ -189,7 +282,7 @@ add_action('wp_footer', function () {
         var show=MIN>0&&s.goods>0&&(!s.country||s.country==='DE');
         if(!show){if(top)top.remove();document.querySelectorAll('.sp-fsh-box').forEach(function(b){b.remove();});return;}
         var reached=s.free||s.basis>=MIN,rest=Math.max(0,MIN-s.basis),pct=Math.min(100,Math.round(s.basis/MIN*100));
-        var sug=reached?[]:suggestions(s,rest);
+        var sg=reached?{items:[],pair:false}:suggestions(s,rest),sug=sg.items;
         if(main){
           if(!top){top=document.createElement('div');top.id='sp-fsh-top';top.lang='de';}
           if(top.parentNode!==main){main.insertBefore(top,main.firstChild);}
@@ -199,9 +292,9 @@ add_action('wp_footer', function () {
         }
         var boxHTML='';
         if(!reached&&sug.length){
-          boxHTML='<p class="h">🚚 Für <b>Gratisversand</b> fehlen noch <b>'+money(rest,s.totals)+'</b></p>';
+          boxHTML='<p class="h">🚚 Für <b>Gratisversand</b> fehlen noch <b>'+money(rest,s.totals)+'</b>'+(sg.pair?' – <b>mit beidem zusammen</b> geschafft:':'')+'</p>';
           sug.forEach(function(x){
-            boxHTML+='<div class="it">'+(x.img?'<img src="'+esc(x.img)+'" alt="">':'')+'<div class="n">'+esc(x.name)+'<small>'+(x.kind==='more'?'+ ':'')+money(x.price,s.totals)+(x.price>=rest?' · <b>✓ Gratisversand</b>':'')+'</small></div><button type="button" '+PS+' aria-label="Hinzufügen" '+(x.kind==='more'?'data-more="'+esc(x.key)+'" data-qty="'+x.qty+'"':'data-add="'+x.id+'"')+(busy?' disabled':'')+'>+</button></div>';
+            boxHTML+='<div class="it">'+(x.img?'<img src="'+esc(x.img)+'" alt="">':'')+'<div class="n">'+esc(x.name)+'<small>'+(x.why?esc(x.why)+' · ':'')+(x.kind==='more'?'+ ':'')+money(x.price,s.totals)+(x.closes?' · <b>✓ Gratisversand</b>':'')+'</small></div><button type="button" '+PS+' aria-label="Hinzufügen" '+(x.kind==='more'?'data-more="'+esc(x.key)+'" data-qty="'+x.qty+'"':'data-add="'+x.id+'"')+(busy?' disabled':'')+'>+</button></div>';
           });
         }
         var seen=[];
