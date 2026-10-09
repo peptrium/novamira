@@ -12,6 +12,15 @@ The user communicates in German (often with typos). Respond in German.
 project shell (this file + `.mcp.json`). All real work happens *directly on
 the live server* through a custom ability — see below.
 
+## Shop at a glance (verified live 2026-10-09 — trust this over older notes)
+
+- Stack: WP 7.1.3, WooCommerce 10.9.4 (**Blocks checkout**), Astra, Elementor Pro 4.2, PHP 8.3, Redis object cache, 73 `sp-*` mu-plugins.
+- Email: **solved** — WP Mail SMTP → SMTP2GO, from `info@peptrium.com`; the user runs the inbox in **FreeScout**. (Older notes saying "no mailbox / no SMTP" are outdated.)
+- Header menu: **built** — hamburger drawer (header template 316) using the WP menu "Hauptmenü" + Abo entry via `sp-abo-nav.php`. (Older notes calling it a placeholder are outdated.)
+- Payments: Vorkasse, Krypto (NOWPayments), Guthaben (`sp_wallet`). The user confirms payments and ships **manually himself** — no third party; WP-Cron timing is fine, no server cron wanted.
+- Customers 17, 41, 90 and their orders/abos (e.g. top-up #3244) are **test data**, not real customers.
+- Genuinely still open: **no Impressum page exists** (and "Über uns" claims one), §312k cancellation button only behind login, Abo/Guthaben UX improvements.
+
 ## How to connect / operate on the live site
 
 The site is controlled exclusively via a custom REST ability exposed by the
