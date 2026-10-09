@@ -203,6 +203,8 @@ not classic `$_POST`, so a `$_POST`-only name-sync check always failed).
 
 **2026-10-09 (later):** Solved the long-running "dark strip under the menu bar on non-homepage pages" issue by actually measuring it in a real browser: root cause was `hdrA001`'s `gap:20px` (not padding), fixed via new `sp-header-gap-fix.php`. Real-browser screenshots worked this time via **Playwright (global node module) + `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`**, passing the proxy from `$https_proxy` (server + username/password parsed from the URL). The browser-use plugin's daemon fails with `chrome-not-running`. The age-gate overlay must be removed via JS before screenshotting. Current execute-php endpoint used: `/wp-json/wp-abilities/v1/abilities/novamira/execute-php/run` (browser User-Agent + `-x "$https_proxy"` required against Cloudflare); the older `/novamira/v1/` path also still works.
 
+Also shortened the Pen Nadeln page's "Produkt" tab to a compact version (intro sentence, 4 feature chips, 4-row `.sp-pn-specs` flex list instead of a table — tables wrap badly at 390px — one usage line, one disclaimer).
+
 *(Earlier history predates this file; ask the user or check this repo's
 future commits for what's changed since the date above.)*
 
