@@ -3,13 +3,16 @@
  * Plugin Name: SP Warenkorb-Erinnerung
  * Description: Eigene Warenkorb-Abbrecher-Erinnerung ohne externen Dienst (2026-10-09, ersetzt Omnisend).
  *
- * Rechtlich bewusst nur MIT Einwilligung (Werbe-Mail nach UWG/DSGVO): an der
- * Kasse gibt es unter der E-Mail-Adresse eine freiwillige, nicht
- * vorangehakte Checkbox. Nur wer sie anhakt, kann EINE Erinnerung bekommen.
+ * OHNE Checkbox (ausdruecklicher Wunsch des Nutzers am 09.10.2026, nachdem er
+ * auf das Abmahnrisiko nach UWG Paragraph 7 bei Werbe-Mails ohne Einwilligung
+ * hingewiesen wurde - Entscheidung liegt beim Shop-Betreiber). Abmilderung:
+ * nur EINE Mail, Abmelde-Link, Abmeldungen werden dauerhaft respektiert,
+ * Datenschutzerklaerung (Seite 410) per Ausgabefilter ergaenzt, Daten nach
+ * 30 Tagen geloescht.
  *
  * Ablauf:
- *  1. Kunde hakt an -> E-Mail + Warenkorb werden gespeichert (Tabelle
- *     wp_sp_cart_reminders, mit Zeitpunkt der Einwilligung als Nachweis).
+ *  1. Kunde gibt an der Kasse seine E-Mail ein -> E-Mail + Warenkorb werden
+ *     gespeichert (Tabelle wp_sp_cart_reminders).
  *  2. Bestellt er innerhalb von 2 Std. -> nichts passiert.
  *  3. Sonst: stuendlicher Cron schickt genau EINE Mail mit Warenkorb-Inhalt
  *     und Button "Zurueck zum Warenkorb" (stellt den Warenkorb wieder her).
@@ -57,20 +60,8 @@ add_action('init', function () {
 });
 
 /* ---------------------------------------------------------------------
- * 1) Einwilligungs-Checkbox an der Kasse (Block-Checkout, Kontakt-Bereich)
+ * 1) E-Mail an der Kasse erfassen (keine Checkbox)
  * ------------------------------------------------------------------- */
-
-add_action('woocommerce_init', function () {
-    if (function_exists('woocommerce_register_additional_checkout_field')) {
-        woocommerce_register_additional_checkout_field(array(
-            'id' => 'sp/cart-reminder',
-            'label' => SP_CR_LABEL,
-            'location' => 'contact',
-            'type' => 'checkbox',
-            'required' => false,
-        ));
-    }
-});
 
 /** Warenkorb-Inhalt als speicherbare Liste (ohne Gratis-Geschenke und Guthaben-Aufladungen). */
 function sp_cr_cart_snapshot() {
@@ -103,7 +94,7 @@ function sp_cr_ajax_save() {
     check_ajax_referer('sp_cr_save', 'nonce');
     global $wpdb;
     $email = sanitize_email(wp_unslash($_POST['email'] ?? ''));
-    $consent = !empty($_POST['consent']);
+    $consent = true; // ohne Checkbox: jede eingegebene E-Mail wird erfasst (siehe Kopfkommentar)
     if (!is_email($email)) {
         wp_send_json_error('email');
     }
@@ -147,20 +138,18 @@ add_action('wp_footer', function () {
     ?>
     <script>
     (function(){
-      var LABEL = <?php echo wp_json_encode(mb_substr(SP_CR_LABEL, 0, 40)); ?>;
       var url = <?php echo wp_json_encode(admin_url('admin-ajax.php')); ?>, nonce = <?php echo wp_json_encode(wp_create_nonce('sp_cr_save')); ?>;
       var last = '';
-      function box(){ var ls = document.querySelectorAll('label'); for (var i = 0; i < ls.length; i++) { if (ls[i].textContent.indexOf(LABEL) !== -1) { return ls[i].querySelector('input[type=checkbox]') || document.getElementById(ls[i].getAttribute('for')); } } return null; }
       function email(){ var e = document.getElementById('email') || document.querySelector('input[type=email]'); return e ? e.value.trim() : ''; }
       function send(){
-        var b = box(); if (!b) { return; }
-        var mail = email(); if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail)) { return; }
-        var key = mail + '|' + (b.checked ? 1 : 0); if (key === last) { return; } last = key;
-        var fd = new FormData(); fd.append('action', 'sp_cr_save'); fd.append('nonce', nonce); fd.append('email', mail); fd.append('consent', b.checked ? '1' : '');
+        var mail = email(); if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail) || mail === last) { return; } last = mail;
+        var fd = new FormData(); fd.append('action', 'sp_cr_save'); fd.append('nonce', nonce); fd.append('email', mail); fd.append('consent', '1');
         fetch(url, { method: 'POST', body: fd, credentials: 'same-origin' });
       }
-      document.addEventListener('change', function(e){ var b = box(); if (b && (e.target === b || e.target.type === 'email')) { setTimeout(send, 50); } }, true);
       document.addEventListener('focusout', function(e){ if (e.target && e.target.type === 'email') { setTimeout(send, 50); } }, true);
+      document.addEventListener('change', function(e){ if (e.target && e.target.type === 'email') { setTimeout(send, 50); } }, true);
+      // Eingeloggte Kunden: E-Mail ist schon ausgefuellt
+      var tries = 0, iv = setInterval(function(){ if (email() || ++tries > 20) { clearInterval(iv); send(); } }, 500);
     })();
     </script>
     <?php
@@ -199,6 +188,14 @@ add_action('init', function () {
 });
 
 add_action('sp_cr_cron', 'sp_cr_send_due');
+add_action('sp_cr_cron', function () {
+    // Datensparsamkeit: Warenkorb-Daten nach 30 Tagen loeschen. Abmeldungen
+    // bleiben (nur E-Mail), damit keine weitere Erinnerung mehr rausgeht.
+    global $wpdb;
+    $cut = date('Y-m-d H:i:s', current_time('timestamp') - 30 * DAY_IN_SECONDS);
+    $wpdb->query($wpdb->prepare("DELETE FROM " . sp_cr_table() . " WHERE status <> 'optout' AND updated_at < %s", $cut));
+    $wpdb->query($wpdb->prepare("UPDATE " . sp_cr_table() . " SET cart = '[]', cart_total = 0 WHERE status = 'optout' AND updated_at < %s", $cut));
+}, 20);
 function sp_cr_send_due() {
     global $wpdb;
     $table = sp_cr_table();
@@ -248,7 +245,7 @@ function sp_cr_send_mail($row) {
     </div>
     <a href="<?php echo esc_url($restore); ?>" style="display:inline-block;background:linear-gradient(135deg,#0D0F12 0%,#2A2E33 100%);color:#FFFFFF;text-decoration:none;font-weight:700;font-size:14px;padding:12px 22px;border-radius:9px;">Zurück zum Warenkorb &rarr;</a>
     <p style="margin:16px 0 0;font-size:13px;line-height:1.6;color:#4B5157;">Fragen zu Produkt, Versand oder Bezahlung? Antworte einfach auf diese Mail oder schreib uns auf <a href="https://t.me/peptrium" style="color:#4B5157;">Telegram</a>.</p>
-    <p style="margin:14px 0 0;font-size:11px;line-height:1.5;color:#8A9099;">Du bekommst diese einmalige Erinnerung, weil du an der Kasse zugestimmt hast. <a href="<?php echo esc_url($unsub); ?>" style="color:#8A9099;">Keine Erinnerungen mehr erhalten</a></p>
+    <p style="margin:14px 0 0;font-size:11px;line-height:1.5;color:#8A9099;">Du bekommst diese einmalige Erinnerung, weil du an der Kasse deine E-Mail-Adresse angegeben hast. <a href="<?php echo esc_url($unsub); ?>" style="color:#8A9099;">Keine Erinnerungen mehr erhalten</a></p>
     <?php
     sp_abo_send_branded_email($row->email, 'Dein Warenkorb wartet noch auf dich', 'Noch etwas vergessen?', ob_get_clean());
 }
@@ -325,9 +322,9 @@ function sp_cr_render_admin() {
     ?>
     <div class="wrap">
       <h1>Warenkorb-Erinnerungen</h1>
-      <p style="max-width:820px;color:#50575e;">Nur Kunden, die an der Kasse die Checkbox „Erinnere mich per E-Mail …“ angehakt haben, bekommen <?php echo (int) SP_CR_DELAY_HOURS; ?> Stunden nach dem Abbruch <strong>eine</strong> Erinnerung mit ihrem Warenkorb und einem Link, der ihn wiederherstellt. Wer vorher bestellt, bekommt nichts.</p>
+      <p style="max-width:820px;color:#50575e;">Wer an der Kasse seine E-Mail-Adresse eingibt und nicht bestellt, bekommt <?php echo (int) SP_CR_DELAY_HOURS; ?> Stunden später <strong>eine</strong> Erinnerung mit ihrem Warenkorb und einem Link, der ihn wiederherstellt. Wer vorher bestellt, bekommt nichts.</p>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin:14px 0;">
-        <?php foreach (array('Einwilligungen (30 Tage)' => $consents, 'Selbst bestellt' => $ordered, 'Erinnerung gesendet' => $sent, 'Danach bestellt' => $recovered) as $l => $v) : ?>
+        <?php foreach (array('Erfasst (30 Tage)' => $consents, 'Selbst bestellt' => $ordered, 'Erinnerung gesendet' => $sent, 'Danach bestellt' => $recovered) as $l => $v) : ?>
           <div style="background:#fff;border:1px solid #dcdcde;border-radius:8px;padding:10px 16px;"><div style="font-size:12px;color:#50575e;"><?php echo esc_html($l); ?></div><div style="font-size:22px;font-weight:700;"><?php echo (int) $v; ?></div></div>
         <?php endforeach; ?>
         <div style="background:#fff;border:1px solid #dcdcde;border-radius:8px;padding:10px 16px;"><div style="font-size:12px;color:#50575e;">Zurückgeholter Umsatz</div><div style="font-size:22px;font-weight:700;color:#1F7A4D;"><?php echo wp_kses_post(wc_price($rec_total)); ?></div></div>
@@ -354,3 +351,23 @@ function sp_cr_render_admin() {
     </div>
     <?php
 }
+
+
+/* ---------------------------------------------------------------------
+ * 6) Datenschutzerklaerung (Seite 410, Elementor) beim Ausliefern anpassen:
+ *    Omnisend entfernt, Abschnitt zur Warenkorb-Erinnerung ergaenzt.
+ *    Gespeicherte Elementor-Daten werden NICHT veraendert.
+ * ------------------------------------------------------------------- */
+
+function sp_cr_privacy_filter($html) {
+    if (!is_page(410) || strpos($html, 'Daten von Kindern') === false || strpos($html, 'sp-cr-privacy') !== false) {
+        return $html;
+    }
+    $html = str_replace(' und Omnisend (Marketing)', '', $html);
+    $section = '<h2 class="sp-cr-privacy">Warenkorb-Erinnerung per E-Mail</h2>'
+        . '<p>Wenn du an der Kasse deine E-Mail-Adresse eingibst, deine Bestellung aber nicht abschließt, speichern wir deine E-Mail-Adresse zusammen mit dem Inhalt deines Warenkorbs. Hast du nach etwa zwei Stunden nicht bestellt, senden wir dir einmalig eine E-Mail, die dich an deinen Warenkorb erinnert und ihn mit einem Klick wiederherstellt. Rechtsgrundlage ist unser berechtigtes Interesse, Interessenten, die einen Kauf bereits begonnen haben, auf ihren unvollständigen Einkauf hinzuweisen (Art. 6 Abs. 1 lit. f DSGVO).</p>'
+        . '<p>Du kannst dem jederzeit widersprechen &ndash; über den Abmelde-Link in der E-Mail oder per Nachricht an info@peptrium.com. Danach erhältst du keine Erinnerungen mehr; wir speichern dann nur noch deine E-Mail-Adresse, damit wir dir auch künftig keine Erinnerung senden. Warenkorb-Daten werden spätestens nach 30 Tagen gelöscht. Der Versand erfolgt über unseren E-Mail-Versanddienstleister SMTP2GO.</p>';
+    return str_replace('<h2>Daten von Kindern</h2>', $section . '<h2>Daten von Kindern</h2>', $html);
+}
+add_filter('elementor/frontend/the_content', 'sp_cr_privacy_filter', 99);
+add_filter('the_content', 'sp_cr_privacy_filter', 99);
