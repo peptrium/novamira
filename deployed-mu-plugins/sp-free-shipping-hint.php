@@ -153,6 +153,23 @@ add_action('woocommerce_update_product', function () {
     delete_transient('sp_fsh_catalog_v2');
 });
 
+/* Messung: Vorschlaege gesehen / "+" getippt -> wp_sp_stats (type fshview / fshclick, campaign "add|more:<Preis>"). */
+function sp_fsh_ajax_event() {
+    if (!function_exists('sp_an_should_track') || !function_exists('sp_an_insert') || !sp_an_should_track()) {
+        wp_die('', '', array('response' => 204));
+    }
+    $click = isset($_POST['t']) && $_POST['t'] === 'click';
+    $kind = isset($_POST['k']) && $_POST['k'] === 'more' ? 'more' : 'add';
+    sp_an_insert(array(
+        'type' => $click ? 'fshclick' : 'fshview',
+        'product_id' => $click ? absint($_POST['pid'] ?? 0) : 0,
+        'campaign' => $click ? $kind . ':' . number_format(round((float) ($_POST['p'] ?? 0), 2), 2, '.', '') : '',
+    ));
+    wp_die('', '', array('response' => 204));
+}
+add_action('wp_ajax_sp_fsh_ev', 'sp_fsh_ajax_event');
+add_action('wp_ajax_nopriv_sp_fsh_ev', 'sp_fsh_ajax_event');
+
 add_action('wp_footer', function () {
     if (!function_exists('is_checkout') || !is_checkout() || is_order_received_page()) {
         return;
@@ -244,7 +261,7 @@ add_action('wp_footer', function () {
              (sp-quantity-discount.php rechnet vom regulaeren Preis - bei Angebotspreisen kann das teurer werden) */
           if(t&&extra>=(+i.prices.price||0)/s.u-0.005)t=null;
           var v=(i.variation||[]).map(function(x){return x.value;}).join(' ');
-          put({kind:'more',key:i.key,qty:i.quantity,price:extra,name:'Noch 1× '+txt(i.name)+(v?' '+v:''),img:(i.images&&i.images[0]&&i.images[0].thumbnail)||'',why:t?('ab '+t.size+' Stück −'+t.percent+' %'):'',rel:t?42:15});
+          put({kind:'more',pid:pp,key:i.key,qty:i.quantity,price:extra,name:'Noch 1× '+txt(i.name)+(v?' '+v:''),img:(i.images&&i.images[0]&&i.images[0].thumbnail)||'',why:t?('ab '+t.size+' Stück −'+t.percent+' %'):'',rel:t?42:15});
         });
         /* 2) Passende Ergaenzung (gepflegte Kombinationen + gemeinsam gekauft) */
         Object.keys(inCart).forEach(function(pp){
@@ -252,12 +269,12 @@ add_action('wp_footer', function () {
           Object.keys(m).forEach(function(q){
             q=+q;if(inCart[q]||!P[q]||m[q]<2)return; /* Einzelfall (1x zusammen gekauft) ist kein Muster */
             var vr=pickVar(P[q],rest);
-            put({kind:'add',id:vr.id,price:vr.price,name:P[q].name+(vr.label?' '+vr.label:''),img:P[q].img,why:'Oft zusammen mit '+(names[pp]||'deiner Bestellung')+' gekauft',rel:30+Math.min(30,m[q]*3)});
+            put({kind:'add',pid:q,id:vr.id,price:vr.price,name:P[q].name+(vr.label?' '+vr.label:''),img:P[q].img,why:'Oft zusammen mit '+(names[pp]||'deiner Bestellung')+' gekauft',rel:30+Math.min(30,m[q]*3)});
           });
         });
         /* 3) Zubehoer, das zur Bestellung gehoert */
         var need=[];if(vial){need.push([74,'Zum Anmischen'],[80,'Passendes Zubehör']);}if(pen){need.push([908,'Passend zum Pen']);}
-        need.forEach(function(n){if(inCart[n[0]]||!P[n[0]])return;var vr=P[n[0]].vars[0];put({kind:'add',id:vr.id,price:vr.price,name:P[n[0]].name,img:P[n[0]].img,why:n[1],rel:n[0]===74?40:35}); /* Bac Water ist bei Flaeschchen fast immer dabei */});
+        need.forEach(function(n){if(inCart[n[0]]||!P[n[0]])return;var vr=P[n[0]].vars[0];put({kind:'add',pid:n[0],id:vr.id,price:vr.price,name:P[n[0]].name,img:P[n[0]].img,why:n[1],rel:n[0]===74?40:35}); /* Bac Water ist bei Flaeschchen fast immer dabei */});
         var list=Object.keys(cands).map(function(k){var c=cands[k];c.closes=c.price>=rest-0.005;c.score=c.closes?100+c.rel-(c.price-rest)/4:c.rel+10*c.price/rest;return c;});
         list.sort(function(a,b){return b.score-a.score;});
         var out=list.slice(0,1),pair=false;
@@ -311,7 +328,7 @@ add_action('wp_footer', function () {
         if(!reached&&sug.length){
           boxHTML='<p class="h">🚚 Für <b>Gratisversand</b> fehlen noch <b>'+money(rest,s.totals)+'</b>'+(sg.pair?' – <b>mit beidem zusammen</b> geschafft:':'')+'</p>';
           sug.forEach(function(x){
-            boxHTML+='<div class="it">'+(x.img?'<img src="'+esc(x.img)+'" alt="">':'')+'<div class="n">'+esc(x.name)+'<small>'+(x.why?esc(x.why)+' · ':'')+(x.kind==='more'?'+ ':'')+money(x.price,s.totals)+(x.closes?' · <b>✓ Gratisversand</b>':'')+'</small></div><button type="button" '+PS+' aria-label="Hinzufügen" '+(x.kind==='more'?'data-more="'+esc(x.key)+'" data-qty="'+x.qty+'"':'data-add="'+x.id+'"')+(busy?' disabled':'')+'>+</button></div>';
+            boxHTML+='<div class="it">'+(x.img?'<img src="'+esc(x.img)+'" alt="">':'')+'<div class="n">'+esc(x.name)+'<small>'+(x.why?esc(x.why)+' · ':'')+(x.kind==='more'?'+ ':'')+money(x.price,s.totals)+(x.closes?' · <b>✓ Gratisversand</b>':'')+'</small></div><button type="button" '+PS+' aria-label="Hinzufügen" data-pid="'+(x.pid||0)+'" data-price="'+x.price.toFixed(2)+'" '+(x.kind==='more'?'data-more="'+esc(x.key)+'" data-qty="'+x.qty+'"':'data-add="'+x.id+'"')+(busy?' disabled':'')+'>+</button></div>';
           });
         }
         var seen=[];
@@ -325,14 +342,20 @@ add_action('wp_footer', function () {
           if(!box){box=document.createElement('div');box.className='sp-fsh-box wc-block-components-totals-wrapper';box.lang='de';}
           if(box.previousSibling!==anchor){anchor.parentNode.insertBefore(box,anchor.nextSibling);}
           setHTML(box,boxHTML);
+          if(!viewed&&box.offsetParent!==null){viewed=true;ev('view');}
         });
       }
+      /* Messung fuer den Analyse-Tab: Vorschlaege gesehen (1x pro Seitenaufruf) und "+" getippt */
+      var AJ=<?php echo wp_json_encode(admin_url('admin-ajax.php')); ?>,viewed=false;
+      function ev(t,b){try{var f=new FormData();f.append('action','sp_fsh_ev');f.append('t',t);if(b){f.append('pid',b.getAttribute('data-pid')||0);f.append('k',b.hasAttribute('data-more')?'more':'add');f.append('p',b.getAttribute('data-price')||0);}
+        if(!(navigator.sendBeacon&&navigator.sendBeacon(AJ,f))){fetch(AJ,{method:'POST',body:f,keepalive:true,credentials:'same-origin'});}}catch(x){}}
       function run(p){busy=true;render();Promise.resolve(p).catch(function(){location.reload();}).then(function(){busy=false;render();});}
       document.addEventListener('click',function(e){
         var j=e.target.closest&&e.target.closest('[data-fsh-jump]');
         if(j){e.preventDefault();var b=[].filter.call(document.querySelectorAll('.sp-fsh-box'),function(x){return x.offsetParent!==null;})[0];if(b)b.scrollIntoView({behavior:'smooth',block:'start'});return;}
         var b=e.target.closest&&e.target.closest('.sp-fsh-box button,.sp-oi-ctl button');if(!b||busy||b.disabled)return;
         e.preventDefault();var d=act();if(!d)return;
+        if(b.hasAttribute('data-add')||b.hasAttribute('data-more')){ev('click',b);}
         if(b.hasAttribute('data-add')){run(d.addItemToCart(+b.getAttribute('data-add'),1));return;}
         if(b.hasAttribute('data-more')){run(d.changeCartItemQuantity(b.getAttribute('data-more'),+b.getAttribute('data-qty')+1));return;}
         var ctl=b.closest('.sp-oi-ctl'),key=ctl.getAttribute('data-key'),q=+ctl.getAttribute('data-qty'),a=b.getAttribute('data-act');

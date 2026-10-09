@@ -836,3 +836,71 @@ add_action('wp_footer', function () {
     </script>
     <?php
 }, 101);
+
+/* -----------------------------------------------------------------------
+ * 7. Gratisversand-Hinweis in der Kasse: gesehen / "+" getippt / bestellt
+ * ---------------------------------------------------------------------*/
+
+function sp_an_fsh_stats($start, $end) {
+    global $wpdb;
+    $rows = $wpdb->get_results($wpdb->prepare('SELECT vh, day, type, product_id, campaign FROM ' . sp_an_table() . " WHERE day BETWEEN %s AND %s AND type IN ('fshview','fshclick','order')", $start, $end));
+    $views = array();
+    $clickers = array();
+    $ordered = array();
+    $clicks = 0;
+    $value = 0.0;
+    $prod = array();
+    foreach ($rows as $r) {
+        $k = $r->vh . '|' . $r->day;
+        if ($r->type === 'fshview') {
+            $views[$k] = true;
+        } elseif ($r->type === 'fshclick') {
+            $clickers[$k] = true;
+            $clicks++;
+            $parts = explode(':', $r->campaign);
+            $value += (float) ($parts[1] ?? 0);
+            $prod[(int) $r->product_id] = ($prod[(int) $r->product_id] ?? 0) + 1;
+        } else {
+            $ordered[$k] = true;
+        }
+    }
+    arsort($prod);
+    return array(
+        'viewers' => count($views),
+        'viewers_ordered' => count(array_intersect_key($views, $ordered)),
+        'clickers' => count($clickers),
+        'clickers_ordered' => count(array_intersect_key($clickers, $ordered)),
+        'clicks' => $clicks,
+        'value' => $value,
+        'products' => $prod,
+    );
+}
+
+add_action('sp_an_render_insights', function ($start, $end, $since) {
+    $x = sp_an_fsh_stats($start, $end);
+    ?>
+    <div class="sp-dash-card">
+      <h2>Gratisversand-Hinweis in der Kasse – bringt er etwas?</h2>
+      <?php if (!$x['viewers']): ?>
+        <p class="sp-dash-empty">Im Zeitraum hat noch niemand Vorschläge gesehen (Messung läuft seit 09.10.2026; Vorschläge erscheinen nur unter 100 € bei Lieferung nach Deutschland).</p>
+      <?php else: ?>
+        <div class="sp-dash-status-grid">
+          <div class="sp-dash-status-tile"><div class="l">Vorschläge gesehen</div><div class="n"><?php echo esc_html($x['viewers']); ?></div><div class="v">Besucher · davon bestellt: <?php echo esc_html($x['viewers_ordered']); ?></div></div>
+          <div class="sp-dash-status-tile"><div class="l">Auf „+“ getippt</div><div class="n"><?php echo esc_html($x['clickers']); ?></div><div class="v"><?php echo esc_html(sp_an_fmt_pct(sp_an_pct($x['clickers'], $x['viewers']))); ?> der Besucher · <?php echo esc_html($x['clicks']); ?> Klicks</div></div>
+          <div class="sp-dash-status-tile"><div class="l">Danach bestellt</div><div class="n"><?php echo esc_html($x['clickers_ordered']); ?></div><div class="v">von <?php echo esc_html($x['clickers']); ?> Besuchern mit Klick</div></div>
+          <div class="sp-dash-status-tile"><div class="l">Hinzugefügter Warenwert</div><div class="n"><?php echo sp_dashboard_money($x['value']); ?></div><div class="v">Summe der per „+“ hinzugefügten Artikel</div></div>
+        </div>
+        <?php if ($x['products']): ?>
+          <p class="sp-an-muted" style="margin-top:12px">Am häufigsten hinzugefügt:
+            <?php $names = array();
+            foreach (array_slice($x['products'], 0, 5, true) as $pid => $n) {
+                $p = wc_get_product($pid);
+                $names[] = ($p ? $p->get_name() : '#' . $pid) . ' (' . $n . '×)';
+            }
+            echo esc_html(implode(', ', $names)); ?></p>
+        <?php endif; ?>
+        <p class="sp-an-muted">So liest du es: Bestellen Besucher mit Klick ähnlich oft oder öfter als alle, die die Vorschläge gesehen haben, schadet der Hinweis nicht und bringt Zusatzumsatz. Tippt fast niemand, kann er weg. Gezählt wird pro Besucher und Tag, ohne Cookies.</p>
+      <?php endif; ?>
+    </div>
+    <?php
+}, 15, 3);

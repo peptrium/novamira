@@ -255,6 +255,9 @@ function sp_an_weekly_build() {
 
       <h2 style="<?php echo $h2; ?>">Gratisversand-Grenze (100 €)</h2>
       <div style="font-size:14px">Knapp darunter (70–99 €): <b><?php echo esc_html($near_below); ?></b> · knapp darüber (100–129 €): <b><?php echo esc_html($near_above); ?></b></div>
+      <?php if (function_exists('sp_an_fsh_stats')): $fx = sp_an_fsh_stats($start, $end); if ($fx['viewers']): ?>
+        <div style="font-size:14px;margin-top:6px">Hinweis in der Kasse: <b><?php echo esc_html($fx['viewers']); ?></b> sahen Vorschläge, <b><?php echo esc_html($fx['clickers']); ?></b> tippten auf „+“ (<?php echo esc_html(sp_an_weekly_money($fx['value'])); ?> hinzugefügt), davon <b><?php echo esc_html($fx['clickers_ordered']); ?></b> bestellt.</div>
+      <?php endif; endif; ?>
 
       <?php if ($errs): ?>
         <h2 style="<?php echo $h2; ?>">⚠️ Fehler, die Kunden gesehen haben</h2>
