@@ -174,6 +174,7 @@ ones with established, understood behavior from this engagement. Run a
 | `sp-myaccount-auth.php` | Custom login/register UI on `/mein-konto/`, incl. the checkout-block account-creation name-sync fix (reads `WC()->customer` as a fallback when `$_POST` is empty, since the Blocks checkout never posts classic form data) and the de-duplicated password-hint tooltip. |
 | `sp-order-numbering.php` | Customer-facing order number counter (starts at 3201), independent of internal order ID. |
 | `sp-home-hero-mobile.php` | Mobile-only homepage hero override. |
+| `sp-header-gap-fix.php` | Non-homepage header fix: zeroes the 20px flex `gap` on Elementor container `hdrA001` (Post 316) that created a dark strip under `#sp-header-bar` (caused by the empty `hdrcenterfix1` CSS widget being a 2nd flex child), and makes bottom spacing match top. Delete the file to revert. |
 | `sp-home-reveal-speed.php` | Monkey-patches `IntersectionObserver` sitewide (on the homepage) to make scroll-reveal animations trigger earlier. |
 | `sp-wallet.php` / `sp-wallet-gateway.php` | Store credit / "Guthaben" balance + the custom payment gateway that consumes it (used for automatic 2nd+ Abo delivery billing). |
 | `sp-subscriptions.php` | Core recurring-order/subscription engine (separate from the buybox toggle — this is what actually creates and bills renewal orders). |
@@ -199,6 +200,8 @@ rendering glitch, avatar cropping, password-hint duplication bug), full
 footer removal on checkout, and a fix to checkout-triggered account
 creation not picking up the customer's name (Blocks checkout posts JSON,
 not classic `$_POST`, so a `$_POST`-only name-sync check always failed).
+
+**2026-10-09 (later):** Solved the long-running "dark strip under the menu bar on non-homepage pages" issue by actually measuring it in a real browser: root cause was `hdrA001`'s `gap:20px` (not padding), fixed via new `sp-header-gap-fix.php`. Real-browser screenshots worked this time via **Playwright (global node module) + `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`**, passing the proxy from `$https_proxy` (server + username/password parsed from the URL). The browser-use plugin's daemon fails with `chrome-not-running`. The age-gate overlay must be removed via JS before screenshotting. Current execute-php endpoint used: `/wp-json/wp-abilities/v1/abilities/novamira/execute-php/run` (browser User-Agent + `-x "$https_proxy"` required against Cloudflare); the older `/novamira/v1/` path also still works.
 
 *(Earlier history predates this file; ask the user or check this repo's
 future commits for what's changed since the date above.)*
