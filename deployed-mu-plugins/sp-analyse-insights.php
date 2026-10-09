@@ -530,3 +530,309 @@ add_action('sp_an_render_insights', function ($start, $end, $since) {
     </div>
     <?php
 }, 10, 3);
+
+/* -----------------------------------------------------------------------
+ * 4. Geschenkstufen, 5. Zubehoer/Abo/Gutscheine (2026-10-09)
+ * ---------------------------------------------------------------------*/
+
+/** Bezahlte, vom Kunden aufgegebene Bestellungen im Zeitraum mit Warenwert wie bei den Geschenkstufen. */
+function sp_an_paid_order_details($start, $end) {
+    $out = array();
+    foreach (sp_an_customer_orders($start, $end) as $o) {
+        if (!$o->get_date_paid()) {
+            continue;
+        }
+        $basis = 0.0;
+        $items = array();
+        $gifts = array();
+        $abo = false;
+        foreach ($o->get_items() as $item) {
+            if ($item->get_meta('_sp_wallet_amount')) {
+                continue;
+            }
+            $pid = (int) $item->get_product_id();
+            if ($item->get_meta('Geschenk')) {
+                $gifts[] = $item;
+                continue;
+            }
+            // Gleiche Basis wie sp_gift_non_gift_subtotal(): Artikelpreis vor Gutscheinen, ohne Geschenke/Aufladungen.
+            $basis += (float) $item->get_subtotal() + (float) $item->get_subtotal_tax();
+            $items[$pid] = ($items[$pid] ?? 0.0) + (float) $item->get_total() + (float) $item->get_total_tax();
+            if ($item->get_meta('_sp_abo_interval_days')) {
+                $abo = true;
+            }
+        }
+        if (!$items) {
+            continue; // reine Aufladung
+        }
+        $out[] = array('order' => $o, 'basis' => $basis, 'items' => $items, 'gifts' => $gifts, 'abo' => $abo);
+    }
+    return $out;
+}
+
+function sp_an_gift_thresholds() {
+    $t = array(100 => 'Gratisversand');
+    if (function_exists('sp_gift_tiers')) {
+        foreach (sp_gift_tiers() as $tier) {
+            $th = (int) $tier['threshold'];
+            $t[$th] = isset($t[$th]) ? $t[$th] . ' + ' . $tier['label'] : $tier['label'];
+        }
+    }
+    ksort($t);
+    return $t;
+}
+
+function sp_an_affiliate_coupon_codes() {
+    $map = array();
+    if (!function_exists('slicewp_get_affiliates') || !function_exists('slicewp_get_affiliate_meta')) {
+        return $map;
+    }
+    foreach (slicewp_get_affiliates(array('number' => -1)) as $aff) {
+        $code = strtolower((string) slicewp_get_affiliate_meta($aff->get('id'), 'sp_coupon_code', true));
+        if ($code !== '') {
+            $map[$code] = (int) $aff->get('id');
+        }
+    }
+    return $map;
+}
+
+add_action('sp_an_render_insights', function ($start, $end, $since) {
+    $orders = sp_an_paid_order_details($start, $end);
+
+    /* 4. Geschenkstufen */
+    $thresholds = sp_an_gift_thresholds();
+    $step = 25;
+    $buckets = array();
+    $max_bucket = 600;
+    foreach ($orders as $d) {
+        $b = (int) min($max_bucket, floor($d['basis'] / $step) * $step);
+        $buckets[$b] = ($buckets[$b] ?? 0) + 1;
+    }
+    $near = array();
+    foreach ($thresholds as $t => $label) {
+        $near[$t] = array('below' => 0, 'above' => 0);
+        foreach ($orders as $d) {
+            if ($d['basis'] >= $t - 30 && $d['basis'] < $t) {
+                $near[$t]['below']++;
+            } elseif ($d['basis'] >= $t && $d['basis'] < $t + 30) {
+                $near[$t]['above']++;
+            }
+        }
+    }
+    $gift_sum = array();
+    foreach ($orders as $d) {
+        foreach ($d['gifts'] as $g) {
+            $p = $g->get_product();
+            $name = $g->get_name();
+            if (!isset($gift_sum[$name])) {
+                $gift_sum[$name] = array('n' => 0, 'value' => 0.0);
+            }
+            $gift_sum[$name]['n'] += $g->get_quantity();
+            $gift_sum[$name]['value'] += $p ? (float) $p->get_regular_price() * $g->get_quantity() : 0.0;
+        }
+    }
+    $maxn = $buckets ? max($buckets) : 1;
+    ?>
+    <div class="sp-dash-card">
+      <h2>Geschenkstufen – legen Kunden nach, um das Geschenk zu bekommen?</h2>
+      <?php if (!$orders): ?>
+        <p class="sp-dash-empty">Keine bezahlten Bestellungen im Zeitraum.</p>
+      <?php else: ?>
+        <div class="sp-an-small">
+          <div>
+            <p class="sp-an-muted" style="margin-top:0">Bestellwerte (Warenwert ohne Geschenke/Aufladungen, vor Gutscheinen – wie bei den Geschenkstufen), in 25-€-Schritten:</p>
+            <?php for ($b = 0; $b <= $max_bucket; $b += $step):
+                $n = $buckets[$b] ?? 0;
+                $mark = '';
+                foreach ($thresholds as $t => $label) {
+                    if ($t >= $b && $t < $b + $step) {
+                        $mark = '🎁 ' . $t . ' €: ' . $label;
+                    }
+                }
+                if (!$n && !$mark) {
+                    continue;
+                } ?>
+              <div class="sp-an-funnel-row" style="grid-template-columns:90px 1fr 40px;margin-bottom:4px">
+                <span class="sp-an-muted"><?php echo esc_html($b >= $max_bucket ? 'ab ' . $max_bucket . ' €' : $b . '–' . ($b + $step - 1) . ' €'); ?></span>
+                <div class="sp-an-funnel-bar" style="height:16px"><span style="width:<?php echo esc_attr($n ? max(3, round($n / $maxn * 100)) : 0); ?>%"></span></div>
+                <span><?php echo esc_html($n); ?></span>
+              </div>
+              <?php if ($mark): ?><div class="sp-an-muted" style="margin:-2px 0 6px 102px;color:#B45309;font-weight:600"><?php echo esc_html($mark); ?></div><?php endif; ?>
+            <?php endfor; ?>
+          </div>
+          <div>
+            <table class="sp-dash-table">
+              <thead><tr><th>Stufe</th><th>knapp darunter<br><span class="sp-an-muted">(bis 30 € fehlen)</span></th><th>knapp erreicht<br><span class="sp-an-muted">(bis 30 € drüber)</span></th></tr></thead>
+              <tbody>
+              <?php foreach ($thresholds as $t => $label): ?>
+                <tr><td><strong><?php echo esc_html($t); ?> €</strong><br><span class="sp-an-muted"><?php echo esc_html($label); ?></span></td><td><?php echo esc_html($near[$t]['below']); ?></td><td><?php echo esc_html($near[$t]['above']); ?></td></tr>
+              <?php endforeach; ?>
+              </tbody>
+            </table>
+            <p class="sp-an-muted">Viele „knapp erreicht“ = Kunden legen für die Stufe nach (sie wirkt). Viele „knapp darunter“ = Kunden scheitern knapp – ein Hinweis „Nur noch X € bis …“ oder eine niedrigere Stufe könnte helfen.</p>
+            <?php if ($gift_sum): ?>
+              <table class="sp-dash-table" style="margin-top:12px">
+                <thead><tr><th>Verschenkt im Zeitraum</th><th>Stück</th><th>Ladenpreis</th></tr></thead>
+                <tbody>
+                <?php foreach ($gift_sum as $name => $x): ?>
+                  <tr><td><?php echo esc_html($name); ?></td><td><?php echo esc_html($x['n']); ?></td><td><?php echo sp_dashboard_money($x['value']); ?></td></tr>
+                <?php endforeach; ?>
+                </tbody>
+              </table>
+            <?php endif; ?>
+          </div>
+        </div>
+      <?php endif; ?>
+    </div>
+    <?php
+
+    /* 5. Zubehoer, Abo, Gutscheine */
+    $acc_ids = array();
+    $peptide_orders = 0;
+    $attach = array();
+    $abo_orders = 0;
+    $coupons = array();
+    $aff_codes = sp_an_affiliate_coupon_codes();
+    foreach ($orders as $d) {
+        $has_peptide = false;
+        $acc_in_order = array();
+        foreach ($d['items'] as $pid => $value) {
+            if (!isset($acc_ids[$pid])) {
+                $acc_ids[$pid] = has_term(20, 'product_cat', $pid);
+            }
+            if ($acc_ids[$pid]) {
+                $acc_in_order[$pid] = $value;
+            } else {
+                $has_peptide = true;
+            }
+        }
+        if ($has_peptide) {
+            $peptide_orders++;
+            foreach ($acc_in_order as $pid => $value) {
+                if (!isset($attach[$pid])) {
+                    $attach[$pid] = array('n' => 0, 'value' => 0.0);
+                }
+                $attach[$pid]['n']++;
+                $attach[$pid]['value'] += $value;
+            }
+        }
+        if ($d['abo']) {
+            $abo_orders++;
+        }
+        foreach ($d['order']->get_items('coupon') as $c) {
+            $code = strtolower($c->get_code());
+            if (!isset($coupons[$code])) {
+                $coupons[$code] = array('n' => 0, 'discount' => 0.0);
+            }
+            $coupons[$code]['n']++;
+            $coupons[$code]['discount'] += (float) $c->get_discount() + (float) $c->get_discount_tax();
+        }
+    }
+    uasort($attach, function ($a, $b) {
+        return $b['n'] <=> $a['n'];
+    });
+    uasort($coupons, function ($a, $b) {
+        return $b['n'] <=> $a['n'];
+    });
+    // Zubehoer, das nie mitgekauft wurde, trotzdem zeigen - ohne reine Geschenk-/Aufladeprodukte.
+    $skip = array(SP_AN_TOPUP_PRODUCT_ID => true, 745 => true, 817 => true);
+    $acc_term = get_term(20, 'product_cat');
+    foreach ($acc_term && !is_wp_error($acc_term) ? wc_get_products(array('status' => 'publish', 'limit' => -1, 'category' => array($acc_term->slug), 'return' => 'ids')) : array() as $pid) {
+        if (!isset($attach[$pid]) && !isset($skip[$pid])) {
+            $attach[$pid] = array('n' => 0, 'value' => 0.0);
+        }
+    }
+    ?>
+    <div class="sp-dash-card">
+      <h2>Zubehör, Abo & Gutscheine – was wird mitgekauft?</h2>
+      <?php if (!$orders): ?>
+        <p class="sp-dash-empty">Keine bezahlten Bestellungen im Zeitraum.</p>
+      <?php else: ?>
+        <div class="sp-dash-status-grid" style="margin-bottom:16px">
+          <div class="sp-dash-status-tile"><div class="l">Bestellungen mit Peptid</div><div class="n"><?php echo esc_html($peptide_orders); ?></div><div class="v">von <?php echo esc_html(count($orders)); ?> bezahlten</div></div>
+          <div class="sp-dash-status-tile"><div class="l">Mit Abo-Artikel</div><div class="n"><?php echo esc_html(sp_an_fmt_pct(sp_an_pct($abo_orders, count($orders)))); ?></div><div class="v"><?php echo esc_html($abo_orders); ?> Bestellung(en) mit „Im Abo“</div></div>
+          <div class="sp-dash-status-tile"><div class="l">Mit Gutschein</div><div class="n"><?php echo esc_html(sp_an_fmt_pct(sp_an_pct(array_sum(array_column($coupons, 'n')), count($orders)))); ?></div><div class="v"><?php echo sp_dashboard_money(array_sum(array_column($coupons, 'discount'))); ?> Rabatt gesamt</div></div>
+        </div>
+        <div class="sp-an-small">
+          <div>
+            <table class="sp-dash-table">
+              <thead><tr><th>Zubehör</th><th>in Peptid-Bestellungen</th><th>Umsatz</th></tr></thead>
+              <tbody>
+              <?php foreach ($attach as $pid => $x):
+                  $p = wc_get_product($pid);
+                  if (!$p) {
+                      continue;
+                  } ?>
+                <tr><td><?php echo esc_html($p->get_name()); ?></td><td><?php echo esc_html($x['n']); ?> <span class="sp-an-muted">(<?php echo esc_html(sp_an_fmt_pct(sp_an_pct($x['n'], $peptide_orders))); ?>)</span></td><td><?php echo sp_dashboard_money($x['value']); ?></td></tr>
+              <?php endforeach; ?>
+              </tbody>
+            </table>
+            <p class="sp-an-muted">Anteil der Bestellungen mit mindestens einem Peptid, in denen das Zubehör mitgekauft wurde (über Zubehör-Schalter, Warenkorb-Vorschlag oder direkt). Gratis-Geschenke zählen nicht.</p>
+          </div>
+          <div>
+            <table class="sp-dash-table">
+              <thead><tr><th>Gutschein</th><th>Bestellungen</th><th>Rabatt</th></tr></thead>
+              <tbody>
+              <?php if (!$coupons): ?>
+                <tr><td colspan="3" class="sp-an-muted">Keine Gutscheine im Zeitraum.</td></tr>
+              <?php endif; ?>
+              <?php foreach ($coupons as $code => $x): ?>
+                <tr><td><strong><?php echo esc_html(strtoupper($code)); ?></strong><?php if (isset($aff_codes[$code])): ?><br><span class="sp-an-muted">Partner: <?php echo esc_html(sp_an_affiliate_name($aff_codes[$code])); ?></span><?php endif; ?></td><td><?php echo esc_html($x['n']); ?></td><td><?php echo sp_dashboard_money($x['discount']); ?></td></tr>
+              <?php endforeach; ?>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      <?php endif; ?>
+    </div>
+    <?php
+}, 20, 3);
+
+/* -----------------------------------------------------------------------
+ * 6. Clarity: Herkunft als Tag, damit Aufnahmen danach filterbar sind
+ * ---------------------------------------------------------------------*/
+
+/** Herkunft des aktuellen Besuchers heute (gleiche Regel wie im Analyse-Tab). */
+function sp_an_visitor_source_today() {
+    global $wpdb;
+    $rows = $wpdb->get_results($wpdb->prepare('SELECT src, campaign FROM ' . sp_an_table() . " WHERE vh = %s AND day = %s AND type IN ('pv','link') AND src <> '' ORDER BY ts ASC", sp_an_visitor_hash(), current_time('Y-m-d')));
+    $src = '';
+    $campaign = '';
+    // Partner > eigener Link > erste echte Quelle (wie sp_an_get_visits()).
+    foreach ($rows as $r) {
+        if ($src === 'partner') {
+            break;
+        }
+        if ($r->src === 'partner' || (strpos($r->src, 'eigen-') === 0 && strpos($src, 'eigen-') !== 0) || $src === '' || ($src === 'direkt' && $r->src !== 'direkt')) {
+            $src = $r->src;
+            $campaign = $r->campaign;
+        }
+    }
+    if ($src === '') {
+        list($src, $campaign) = sp_an_source_from_request(
+            isset($_SERVER['QUERY_STRING']) ? (string) $_SERVER['QUERY_STRING'] : '',
+            isset($_SERVER['HTTP_REFERER']) ? esc_url_raw(wp_unslash($_SERVER['HTTP_REFERER'])) : '',
+            isset($_SERVER['HTTP_USER_AGENT']) ? (string) $_SERVER['HTTP_USER_AGENT'] : ''
+        );
+    }
+    return array($src !== '' ? $src : 'direkt', $campaign);
+}
+
+add_action('wp_footer', function () {
+    if (is_admin() || !function_exists('sp_an_should_track') || !sp_an_should_track()) {
+        return;
+    }
+    list($src, $campaign) = sp_an_visitor_source_today();
+    $group = $src === 'partner' ? 'Partner' : (strpos($src, 'eigen-') === 0 ? 'Eigener Link' : sp_an_source_label($src));
+    $tags = array('quelle' => $group, 'quelle_detail' => $src);
+    if ($campaign !== '') {
+        $tags['kampagne'] = $campaign;
+    }
+    ?>
+    <script>
+    (function(){var t=<?php echo wp_json_encode($tags); ?>,tries=0;
+      (function go(){if(typeof clarity==='function'){for(var k in t){clarity('set',k,t[k]);}return;}if(++tries<20){setTimeout(go,1000);}})();
+    })();
+    </script>
+    <?php
+}, 101);
