@@ -35,13 +35,16 @@ if (!defined('ABSPATH')) {
 
 define('SP_ASB_REMINDER_DAYS', '7,2');
 
-/* Alte Einzel-Callbacks durch Stack-Versionen ersetzen (sp-subscriptions.php und
- * sp-abo-emails.php laden alphabetisch vor dieser Datei). */
-remove_action('sp_abo_daily_cron', 'sp_abo_maybe_auto_resume_paused', 5);
-remove_action('sp_abo_daily_cron', 'sp_abo_process_due_subscriptions', 10);
-remove_action('sp_abo_daily_cron', 'sp_abo_maybe_send_cancel_warning', 15);
-remove_action('sp_abo_daily_cron', 'sp_abo_maybe_auto_cancel_abandoned', 20);
-remove_action('sp_abo_reminder_daily_cron', 'sp_abo_check_upcoming_insufficient_funds', 10);
+/* Alte Einzel-Callbacks durch Stack-Versionen ersetzen. Erst bei plugins_loaded,
+ * weil diese Datei alphabetisch VOR sp-subscriptions.php geladen wird - ein
+ * remove_action direkt beim Laden kaeme zu frueh und wuerde nichts entfernen. */
+add_action('plugins_loaded', function () {
+    remove_action('sp_abo_daily_cron', 'sp_abo_maybe_auto_resume_paused', 5);
+    remove_action('sp_abo_daily_cron', 'sp_abo_process_due_subscriptions', 10);
+    remove_action('sp_abo_daily_cron', 'sp_abo_maybe_send_cancel_warning', 15);
+    remove_action('sp_abo_daily_cron', 'sp_abo_maybe_auto_cancel_abandoned', 20);
+    remove_action('sp_abo_reminder_daily_cron', 'sp_abo_check_upcoming_insufficient_funds', 10);
+}, 1);
 
 add_action('sp_abo_daily_cron', 'sp_asb_cron_resume', 5);
 add_action('sp_abo_daily_cron', 'sp_asb_cron_process', 10);
