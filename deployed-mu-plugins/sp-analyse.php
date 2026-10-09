@@ -69,8 +69,8 @@ function sp_an_install() {
     }
     if (get_option('sp_an_links') === false) {
         update_option('sp_an_links', array(
-            'tiktok-bio' => array('label' => 'TikTok Bio-Link', 'channel' => 'tiktok', 'target' => '/'),
-            'insta-bio'  => array('label' => 'Instagram Bio-Link', 'channel' => 'instagram', 'target' => '/'),
+            sp_an_random_slug(array()) => array('label' => 'TikTok Bio-Link', 'channel' => 'tiktok', 'target' => '/'),
+            sp_an_random_slug(array()) . 'x' => array('label' => 'Instagram Bio-Link', 'channel' => 'instagram', 'target' => '/'),
         ), false);
     }
 }
@@ -316,7 +316,7 @@ function sp_an_on_order($order) {
     }
     global $wpdb;
     $vh = sp_an_visitor_hash();
-    $rows = $wpdb->get_results($wpdb->prepare('SELECT src, campaign FROM ' . sp_an_table() . " WHERE vh = %s AND day = %s AND type = 'pv' AND src <> '' ORDER BY ts ASC", $vh, current_time('Y-m-d')));
+    $rows = $wpdb->get_results($wpdb->prepare('SELECT src, campaign FROM ' . sp_an_table() . " WHERE vh = %s AND day = %s AND type IN ('pv','link') AND src <> '' ORDER BY ts ASC", $vh, current_time('Y-m-d')));
     $src = '';
     $campaign = '';
     foreach ($rows as $r) {
@@ -355,6 +355,13 @@ function sp_an_links() {
     return is_array($links) ? $links : array();
 }
 
+function sp_an_random_slug($links) {
+    do {
+        $slug = strtolower(wp_generate_password(4, false, false));
+    } while (isset($links[$slug]) || !preg_match('/^[a-z0-9]{4}$/', $slug));
+    return $slug;
+}
+
 function sp_an_link_url($slug) {
     return home_url('/l/' . $slug);
 }
@@ -371,12 +378,13 @@ add_action('init', function () {
         wp_safe_redirect(home_url('/'), 302);
         exit;
     }
-    $target = home_url('/' . ltrim($link['target'], '/'));
-    wp_safe_redirect(add_query_arg(array(
-        'utm_source' => $link['channel'] === 'sonstiges' ? 'link' : $link['channel'],
-        'utm_medium' => $link['channel'] === 'email' ? 'email' : 'social',
-        'utm_campaign' => $m[1],
-    ), $target), 302);
+    // Klick serverseitig merken (gleicher anonymer Tagescode wie der folgende
+    // Seitenaufruf) und auf die SAUBERE Zieladresse weiterleiten - ohne
+    // sichtbare utm-Parameter. Link-Vorschau-Bots werden nicht gezaehlt.
+    if (sp_an_should_track()) {
+        sp_an_insert(array('type' => 'link', 'src' => 'eigen-' . $link['channel'], 'campaign' => $m[1]));
+    }
+    wp_safe_redirect(home_url('/' . ltrim($link['target'], '/')), 302);
     exit;
 }, 1);
 
@@ -606,9 +614,15 @@ function sp_an_get_visits($start, $end) {
                 'viewed' => array(), 'carted' => array());
         }
         $v =& $visits[$k];
-        if ($r->type === 'pv') {
+        if ($r->type === 'link') {
+            // Klick auf einen eigenen Tracking-Link schlaegt die (danach erkannte) App-Herkunft.
+            if ($v['src'] !== 'partner') {
+                $v['src'] = $r->src;
+                $v['campaign'] = $r->campaign;
+            }
+        } elseif ($r->type === 'pv') {
             $v['pv'] = true;
-            if ($r->src !== '' && ($v['src'] === '' || ($v['src'] === 'direkt' && $r->src !== 'direkt'))) {
+            if ($r->src !== '' && ($v['src'] === '' || ($v['src'] === 'direkt' && $r->src !== 'direkt') || ($r->src === 'partner' && $v['src'] !== 'partner'))) {
                 $v['src'] = $r->src;
                 $v['campaign'] = $r->campaign;
             }
@@ -699,8 +713,11 @@ function sp_an_handle_post() {
         if ($label === '' || !isset(sp_an_channels()[$channel])) {
             return 'Bitte Name und Kanal angeben.';
         }
-        $slug = sanitize_title(wp_unslash($_POST['slug'] ?? '')) ?: sanitize_title($label);
-        $slug = substr(preg_replace('/[^a-z0-9\-]/', '', $slug), 0, 40);
+        // Ohne eigene Kennung: neutraler Zufallscode, damit im Link weder Kanal noch Inhalt steht.
+        $slug = substr(preg_replace('/[^a-z0-9\-]/', '', sanitize_title(wp_unslash($_POST['slug'] ?? ''))), 0, 40);
+        if ($slug === '') {
+            $slug = sp_an_random_slug($links);
+        }
         if ($slug === '' || isset($links[$slug])) {
             return 'Diese Link-Kennung gibt es schon – bitte einen anderen Namen wählen.';
         }
@@ -1057,7 +1074,7 @@ function sp_an_render_tab($range) {
 
     <div class="sp-dash-card">
       <h2>Tracking-Links – welcher Post / welches Video verkauft?</h2>
-      <p class="sp-an-muted">Nimm für jeden Kanal (und gern für einzelne Videos) einen eigenen Link. Er leitet auf die Zielseite weiter und merkt sich, woher der Besucher kam.</p>
+      <p class="sp-an-muted">Nimm für jeden Kanal (und gern für einzelne Videos) einen eigenen Link. Die Links sind neutral (z. B. /l/k7m2), leiten ohne sichtbare Zusätze auf die Zielseite weiter und merken sich serverseitig, woher der Besucher kam.</p>
       <table class="sp-dash-table">
         <thead><tr><th>Name</th><th>Link</th><th>Ziel</th><th>Besucher</th><th>Bestellungen</th><th>Umsatz</th><th></th></tr></thead>
         <tbody>
@@ -1102,7 +1119,7 @@ function sp_an_render_tab($range) {
           <option value="custom">Andere Adresse…</option>
         </select></label>
         <label style="display:none" id="sp-an-custom-wrap">&nbsp;<input type="text" name="target_custom" placeholder="/seite/" style="display:none"></label>
-        <label>Kennung (optional) <input type="text" name="slug" placeholder="tt-reta-1"></label>
+        <label>Kennung (optional) <input type="text" name="slug" placeholder="leer = Zufallscode"></label>
         <button class="button button-primary">Link anlegen</button>
       </form>
     </div>
