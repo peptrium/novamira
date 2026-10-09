@@ -142,6 +142,41 @@ function sp_an_classify_name($value) {
     return 'web:' . substr(preg_replace('/[^a-z0-9.\-_]/', '', $v), 0, 55);
 }
 
+/** Plattform aus Referrer bzw. In-App-Browser. '' = interne Navigation / Rueckkehr vom Zahlungsdienst. */
+function sp_an_platform($referrer, $ua) {
+    $host = $referrer !== '' ? (string) wp_parse_url($referrer, PHP_URL_HOST) : '';
+    $own = (string) wp_parse_url(home_url(), PHP_URL_HOST);
+    if ($host !== '') {
+        $h = strtolower(preg_replace('/^www\./', '', $host));
+        if ($h === strtolower(preg_replace('/^www\./', '', $own))) {
+            return '';
+        }
+        if (preg_match('/nowpayments|paypal|stripe|klarna|sofort|giropay/', $h)) {
+            return '';
+        }
+        return sp_an_classify_name($h);
+    }
+    // Kein Referrer: In-App-Browser erkennen.
+    if (preg_match('/BytedanceWebview|musical_ly|TikTok|trill_/i', $ua)) {
+        return 'tiktok';
+    }
+    if (preg_match('/Instagram/i', $ua)) {
+        return 'instagram';
+    }
+    if (preg_match('/FBAN|FBAV|FB_IAB/i', $ua)) {
+        return 'facebook';
+    }
+    return 'direkt';
+}
+
+/**
+ * Quelle eines Seitenaufrufs. Reihenfolge:
+ * 1. eigener Tracking-Link (/l/<slug>)       -> "eigen-<kanal>", Kampagne = slug
+ * 2. Partner-Link (?ref=ID)                    -> "partner", Kampagne "aff-ID/<plattform>"
+ * 3. andere utm-Links
+ * 4. Rueckkehrer mit SliceWP-Partner-Cookie    -> "partner" (Kunde dieses Partners)
+ * 5. Referrer / In-App-Browser / direkt
+ */
 function sp_an_source_from_request($query, $referrer, $ua) {
     parse_str(ltrim($query, '?'), $q);
     $campaign = '';
@@ -151,36 +186,27 @@ function sp_an_source_from_request($query, $referrer, $ua) {
             $campaign .= '/' . substr(sanitize_title((string) $q['utm_content']), 0, 28);
         }
     }
+    $platform = sp_an_platform($referrer, $ua);
+    $links = sp_an_links();
+    $slug = !empty($q['utm_campaign']) ? sanitize_title((string) $q['utm_campaign']) : '';
+    if ($slug !== '' && isset($links[$slug])) {
+        return array('eigen-' . $links[$slug]['channel'], $slug);
+    }
+    $aff = !empty($q['ref']) ? absint($q['ref']) : 0;
+    if ($aff) {
+        return array('partner', 'aff-' . $aff . ($platform !== '' && $platform !== 'direkt' ? '/' . $platform : ''));
+    }
     if (!empty($q['utm_source'])) {
         return array(sp_an_classify_name((string) $q['utm_source']) ?: 'direkt', $campaign);
     }
-    if (!empty($q['ref'])) {
-        return array('partner', $campaign);
+    if ($platform === '') {
+        return array('', '');
     }
-    $host = $referrer !== '' ? (string) wp_parse_url($referrer, PHP_URL_HOST) : '';
-    $own = (string) wp_parse_url(home_url(), PHP_URL_HOST);
-    if ($host !== '') {
-        $h = strtolower(preg_replace('/^www\./', '', $host));
-        if ($h === strtolower(preg_replace('/^www\./', '', $own))) {
-            return array('', '');
-        }
-        // Rueckkehr von Zahlungsdienstleistern ist keine neue Quelle.
-        if (preg_match('/nowpayments|paypal|stripe|klarna|sofort|giropay/', $h)) {
-            return array('', '');
-        }
-        return array(sp_an_classify_name($h), $campaign);
+    $cookie_aff = !empty($_COOKIE['slicewp_aff']) ? absint($_COOKIE['slicewp_aff']) : 0;
+    if ($cookie_aff) {
+        return array('partner', 'aff-' . $cookie_aff . ($platform !== 'direkt' ? '/' . $platform : ''));
     }
-    // Kein Referrer: In-App-Browser erkennen.
-    if (preg_match('/BytedanceWebview|musical_ly|TikTok|trill_/i', $ua)) {
-        return array('tiktok', $campaign);
-    }
-    if (preg_match('/Instagram/i', $ua)) {
-        return array('instagram', $campaign);
-    }
-    if (preg_match('/FBAN|FBAV|FB_IAB/i', $ua)) {
-        return array('facebook', $campaign);
-    }
-    return array('direkt', $campaign);
+    return array($platform, $campaign);
 }
 
 function sp_an_should_track() {
@@ -441,13 +467,17 @@ add_filter('the_content', 'sp_an_privacy_filter', 98);
 
 function sp_an_source_label($src) {
     $labels = array(
-        'tiktok' => 'TikTok', 'instagram' => 'Instagram', 'facebook' => 'Facebook', 'youtube' => 'YouTube',
+        'tiktok' => 'TikTok (ohne Link)', 'instagram' => 'Instagram (ohne Link)', 'facebook' => 'Facebook', 'youtube' => 'YouTube',
         'telegram' => 'Telegram', 'whatsapp' => 'WhatsApp', 'google' => 'Google', 'bing' => 'Bing',
-        'ki' => 'KI-Suche (ChatGPT & Co.)', 'reddit' => 'Reddit', 'email' => 'E-Mail', 'partner' => 'Partner-Link',
+        'ki' => 'KI-Suche (ChatGPT & Co.)', 'reddit' => 'Reddit', 'email' => 'E-Mail', 'partner' => 'Partner (Affiliates)',
         'link' => 'Tracking-Link', 'direkt' => 'Direkt / unbekannt', 'unbekannt' => 'Direkt / unbekannt',
     );
     if (isset($labels[$src])) {
         return $labels[$src];
+    }
+    if (strpos($src, 'eigen-') === 0) {
+        $ch = substr($src, 6);
+        return 'Eigener ' . (sp_an_channels()[$ch] ?? $ch) . '-Account (Link)';
     }
     if (strpos($src, 'web:') === 0) {
         return substr($src, 4);
@@ -455,8 +485,52 @@ function sp_an_source_label($src) {
     return $src;
 }
 
-/** Herkunft einer Bestellung: eigene Erfassung, sonst WooCommerce-Order-Attribution. */
+/** SliceWP-Provisionen je Bestellung (nicht abgelehnt): order_id => [affiliate_id, Provision]. */
+function sp_an_commission_map() {
+    static $map = null;
+    if ($map !== null) {
+        return $map;
+    }
+    global $wpdb;
+    $map = array();
+    $table = $wpdb->prefix . 'slicewp_commissions';
+    if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table)) !== $table) {
+        return $map;
+    }
+    $rows = $wpdb->get_results("SELECT reference, affiliate_id, CAST(amount AS DECIMAL(15,2)) AS amount FROM {$table} WHERE origin = 'woo' AND status <> 'rejected'");
+    foreach ($rows as $r) {
+        $map[(int) $r->reference] = array((int) $r->affiliate_id, (float) $r->amount);
+    }
+    return $map;
+}
+
+function sp_an_affiliate_name($affiliate_id) {
+    return function_exists('sp_aff_display_name') ? sp_aff_display_name($affiliate_id) : 'Partner #' . $affiliate_id;
+}
+
+/**
+ * Herkunft einer Bestellung. Hat SliceWP eine Provision gebucht, ist es
+ * IMMER eine Partner-Bestellung (Kampagne "aff-ID/<plattform>") - auch wenn
+ * der Kunde ueber TikTok/Instagram kam, denn das war dann das Video des
+ * Partners, nicht dein eigener Account.
+ */
 function sp_an_order_source($order) {
+    list($src, $campaign) = sp_an_order_source_raw($order);
+    $map = sp_an_commission_map();
+    if (isset($map[$order->get_id()])) {
+        $aff = $map[$order->get_id()][0];
+        if ($src === 'partner') {
+            $platform = strpos($campaign, '/') !== false ? substr($campaign, strpos($campaign, '/') + 1) : '';
+        } else {
+            $platform = ($src !== 'direkt' && strpos($src, 'eigen-') !== 0) ? $src : '';
+        }
+        return array('partner', 'aff-' . $aff . ($platform !== '' ? '/' . $platform : ''));
+    }
+    return array($src, $campaign);
+}
+
+/** Herkunft ohne Partner-Abgleich: eigene Erfassung, sonst WooCommerce-Order-Attribution. */
+function sp_an_order_source_raw($order) {
     $src = (string) $order->get_meta('_sp_an_src');
     $campaign = (string) $order->get_meta('_sp_an_campaign');
     if ($src === '' || $src === 'direkt' || $src === 'unbekannt') {
@@ -508,6 +582,7 @@ function sp_an_get_orders($start, $end) {
             'goods' => $goods,
             'src' => $src,
             'campaign' => $campaign,
+            'commission' => isset(sp_an_commission_map()[$order->get_id()]) ? sp_an_commission_map()[$order->get_id()][1] : 0.0,
             'day' => $order->get_date_created() ? $order->get_date_created()->date('Y-m-d') : $start,
             'products' => array_keys($products),
         );
@@ -746,6 +821,40 @@ function sp_an_render_tab($range) {
         }
     }
 
+    /* Partner (Affiliates) */
+    $partners = array();
+    $pb = array('visitors' => 0, 'orders' => 0, 'revenue' => 0.0, 'commission' => 0.0, 'via' => array());
+    $add_partner = function ($campaign) use (&$partners, $pb) {
+        if (strpos($campaign, 'aff-') !== 0) {
+            return null;
+        }
+        $parts = explode('/', substr($campaign, 4), 2);
+        $id = (int) $parts[0];
+        if (!isset($partners[$id])) {
+            $partners[$id] = $pb;
+        }
+        return array($id, isset($parts[1]) ? $parts[1] : '');
+    };
+    foreach ($visits as $v) {
+        if ($v['src'] === 'partner' && ($r = $add_partner($v['campaign']))) {
+            $partners[$r[0]]['visitors']++;
+        }
+    }
+    foreach ($orders as $o) {
+        if ($o['src'] === 'partner' && ($r = $add_partner($o['campaign']))) {
+            $partners[$r[0]]['orders']++;
+            if ($o['paid']) {
+                $partners[$r[0]]['revenue'] += $o['goods'];
+            }
+            $partners[$r[0]]['commission'] += $o['commission'];
+            $via = $r[1] !== '' ? $r[1] : 'unbekannt';
+            $partners[$r[0]]['via'][$via] = ($partners[$r[0]]['via'][$via] ?? 0) + 1;
+        }
+    }
+    uasort($partners, function ($a, $b) {
+        return array($b['revenue'], $b['orders'], $b['visitors']) <=> array($a['revenue'], $a['orders'], $a['visitors']);
+    });
+
     /* Produkte */
     $prod = array();
     $pblank = array('views' => 0, 'cart' => 0, 'buys' => 0);
@@ -913,7 +1022,36 @@ function sp_an_render_tab($range) {
           <?php endforeach; ?>
           </tbody>
         </table>
-        <p class="sp-an-muted">TikTok/Instagram werden auch erkannt, wenn die App keinen Absender mitschickt (am In-App-Browser). Für ältere Bestellungen stammt die Herkunft aus WooCommerces eigener Erfassung.</p>
+        <p class="sp-an-muted"><strong>Partner</strong> = über einen Partner-Link oder mit Partner-Provision (egal ob der Partner auf TikTok oder Instagram postet). <strong>Eigener …-Account (Link)</strong> = über deine eigenen Tracking-Links. <strong>TikTok/Instagram (ohne Link)</strong> = aus der App gekommen, aber ohne Partner- oder eigenen Link – z. B. dein Account, bevor der neue Bio-Link drin ist. Für ältere Bestellungen stammt die Herkunft aus WooCommerces eigener Erfassung plus den SliceWP-Provisionen.</p>
+      <?php endif; ?>
+    </div>
+
+    <div class="sp-dash-card">
+      <h2>Partner (Affiliates) – wer bringt Umsatz?</h2>
+      <?php if (empty($partners)): ?>
+        <p class="sp-dash-empty">Im Zeitraum keine Partner-Besucher oder -Bestellungen.</p>
+      <?php else: ?>
+        <table class="sp-dash-table">
+          <thead><tr><th>Partner</th><th>Besucher</th><th>Bestellungen</th><th>Umsatz (bezahlt)</th><th>Provision</th><th>Bestellungen kamen über</th></tr></thead>
+          <tbody>
+          <?php foreach ($partners as $id => $x):
+              arsort($x['via']);
+              $via = array();
+              foreach ($x['via'] as $pl => $n) {
+                  $via[] = ($pl === 'unbekannt' ? 'nicht erkennbar' : preg_replace('/ \(ohne Link\)$/', '', sp_an_source_label($pl))) . ' ' . $n;
+              } ?>
+            <tr>
+              <td><strong><?php echo esc_html(sp_an_affiliate_name($id)); ?></strong></td>
+              <td><?php echo $start >= $since ? esc_html(number_format_i18n($x['visitors'])) : '–'; ?></td>
+              <td><?php echo esc_html(number_format_i18n($x['orders'])); ?></td>
+              <td><?php echo sp_dashboard_money($x['revenue']); ?></td>
+              <td><?php echo sp_dashboard_money($x['commission']); ?></td>
+              <td class="sp-an-muted"><?php echo esc_html($via ? implode(', ', $via) : '–'); ?></td>
+            </tr>
+          <?php endforeach; ?>
+          </tbody>
+        </table>
+        <p class="sp-an-muted">Partner-Bestellungen = Bestellungen, für die SliceWP eine Provision gebucht hat (auch wenn der Kunde über TikTok/Instagram des Partners kam). „Bestellungen kamen über“ = Plattform, von der der Kunde zuletzt in den Shop kam (z. B. das TikTok-Video des Partners).</p>
       <?php endif; ?>
     </div>
 
@@ -944,7 +1082,9 @@ function sp_an_render_tab($range) {
         </tbody>
       </table>
       <?php
-      $other_camps = array_diff_key($camp, sp_an_links());
+      $other_camps = array_filter(array_diff_key($camp, sp_an_links()), function ($k) {
+          return strpos($k, 'aff-') !== 0;
+      }, ARRAY_FILTER_USE_KEY);
       if ($other_camps): ?>
         <p class="sp-an-muted" style="margin-top:12px">Weitere Kampagnen (utm_campaign aus anderen Links):
           <?php foreach ($other_camps as $c => $x) {
