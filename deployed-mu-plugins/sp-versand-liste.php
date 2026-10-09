@@ -25,6 +25,8 @@ if (!defined('ABSPATH')) {
 
 add_action('admin_menu', function () {
     add_submenu_page('peptrium-dashboard', 'Versand vorbereiten', 'Versand vorbereiten', 'manage_woocommerce', 'sp-versand', 'sp_versand_render_page');
+    // Zweiter Einstieg direkt im WooCommerce-Menue (gleiche Seite).
+    add_submenu_page('woocommerce', 'Versand vorbereiten', '📦 Versand vorbereiten', 'manage_woocommerce', 'admin.php?page=sp-versand');
 }, 20);
 
 /** Bezahlte, unversendete, echte Bestellungen - aelteste Zahlung zuerst. */
@@ -233,7 +235,7 @@ function sp_versand_render_page() {
     ?>
     <div class="wrap">
       <h1>Versand vorbereiten</h1>
-      <p style="max-width:900px;color:#50575e;">Alle bezahlten Bestellungen ohne Sendungsnummer, älteste Zahlung zuerst. Guthaben-Aufladungen und Testbestellungen sind ausgenommen. Diese Seite ändert nichts an den Bestellungen &ndash; Sendungsnummern danach wie gewohnt eintragen (einzeln oder per <a href="<?php echo esc_url(admin_url('admin.php?page=sp-tracking-import')); ?>">Excel-Import</a>).</p>
+      <p style="max-width:900px;color:#50575e;">Alle bezahlten Bestellungen ohne Sendungsnummer, älteste Zahlung zuerst &ndash; die Liste ist bei jedem Öffnen aktuell, neue Bestellungen erscheinen automatisch, versendete (mit Sendungsnummer) verschwinden. Guthaben-Aufladungen und Testbestellungen sind ausgenommen. Diese Seite ändert nichts an den Bestellungen &ndash; Sendungsnummern danach wie gewohnt eintragen (einzeln oder per <a href="<?php echo esc_url(admin_url('admin.php?page=sp-tracking-import')); ?>">Excel-Import</a>).</p>
 
       <?php if (!$orders) : ?>
         <div class="notice notice-success inline"><p><strong>Alles versendet</strong> &ndash; aktuell nichts zu packen.</p></div>
@@ -244,31 +246,19 @@ function sp_versand_render_page() {
         </div>
 
         <p>
-          <a class="button button-primary" target="_blank" href="<?php echo esc_url(sp_versand_out_url('print_pick')); ?>">🖨 Pickliste drucken</a>
-          <a class="button button-primary" target="_blank" href="<?php echo esc_url(sp_versand_out_url('print_pack')); ?>">🖨 Packzettel drucken (1 Seite je Bestellung)</a>
-          <a class="button" href="<?php echo esc_url(sp_versand_out_url('xlsx_pick')); ?>">📥 Pickliste (Excel)</a>
-          <a class="button" href="<?php echo esc_url(sp_versand_out_url('xlsx_pack')); ?>">📥 Packliste (Excel)</a>
+          <a class="button button-primary" target="_blank" href="<?php echo esc_url(sp_versand_out_url('print_pack')); ?>">🖨 Alle Packzettel drucken (1 Seite je Bestellung)</a>
+          <a class="button" href="<?php echo esc_url(sp_versand_out_url('xlsx_pack')); ?>">📥 Liste als Excel</a>
         </p>
 
-        <h2>Pickliste &ndash; das musst du insgesamt holen</h2>
-        <table class="widefat striped" style="max-width:700px;">
-          <thead><tr><th>Produkt</th><th style="width:90px;">Menge</th><th style="width:120px;">in Bestellungen</th></tr></thead>
-          <tbody>
-          <?php foreach ($pick as $p) : ?>
-            <tr><td><?php echo esc_html($p['name']); ?></td><td><strong><?php echo (int) $p['qty']; ?></strong></td><td><?php echo (int) $p['orders']; ?></td></tr>
-          <?php endforeach; ?>
-          </tbody>
-        </table>
-
-        <h2 style="margin-top:28px;">Packliste &ndash; pro Bestellung</h2>
-        <table class="widefat striped" style="max-width:1100px;">
-          <thead><tr><th style="width:90px;">Bestellung</th><th style="width:90px;">Bezahlt</th><th>Lieferadresse</th><th>Inhalt</th><th style="width:110px;">Einzeln</th></tr></thead>
+        <table class="widefat striped" style="max-width:1250px;">
+          <thead><tr><th style="width:95px;">Bestellung</th><th style="width:85px;">Bezahlt</th><th>Kunde &amp; Lieferadresse</th><th>Kontakt</th><th>Was rein muss</th><th style="width:105px;"></th></tr></thead>
           <tbody>
           <?php foreach ($orders as $order) : $addr = sp_versand_address_lines($order); ?>
             <tr>
-              <td><a href="<?php echo esc_url($order->get_edit_order_url()); ?>">#<?php echo esc_html($order->get_order_number()); ?></a></td>
+              <td><a href="<?php echo esc_url($order->get_edit_order_url()); ?>" style="font-weight:700;font-size:14px;">#<?php echo esc_html($order->get_order_number()); ?></a></td>
               <td><?php echo esc_html(sp_versand_paid_date($order)); ?></td>
-              <td><?php echo implode('<br>', array_map('esc_html', $addr)); ?></td>
+              <td><strong><?php echo esc_html($addr[0] ?? ''); ?></strong><br><?php echo implode('<br>', array_map('esc_html', array_slice($addr, 1))); ?></td>
+              <td style="font-size:12.5px;"><?php echo esc_html($order->get_billing_email()); ?><?php if ($order->get_billing_phone()) : ?><br><?php echo esc_html($order->get_billing_phone()); ?><?php endif; ?></td>
               <td>
                 <?php foreach (sp_versand_order_items($order) as $it) : ?>
                   <div><strong><?php echo (int) $it['qty']; ?>×</strong> <?php echo esc_html($it['name']); ?>
@@ -278,11 +268,23 @@ function sp_versand_render_page() {
                 <?php endforeach; ?>
                 <?php if ($order->get_customer_note()) : ?><div style="margin-top:4px;color:#996800;">💬 <?php echo esc_html($order->get_customer_note()); ?></div><?php endif; ?>
               </td>
-              <td><a class="button button-small" target="_blank" href="<?php echo esc_url(sp_versand_out_url('print_pack', array($order->get_id()))); ?>">Packzettel</a></td>
+              <td><a class="button button-small" target="_blank" href="<?php echo esc_url(sp_versand_out_url('print_pack', array($order->get_id()))); ?>">🖨 Packzettel</a></td>
             </tr>
           <?php endforeach; ?>
           </tbody>
         </table>
+
+        <details style="margin-top:28px;max-width:700px;">
+          <summary style="cursor:pointer;font-weight:600;">Optional: Gesamtmengen aller offenen Bestellungen anzeigen</summary>
+          <table class="widefat striped" style="margin-top:10px;">
+            <thead><tr><th>Produkt</th><th style="width:90px;">Menge</th><th style="width:120px;">in Bestellungen</th></tr></thead>
+            <tbody>
+            <?php foreach ($pick as $p) : ?>
+              <tr><td><?php echo esc_html($p['name']); ?></td><td><strong><?php echo (int) $p['qty']; ?></strong></td><td><?php echo (int) $p['orders']; ?></td></tr>
+            <?php endforeach; ?>
+            </tbody>
+          </table>
+        </details>
       <?php endif; ?>
     </div>
     <?php
