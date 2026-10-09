@@ -19,7 +19,7 @@ the live server* through a custom ability — see below.
 - Header menu: **built** — hamburger drawer (header template 316) using the WP menu "Hauptmenü" + Abo entry via `sp-abo-nav.php`. (Older notes calling it a placeholder are outdated.)
 - Payments: Vorkasse, Krypto (NOWPayments), Guthaben (`sp_wallet`). The user confirms payments and ships **manually himself** — no third party; WP-Cron timing is fine, no server cron wanted.
 - Customers 17, 41, 90 and their orders/abos (e.g. top-up #3244) are **test data**, not real customers.
-- Genuinely still open: **no Impressum page exists** (and "Über uns" claims one), §312k cancellation button only behind login, Abo/Guthaben UX improvements.
+- Genuinely still open: **no Impressum page exists** (and "Über uns" claims one), §312k cancellation button only behind login. (Abo/Guthaben UX improvements: done 2026-10-09, `sp-abo-wallet-ux.php`.) BPC-157/TB-500/Semax/Selank were removed from the Zubehör category on request.
 
 ## How to connect / operate on the live site
 
@@ -186,6 +186,7 @@ ones with established, understood behavior from this engagement. Run a
 | `sp-header-gap-fix.php` | Non-homepage header fix: zeroes the 20px flex `gap` on Elementor container `hdrA001` (Post 316) that created a dark strip under `#sp-header-bar` (caused by the empty `hdrcenterfix1` CSS widget being a 2nd flex child), and makes bottom spacing match top. Delete the file to revert. |
 | `sp-wallet-safeguards.php` | Account required at checkout when cart has an Abo item or wallet top-up (`woocommerce_checkout_registration_required` — works in the Blocks checkout, unlike the older `woocommerce_checkout_process` guard in `sp-abo-buybox.php`), no coupons/referral fee on top-ups, credit capped at amount actually paid, voucher double-submit guard. |
 | `sp-abo-stack-billing.php` | Replaces the per-position cron callbacks of `sp-subscriptions.php`/`sp-abo-emails.php` with stack-wide versions (one order + one wallet debit per stack, whole stack paused if funds short, immediate resume+charge after a top-up is credited, reminders 7+2 days ahead with stack totals). Removals run on `plugins_loaded` because this file loads alphabetically BEFORE `sp-subscriptions.php`. |
+| `sp-abo-wallet-ux.php` | Abo/Guthaben UX: top-up page accepts `?betrag=XX` prefill + honest "Gutschrift nach Zahlungseingang" copy + "Fehlbetrag übernehmen" hint; Mein-Abo/Mein-Guthaben top-up buttons prefilled with the shortfall; checkout tip "2. Lieferung gleich mitbezahlen" on first Abo orders (adds a top-up to the same order); free-shipping threshold ignores top-ups; price-increase mail to affected Abo customers. |
 | `sp-home-reveal-speed.php` | Monkey-patches `IntersectionObserver` sitewide (on the homepage) to make scroll-reveal animations trigger earlier. |
 | `sp-wallet.php` / `sp-wallet-gateway.php` | Store credit / "Guthaben" balance + the custom payment gateway that consumes it (used for automatic 2nd+ Abo delivery billing). |
 | `sp-subscriptions.php` | Core recurring-order/subscription engine (separate from the buybox toggle — this is what actually creates and bills renewal orders). |

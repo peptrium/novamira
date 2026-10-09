@@ -103,13 +103,16 @@ function sp_asb_next_date($sub) {
     return date('Y-m-d', strtotime($sub->next_payment_date . ' +' . (int) $sub->interval_days . ' days'));
 }
 
-function sp_asb_topup_url() {
+function sp_asb_topup_url($amount = null) {
+    if (function_exists('sp_awu_topup_url')) {
+        return sp_awu_topup_url($amount);
+    }
     $id = function_exists('sp_wallet_get_topup_product_id') ? sp_wallet_get_topup_product_id() : 0;
     return $id ? get_permalink($id) : wc_get_account_endpoint_url('guthaben');
 }
 
 /** Gemeinsame Stack-Mail: Produktliste, optionale Zahlenbox, optionaler Button. */
-function sp_asb_send_stack_mail($subs, $subject, $heading, $intro, $rows = array(), $cta = null, $outro = '') {
+function sp_asb_send_stack_mail($subs, $subject, $heading, $intro, $rows = array(), $cta = null, $outro = '', $topup_amount = null) {
     if (empty($subs) || !function_exists('sp_abo_send_branded_email')) {
         return;
     }
@@ -139,7 +142,7 @@ function sp_asb_send_stack_mail($subs, $subject, $heading, $intro, $rows = array
     </div>
     <?php endif; ?>
     <?php if ($cta === 'topup') : ?>
-      <a href="<?php echo esc_url(sp_asb_topup_url()); ?>" style="display:inline-block;background:linear-gradient(135deg,#0D0F12 0%,#2A2E33 100%);color:#FFFFFF;text-decoration:none;font-weight:700;font-size:14px;padding:12px 22px;border-radius:9px;">Jetzt Guthaben aufladen &rarr;</a>
+      <a href="<?php echo esc_url(sp_asb_topup_url($topup_amount)); ?>" style="display:inline-block;background:linear-gradient(135deg,#0D0F12 0%,#2A2E33 100%);color:#FFFFFF;text-decoration:none;font-weight:700;font-size:14px;padding:12px 22px;border-radius:9px;">Jetzt Guthaben aufladen &rarr;</a>
     <?php elseif ($cta === 'account') : ?>
       <?php echo sp_abo_email_account_link(); ?>
     <?php endif; ?>
@@ -194,7 +197,8 @@ function sp_asb_charge_stack($subs, $today) {
                 'ES FEHLEN' => wc_price(max(0, $total - $balance)),
             ),
             'topup',
-            'Sobald die Aufladung bei uns eingegangen ist, geht deine Lieferung automatisch raus &ndash; du musst nichts weiter tun.'
+            'Sobald die Aufladung bei uns eingegangen ist, geht deine Lieferung automatisch raus &ndash; du musst nichts weiter tun.',
+            max(0, $total - $balance)
         );
         return;
     }
@@ -392,7 +396,8 @@ function sp_asb_cron_reminders() {
                     'ES FEHLEN' => wc_price(max(0, $needed - $balance)),
                 ),
                 'topup',
-                'Tipp: Eine Überweisung braucht meist 1&ndash;2 Werktage &ndash; lade am besten gleich auf. Passt es gerade nicht? Du kannst deinen Stack in deinem Konto verschieben oder pausieren.'
+                'Tipp: Eine Überweisung braucht meist 1&ndash;2 Werktage &ndash; lade am besten gleich auf. Passt es gerade nicht? Du kannst deinen Stack in deinem Konto verschieben oder pausieren.',
+                max(0, $needed - $balance)
             );
         }
     }
@@ -418,7 +423,9 @@ function sp_asb_cron_cancel_warning() {
             'Nur noch wenige Tage',
             'Dein Abo ist seit Längerem wegen fehlendem Guthaben pausiert. Lädst du nicht innerhalb der nächsten ' . (int) SP_ABO_CANCEL_WARNING_DAYS_BEFORE . ' Tage auf, wird es automatisch beendet.',
             array('BENÖTIGT' => wc_price(sp_asb_sum($subs)), 'DEIN GUTHABEN' => wc_price(sp_wallet_get_balance($subs[0]->user_id))),
-            'topup'
+            'topup',
+            '',
+            max(0, sp_asb_sum($subs) - sp_wallet_get_balance($subs[0]->user_id))
         );
     }
 }
@@ -531,7 +538,7 @@ add_action('template_redirect', function () {
                 'Dein Guthaben reicht noch nicht für die nächste Lieferung (%s, es fehlen %s). <a href="%s">Jetzt aufladen</a> – sobald die Aufladung eingegangen ist, läuft dein Stack automatisch weiter.',
                 wc_price($total),
                 wc_price(max(0, $total - max(0, $remaining))),
-                esc_url(sp_asb_topup_url())
+                esc_url(sp_asb_topup_url($total - max(0, $remaining)))
             ),
             'notice'
         );
