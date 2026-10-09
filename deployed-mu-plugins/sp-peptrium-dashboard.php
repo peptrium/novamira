@@ -587,6 +587,7 @@ function sp_dashboard_tabs() {
         'kunden' => 'Kunden & Partner',
         'live' => 'Live',
         'produkte' => 'Produkte & Traffic',
+        'analyse' => 'Analyse',
     ];
 }
 
@@ -641,6 +642,11 @@ function sp_dashboard_render_page() {
                 break;
             case 'produkte':
                 sp_dashboard_render_tab_produkte($range);
+                break;
+            case 'analyse':
+                if (function_exists('sp_an_render_tab')) {
+                    sp_an_render_tab($range);
+                }
                 break;
             default:
                 sp_dashboard_render_tab_uebersicht($range);
