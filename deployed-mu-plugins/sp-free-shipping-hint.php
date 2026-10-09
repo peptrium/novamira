@@ -58,7 +58,7 @@ define('SP_FSH_SKIP_IDS', '729,745,817'); // Aufladung, reine Geschenk-Produkte
  * 12 h zwischengespeichert; die Kaufdaten aendern sich nur langsam.
  */
 function sp_fsh_catalog() {
-    $cached = get_transient('sp_fsh_catalog_v1');
+    $cached = get_transient('sp_fsh_catalog_v2');
     if (is_array($cached)) {
         return $cached;
     }
@@ -124,16 +124,33 @@ function sp_fsh_catalog() {
             }
         }
     }
+    // Reduzierte Produkte/Varianten bekommen keinen Mengenrabatt (sp_quantity_discount_is_on_sale()).
+    $on_sale = array();
+    if (function_exists('sp_quantity_discount_is_on_sale') && function_exists('sp_quantity_discount_product_ids')) {
+        foreach (sp_quantity_discount_product_ids() as $qid) {
+            $qp = wc_get_product($qid);
+            if (!$qp) {
+                continue;
+            }
+            foreach ($qp->is_type('variable') ? $qp->get_children() : array($qid) as $vid) {
+                $vp = wc_get_product($vid);
+                if ($vp && sp_quantity_discount_is_on_sale($vp)) {
+                    $on_sale[] = (int) $vid;
+                }
+            }
+        }
+    }
     $qty = array(
         'ids' => function_exists('sp_quantity_discount_product_ids') ? array_map('intval', sp_quantity_discount_product_ids()) : array(),
         'tiers' => function_exists('sp_quantity_discount_tiers') ? sp_quantity_discount_tiers() : array(),
+        'sale' => $on_sale,
     );
     $data = array('products' => $products, 'var2parent' => $var2parent, 'comp' => $comp, 'qty' => $qty);
-    set_transient('sp_fsh_catalog_v1', $data, 12 * HOUR_IN_SECONDS);
+    set_transient('sp_fsh_catalog_v2', $data, 12 * HOUR_IN_SECONDS);
     return $data;
 }
 add_action('woocommerce_update_product', function () {
-    delete_transient('sp_fsh_catalog_v1');
+    delete_transient('sp_fsh_catalog_v2');
 });
 
 add_action('wp_footer', function () {
@@ -207,12 +224,12 @@ add_action('wp_footer', function () {
       }
       function parentOf(id){return V2P[id]?+V2P[id]:+id;}
       /* Zeilenpreis mit Mengenrabatt (wie sp-quantity-discount.php: nur die Stueck im groessten erreichten Paket rabattiert) */
-      function lineTotal(pid,unit,q){
-        if(QTY.ids.indexOf(pid)===-1)return unit*q;
+      function lineTotal(pid,unit,q,itemId){
+        if(QTY.ids.indexOf(pid)===-1||(QTY.sale||[]).indexOf(itemId)>-1)return unit*q;
         for(var k=0;k<QTY.tiers.length;k++){var t=QTY.tiers[k];if(q>=t.size){return Math.round(unit*(1-t.percent/100)*100)/100*t.size+unit*(q-t.size);}}
         return unit*q;
       }
-      function tierAt(pid,q){if(QTY.ids.indexOf(pid)===-1)return null;for(var k=0;k<QTY.tiers.length;k++){if(QTY.tiers[k].size===q)return QTY.tiers[k];}return null;}
+      function tierAt(pid,q,itemId){if(QTY.ids.indexOf(pid)===-1||(QTY.sale||[]).indexOf(itemId)>-1)return null;for(var k=0;k<QTY.tiers.length;k++){if(QTY.tiers[k].size===q)return QTY.tiers[k];}return null;}
       function pickVar(prod,rest){var vs=prod.vars.slice().sort(function(a,b){return a.price-b.price;});for(var k=0;k<vs.length;k++){if(vs[k].price>=rest)return vs[k];}return vs[0];}
       function suggestions(s,rest){
         var inCart={},cands={},vial=false,pen=false,names={};
@@ -220,9 +237,9 @@ add_action('wp_footer', function () {
         function put(c){if(c.price>rest+150)return;var k=c.kind+':'+(c.key||c.id);if(!cands[k]||cands[k].rel<c.rel)cands[k]=c;}
         /* 1) Noch 1x vom selben Produkt - mit echtem Mehrpreis inkl. Mengenrabatt */
         s.c.items.forEach(function(i){
-          var unit=(+i.prices.regular_price||+i.prices.price||0)/s.u,lim=i.quantity_limits||{},pp=parentOf(i.id);
+          var onSale=(QTY.sale||[]).indexOf(i.id)>-1,unit=((onSale?+i.prices.price:+i.prices.regular_price)||+i.prices.price||0)/s.u,lim=i.quantity_limits||{},pp=parentOf(i.id);
           if((+i.prices.price||0)<=0||i.id===TOPUP||i.sold_individually||lim.editable===false||i.quantity+1>(lim.maximum||9999)||isAbo(i))return;
-          var now=((+i.totals.line_subtotal||0)+(+i.totals.line_subtotal_tax||0))/s.u,extra=Math.max(0,lineTotal(pp,unit,i.quantity+1)-now),t=tierAt(pp,i.quantity+1);
+          var now=((+i.totals.line_subtotal||0)+(+i.totals.line_subtotal_tax||0))/s.u,extra=Math.max(0,lineTotal(pp,unit,i.quantity+1,i.id)-now),t=tierAt(pp,i.quantity+1,i.id);
           /* Rabatt-Hinweis nur, wenn das zusaetzliche Stueck wirklich guenstiger ist als sein normaler Preis
              (sp-quantity-discount.php rechnet vom regulaeren Preis - bei Angebotspreisen kann das teurer werden) */
           if(t&&extra>=(+i.prices.price||0)/s.u-0.005)t=null;
@@ -253,7 +270,7 @@ add_action('wp_footer', function () {
         if(!out.length||(!out[0].closes&&!pair)){
           /* Kein Einzelartikel reicht: zwei passende, die zusammen reichen? */
           var nc=list.filter(function(c){return !c.closes;});
-          outer:for(var a=0;a<nc.length;a++){for(var b=a+1;b<nc.length;b++){if(nc[a].price+nc[b].price>=rest&&nc[a].id!==nc[b].id){out=[nc[a],nc[b]];pair=true;break outer;}}}
+          outer:for(var a=0;a<nc.length;a++){for(var b=a+1;b<nc.length;b++){if(nc[a].price+nc[b].price>=rest&&(nc[a].key||nc[a].id)!==(nc[b].key||nc[b].id)){out=[nc[a],nc[b]];pair=true;break outer;}}}
         }
         return {items:out,pair:pair};
       }
