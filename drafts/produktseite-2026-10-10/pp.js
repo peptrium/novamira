@@ -1,7 +1,8 @@
 document.addEventListener('DOMContentLoaded',function(){
  /* Abschnitte am Inhalt erkennen (jede Produktvorlage hat eigene Elementor-IDs) */
- var root=document.querySelector('body.single-product [data-elementor-type="product"]'); if(!root)return;
- root.classList.add('pp-root');
+ var root=document.querySelector('body.single-product [data-elementor-type="product"]')||document.querySelector('body.single-product div.product.ast-article-single'); if(!root)return;
+ var hook=!root.hasAttribute('data-elementor-type'); /* Pen Nadeln: Seite per WooCommerce-Hooks gebaut, kein Elementor */
+ root.classList.add('pp-root');if(hook)root.classList.add('pp-hook');
  [].slice.call(root.children).forEach(function(t){
    if(t.querySelector('#rx-buybox'))t.classList.add('pp-main');
    else if(t.querySelector('.rv-card')||/kundenstimmen/i.test(t.id||''))t.classList.add('pp-rev');
@@ -11,9 +12,12 @@ document.addEventListener('DOMContentLoaded',function(){
    else if(/^vsvcont/.test(t.getAttribute('data-id')||''))t.classList.add('pp-vid');
    else if(/Wichtiger Hinweis/.test(t.textContent)&&t.textContent.length<600)t.classList.add('pp-dis');
  });
- function wid(sel){var e=root.querySelector(sel);return e?e.closest('.elementor-widget'):null;}
+ function wid(sel){var e=root.querySelector(sel);return e?(e.closest('.elementor-widget')||(hook?e:null)):null;}
  var main=root.querySelector('.pp-main');
- if(main){var iw=main.querySelector('.elementor-widget-image');if(iw&&iw.parentElement)iw.parentElement.classList.add('pp-img');
+ if(main&&hook){var hi=main.querySelector('.sp-pen-col-img'),hc=main.querySelector('.sp-pen-col-text');if(hi)hi.classList.add('pp-img');if(hc)hc.classList.add('pp-col');
+   [['.sp-reta-hero','pp-herow'],['.sp-reta-qualitybox','pp-qual'],['#rx-buybox','pp-bbw']].forEach(function(x){var w=wid(x[0]);if(w)w.classList.add(x[1]);});
+   [].slice.call(main.querySelectorAll('.rx-tabbtn[data-tab="results"]')).forEach(function(b){b.textContent='Qualität';});}
+ if(main&&!hook){var iw=main.querySelector('.elementor-widget-image');if(iw&&iw.parentElement)iw.parentElement.classList.add('pp-img');
    var bb=main.querySelector('#rx-buybox');var col=bb;while(col&&col.parentElement&&!col.parentElement.classList.contains('e-con-inner')&&col.parentElement!==main)col=col.parentElement;if(col)col.classList.add('pp-col');
    [['.sp-reta-hero','pp-herow'],['.sp-reta-qualitybox','pp-qual'],['#rx-buybox','pp-bbw'],['.sp-pen-promo','pp-penw']].forEach(function(x){var w=wid(x[0]);if(w)w.classList.add(x[1]);});}
  document.body.classList.add('pp-ready');
@@ -41,13 +45,13 @@ document.addEventListener('DOMContentLoaded',function(){
  if(D.pre){var cta2=document.querySelector('#rx-buybox .rx-buycta');if(cta2&&!document.querySelector('.sp-pre-note')&&!/vorbestellbar/i.test(document.getElementById('rx-buybox').textContent))cta2.parentNode.insertBefore(el('<div class="sp-pre-note"><i>Vorbestellung</i><span><b>Jetzt mit Preisvorteil sichern.</b> Wir liefern, sobald die neue Ware eintrifft.</span></div>'),cta2);
    var rb=document.querySelector('form.cart .single_add_to_cart_button');if(rb)rb.textContent='Vorbestellen';}
  /* 1) Kundenstimmen: dunkel, Laufband + Flasche */
- var rv=[];
- document.querySelectorAll('.pp-rev .rv-card').forEach(function(c){var t=c.querySelector('.rv-text'),n=c.querySelector('.rv-name'),a=c.querySelector('.rv-avatar');if(t)rv.push({t:t.textContent.trim(),n:n?n.textContent.trim():'Verifizierter Kunde',a:a?a.textContent.trim():'✓',s:c.querySelectorAll('.rv-stars > svg').length||5});});
+ var rv=[],seen={};
+ document.querySelectorAll('.pp-rev .rv-card').forEach(function(c){var t=c.querySelector('.rv-text');if(t&&seen[t.textContent])return;if(t)seen[t.textContent]=1;var n=c.querySelector('.rv-name'),a=c.querySelector('.rv-avatar');if(t)rv.push({t:t.textContent.trim(),n:n?n.textContent.trim():'Verifizierter Kunde',a:a?a.textContent.trim():'✓',s:c.querySelectorAll('.rv-stars > svg').length||5});});
  if(rv.length<4)(D.extraReviews||[]).forEach(function(t){rv.push({t:t,n:'Verifizierter Kunde',a:'✓',s:5});});
  function card(r){return '<div class="sp-rv"><div class="st">'+'★★★★★'.slice(0,r.s)+'</div><p>„'+r.t+'“</p><div class="au"><i>'+r.a+'</i><div><b>'+r.n+'</b><em>✓ Verifizierter Kauf</em></div></div></div>';}
  function row(list,cls){return '<div class="sp-mq '+cls+'"><div class="tr">'+list.map(card).join('')+'</div></div>';}
  var h1=rv.filter(function(_,i){return i%2===0;}).slice(0,6),h2=rv.filter(function(_,i){return i%2===1;}).slice(0,6);
- var proof=el('<section id="sp-pp-proof" class="sp-pp sp-hp-sec sp-hp-dark'+(D.bottle?'':' nob')+(D.pen&&D.bottle?' pen':'')+'"><div class="in"><div class="hd"><span class="sp-lbl">Kundenstimmen</span><h2>Das sagen Kunden über <span>'+D.name+'</span>.</h2></div>'
+ var proof=el('<section id="sp-pp-proof" class="sp-pp sp-hp-sec sp-hp-dark'+(D.bottle?'':' nob')+(D.pen&&D.bottle?' pen':'')+'"><div class="in"><div class="hd"><span class="sp-lbl">Kundenstimmen</span><h2>Das sagen Kunden über <span>'+(D.short||D.name)+'</span>.</h2></div>'
   +'<div class="sp-sum"><div class="big">'+D.rt+'</div><div><div class="st">★★★★★</div><div class="t">aus <b>'+D.rc+' Bewertungen</b><br>von verifizierten Käufern</div></div></div>'
   +'<div class="sp-stage">'+row(h1,'r1')+row(h2,'r2')+(D.bottle?'<div class="sp-glow"></div><div class="sp-bshadow"></div><div class="sp-bottle"><img src="'+D.bottle+'" alt="'+D.name+'"></div>':'')+'</div></div></section>');
  root.appendChild(proof);
@@ -79,7 +83,7 @@ document.addEventListener('DOMContentLoaded',function(){
  mqStart();
  /* 2) Passt dazu: Sets */
  var S=D.sets||[];
- if(S.length){var sets=el('<section id="sp-pp-sets" class="sp-pp sp-hp-sec sp-hp-light"><div class="in"><div class="hd"><span class="sp-lbl lt">Passt dazu</span><h2>Komplett in einem Klick.</h2><p class="sub">Alles, was du rund um '+D.name+' brauchst – zusammen in den Warenkorb.</p></div><div class="sp-rail">'
+ if(S.length){var sets=el('<section id="sp-pp-sets" class="sp-pp sp-hp-sec sp-hp-light"><div class="in"><div class="hd"><span class="sp-lbl lt">Passt dazu</span><h2>Komplett in einem Klick.</h2><p class="sub">Alles, was du rund um '+(D.short||D.name)+' brauchst – zusammen in den Warenkorb.</p></div><div class="sp-rail">'
   +S.map(function(s,i){var t=s.items.map(function(it){return '<span class="'+(it.w?'w':'')+'"><img loading="lazy" src="'+it.i+'" alt=""></span>';}).join('');
     return '<div class="sp-set" data-set="'+i+'"><div class="thumbs">'+t+'<i>'+s.items.length+' Artikel</i></div><h3>'+s.n+'</h3><p class="why">'+s.d+'</p><ul>'+s.items.map(function(it){return '<li><span>'+it.n+'</span><span>'+eur(it.p)+'</span></li>';}).join('')+'</ul>'
      +'<div class="sum"><span class="ship'+(s.t>=100?'':' no')+'">'+(s.t>=100?'✓ Gratisversand':'noch '+eur(100-s.t)+' bis Gratisversand')+'</span><strong>'+eur(s.t)+'</strong></div><button type="button" class="add">'+cart+'Set in den Warenkorb</button></div>';}).join('')

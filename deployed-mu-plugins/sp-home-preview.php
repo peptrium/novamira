@@ -46,8 +46,8 @@ function sp_hpv_active() {
 }
 
 /** Bestseller fuer die Produkt-Reihe (Peptide + Pens, nach Verkaufszahl). */
-function sp_hpv_products() {
-    $ids = [65, 68, 393, 428, 431, 71, 77, 434];
+function sp_hpv_products($ids = null) {
+    $ids = $ids ?: [65, 68, 393, 428, 431, 71, 77, 434];
     $map = function_exists('sp_abo_picker_rating_map') ? sp_abo_picker_rating_map() : [];
     $qd = function_exists('sp_quantity_discount_product_ids') ? sp_quantity_discount_product_ids() : [];
     $out = [];

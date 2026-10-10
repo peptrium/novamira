@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) {
 
 function sp_ppv_active() {
     return function_exists('sp_hpv_token_ok') && sp_hpv_token_ok() && function_exists('is_product') && is_product()
-        && !in_array((int) get_queried_object_id(), [729, 817, 745, 908], true);
+        && !in_array((int) get_queried_object_id(), [729, 817, 745], true);
 }
 
 function sp_ppv_data() {
@@ -59,7 +59,8 @@ function sp_ppv_data() {
         }
     }
     $more = [];
-    foreach (sp_hpv_products() as $q) {
+    /* Pen Nadeln: zuerst die Pens, dann Bestseller */
+    foreach (sp_hpv_products($id === 908 ? [393, 395, 396, 65, 68, 71] : null) as $q) {
         if ((int) $q['id'] === $id) {
             continue;
         }
@@ -79,7 +80,7 @@ function sp_ppv_data() {
     /* Pens: schwebender Pen mit passender Aufschrift (uploads/sp-redesign/pen-float-*.webp) */
     if ($is_pen) $bottle = content_url('/uploads/sp-redesign/pen-float-' . [393 => 'reta', 395 => 'ghk', 396 => 'motsc'][$id] . '.webp');
     return [
-        'name' => $p->get_name(), 'price' => $price, 'thumb' => wp_get_attachment_image_url($p->get_image_id(), 'thumbnail'),
+        'name' => $p->get_name(), 'short' => [908 => 'Pen Nadeln'][$id] ?? '', 'price' => $price, 'thumb' => wp_get_attachment_image_url($p->get_image_id(), 'thumbnail'),
         'rt' => str_replace('.', ',', (string) ($map[$id]['num'] ?? 4.8)), 'rc' => (int) ($map[$id]['count'] ?? 0),
         'bottle' => $bottle, 'sets' => $sets, 'more' => $more, 'acc' => $is_acc, 'pen' => $is_pen, 'best' => $id === 65,
         'pre' => function_exists('sp_preorder_product_ids') && in_array($id, sp_preorder_product_ids(), true),

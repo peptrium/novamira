@@ -251,3 +251,6 @@ html,body{overflow-x:hidden!important}
 @media(min-width:901px){#sp-pp-proof.pen .sp-bottle{width:420px;margin:-152px 0 0 -210px}#sp-pp-proof.pen .sp-bshadow{width:300px;margin:140px 0 0 -150px}}
 body.single-product .sp-reta-check-item.wrap{white-space:normal!important}
 body.single-product .sp-reta-check-item.wrap span{overflow-wrap:anywhere!important}
+/* Pen Nadeln (Hook-Seite ohne Elementor) */
+body.single-product .pp-hook .sp-pen-wrap{background:transparent!important}
+@media(max-width:900px){body.single-product .pp-hook .sp-pen-wrap{padding:16px 0 28px!important;gap:20px!important}}
