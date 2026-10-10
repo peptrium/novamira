@@ -582,6 +582,8 @@ html,body{overflow-x:hidden!important}
 #sp-pp-proof.pen .sp-bottle{width:300px;margin:-110px 0 0 -150px}
 #sp-pp-proof.pen .sp-bshadow{width:220px;margin:100px 0 0 -110px}
 @media(min-width:901px){#sp-pp-proof.pen .sp-bottle{width:420px;margin:-152px 0 0 -210px}#sp-pp-proof.pen .sp-bshadow{width:300px;margin:140px 0 0 -150px}}
+body.single-product .sp-reta-check-item.wrap{white-space:normal!important}
+body.single-product .sp-reta-check-item.wrap span{overflow-wrap:anywhere!important}
 #sp-hpv-flag{position:fixed;left:12px;top:12px;z-index:200000;background:#FF8A5C;color:#0D0F12;font:700 11px Sora,sans-serif;padding:6px 10px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.3);text-decoration:none!important}
 </style>
     <?php
@@ -626,11 +628,12 @@ document.addEventListener('DOMContentLoaded',function(){
  var imc=document.querySelector('.pp-img');
  var bdh=(D.pre?'<span class="p">Vorbestellung</span>':(D.best?'<span>★ Bestseller</span>':(D.pen?'<span>Neu</span>':'')))+(D.acc?'':'<span class="g">✓ HPLC ≥ 99 %</span>');
  if(imc&&bdh&&!imc.querySelector('.sp-img-bd')){imc.appendChild(el('<div class="sp-img-bd">'+bdh+'</div>'));}
- var short={'99 % Reinheit (HPLC)':'99 % Reinheit','LC-MS Identitätsverifizierung':'LC-MS geprüft','Chargenspezifisches Analysezertifikat (COA)':'Versand aus DE','Diskrete Verpackung & schneller Versand':'Diskret verpackt'};
+ var short={'99 % Reinheit (HPLC)':'99 % Reinheit','LC-MS Identitätsverifizierung':'LC-MS geprüft','Chargenspezifisches Analysezertifikat (COA)':'Versand aus DE','Diskrete Verpackung & schneller Versand':'Diskret verpackt','Dosiszähler – exakt per Klick':'Exakter Dosiszähler','Kein Rekonstituieren nötig':'Fertig gemischt','Dosis frei einstellbar':'Dosis einstellbar','Sauber & hygienisch':'Hygienisch','CE-zertifiziert (EN ISO 13485:2016)':'CE-zertifiziert','Tri-Bevel-Spitze, doppelte Silikonbeschichtung':'Tri-Bevel-Spitze'};
  var pn=document.querySelector('.sp-pen-promo-name'),pb=document.querySelector('.sp-pen-promo-blurb'),pp=document.querySelector('.sp-pen-promo-price');
  if(pn&&!pn.querySelector('em')){pn.innerHTML='Auch als Peptrium-Pen <em>NEU</em>';}
  if(pb&&pp){pb.textContent='Fertig gemischt, kein Anmischen · '+pp.textContent.trim();}
  document.querySelectorAll('.sp-reta-check-item span').forEach(function(s){var t=s.textContent.trim();if(short[t])s.textContent=short[t];});
+ document.querySelectorAll('.sp-reta-check-item').forEach(function(i){if(i.scrollWidth>i.clientWidth+1)i.classList.add('wrap');});
  var cta=document.querySelector('#rx-buybox .rx-buycta');
  if(cta&&!document.querySelector('.sp-bb-trust')){cta.parentNode.insertBefore(el('<div class="sp-bb-trust"><div><b>🚚</b>Gratisversand ab 100 €</div><div><b>📦</b>Neutral verpackt</div><div><b>🔒</b>Sicher bezahlen</div></div>'),cta.nextSibling);}
  /* Vorbestellung: Hinweis + Button-Text */

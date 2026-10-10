@@ -29,11 +29,12 @@ document.addEventListener('DOMContentLoaded',function(){
  var imc=document.querySelector('.pp-img');
  var bdh=(D.pre?'<span class="p">Vorbestellung</span>':(D.best?'<span>★ Bestseller</span>':(D.pen?'<span>Neu</span>':'')))+(D.acc?'':'<span class="g">✓ HPLC ≥ 99 %</span>');
  if(imc&&bdh&&!imc.querySelector('.sp-img-bd')){imc.appendChild(el('<div class="sp-img-bd">'+bdh+'</div>'));}
- var short={'99 % Reinheit (HPLC)':'99 % Reinheit','LC-MS Identitätsverifizierung':'LC-MS geprüft','Chargenspezifisches Analysezertifikat (COA)':'Versand aus DE','Diskrete Verpackung & schneller Versand':'Diskret verpackt'};
+ var short={'99 % Reinheit (HPLC)':'99 % Reinheit','LC-MS Identitätsverifizierung':'LC-MS geprüft','Chargenspezifisches Analysezertifikat (COA)':'Versand aus DE','Diskrete Verpackung & schneller Versand':'Diskret verpackt','Dosiszähler – exakt per Klick':'Exakter Dosiszähler','Kein Rekonstituieren nötig':'Fertig gemischt','Dosis frei einstellbar':'Dosis einstellbar','Sauber & hygienisch':'Hygienisch','CE-zertifiziert (EN ISO 13485:2016)':'CE-zertifiziert','Tri-Bevel-Spitze, doppelte Silikonbeschichtung':'Tri-Bevel-Spitze'};
  var pn=document.querySelector('.sp-pen-promo-name'),pb=document.querySelector('.sp-pen-promo-blurb'),pp=document.querySelector('.sp-pen-promo-price');
  if(pn&&!pn.querySelector('em')){pn.innerHTML='Auch als Peptrium-Pen <em>NEU</em>';}
  if(pb&&pp){pb.textContent='Fertig gemischt, kein Anmischen · '+pp.textContent.trim();}
  document.querySelectorAll('.sp-reta-check-item span').forEach(function(s){var t=s.textContent.trim();if(short[t])s.textContent=short[t];});
+ document.querySelectorAll('.sp-reta-check-item').forEach(function(i){if(i.scrollWidth>i.clientWidth+1)i.classList.add('wrap');});
  var cta=document.querySelector('#rx-buybox .rx-buycta');
  if(cta&&!document.querySelector('.sp-bb-trust')){cta.parentNode.insertBefore(el('<div class="sp-bb-trust"><div><b>🚚</b>Gratisversand ab 100 €</div><div><b>📦</b>Neutral verpackt</div><div><b>🔒</b>Sicher bezahlen</div></div>'),cta.nextSibling);}
  /* Vorbestellung: Hinweis + Button-Text */
