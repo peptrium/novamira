@@ -85,7 +85,7 @@ add_action('wp_footer', function () {
       if (stepsBox) {
         var t = document.createElement('p');
         t.className = 'sp-awu-timing';
-        t.textContent = 'Krypto: meist innerhalb weniger Minuten · Überweisung: 1–2 Werktage. Du bekommst eine Mail, sobald dein Guthaben gutgeschrieben ist.';
+        t.textContent = 'Krypto: meist innerhalb weniger Minuten · Überweisung: sobald deine Zahlung bei uns eingegangen ist. Du bekommst eine Mail, sobald dein Guthaben gutgeschrieben ist.';
         stepsBox.parentNode.insertBefore(t, stepsBox.nextSibling);
       }
       var desc = document.querySelector('.sp-wallet-card-desc');
