@@ -1,8 +1,8 @@
 <?php
 /**
  * Email Footer - Peptrium-Design (sp-email-design.php, 2026-10-10).
- * Schliesst den Rahmen aus email-header.php; dunkler Footer mit E-Mail- und
- * Telegram-Button (direkter Link t.me/peptrium), Links und Labor-Hinweis.
+ * Schliesst den Rahmen aus email-header.php; dunkler Footer mit Kontakt-Button
+ * (Kontaktseite - mailto: tut in vielen Handy-Mail-Apps nichts) und Telegram-Button (direkter Link t.me/peptrium), Links und Labor-Hinweis.
  */
 defined('ABSPATH') || exit;
 
@@ -13,10 +13,10 @@ $btn = 'display:inline-block;white-space:nowrap;box-sizing:border-box;text-decor
 <p style="margin:0 0 6px;font-size:16px;font-weight:700;color:#FFFFFF;">Fragen? Wir sind für dich da.</p>
 <p style="margin:0 0 18px;font-size:13px;line-height:1.6;color:#B9BEC5;">Antworte einfach auf diese E-Mail oder schreib uns direkt.</p>
 <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
-<tr><td align="center" style="padding:0 0 10px;"><a href="mailto:info@peptrium.com" style="<?php echo esc_attr($btn); ?>background:#FFFFFF;color:#0D0F12;width:230px;text-align:center;">✉️&nbsp; info@peptrium.com</a></td></tr>
+<tr><td align="center" style="padding:0 0 10px;"><a href="<?php echo esc_url(home_url('/kontakt/')); ?>" target="_blank" style="<?php echo esc_attr($btn); ?>background:#FFFFFF;color:#0D0F12;width:230px;text-align:center;">✉️&nbsp; Kontakt aufnehmen</a></td></tr>
 <tr><td align="center" style="padding:0 0 10px;"><a href="<?php echo esc_url(SP_EM_TELEGRAM); ?>" style="<?php echo esc_attr($btn); ?>background:#229ED9;color:#FFFFFF;width:230px;text-align:center;"><img src="<?php echo esc_url(content_url('/uploads/sp-email/telegram.png')); ?>" width="20" height="20" alt="" style="display:inline-block;width:20px;height:20px;border:0;vertical-align:-5px;margin:0;" />&nbsp;&nbsp;Telegram öffnen</a></td></tr>
 </table>
-<p style="margin:2px 0 18px;font-size:12px;color:#B9BEC5;">Telegram: <a href="<?php echo esc_url(SP_EM_TELEGRAM); ?>" style="color:#FFFFFF;font-weight:600;text-decoration:underline;">t.me/peptrium</a></p>
+<p style="margin:2px 0 18px;font-size:12px;line-height:1.7;color:#B9BEC5;">E-Mail: <a href="mailto:info@peptrium.com" style="color:#FFFFFF;font-weight:600;text-decoration:underline;">info@peptrium.com</a><br>Telegram: <a href="<?php echo esc_url(SP_EM_TELEGRAM); ?>" style="color:#FFFFFF;font-weight:600;text-decoration:underline;">t.me/peptrium</a></p>
 <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0"><tr>
 <td style="padding:0 9px;"><a href="<?php echo esc_url(home_url('/alle-produkte/')); ?>" style="font-size:12px;color:#C9CDD2;text-decoration:none;">Shop</a></td>
 <td style="padding:0 9px;"><a href="<?php echo esc_url(home_url('/abo-modell/')); ?>" style="font-size:12px;color:#C9CDD2;text-decoration:none;">Abo-Modell</a></td>
