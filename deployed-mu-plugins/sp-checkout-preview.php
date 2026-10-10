@@ -63,6 +63,10 @@ body.woocommerce-checkout #sp-header-bar .sp-hb-right:before{content:'Sichere Ka
 .wc-block-components-checkout-place-order-button{min-height:56px!important;border-radius:14px!important;font-size:16px!important;font-weight:800!important;box-shadow:0 8px 20px rgba(13,15,18,.2)!important}
 /* kein grosser Leerraum unter dem Bestell-Button */
 .wp-block-woocommerce-checkout,.wc-block-components-sidebar-layout,.wc-block-checkout__main,.wc-block-checkout__form,.wc-block-checkout__actions{margin-bottom:0!important;padding-bottom:0!important}
+/* etwas Luft unter dem Bestell-Button (Seite endet sonst direkt am Button; Platz auch fuer die schwebenden Buttons) */
+.wc-block-checkout__actions{padding-bottom:calc(88px + env(safe-area-inset-bottom))!important}
+/* Gratisversand-Zeile ganz oben in der Kasse ausblenden (Hinweis bleibt in der Bestelluebersicht) */
+#sp-fsh-top{display:none!important}
 /* Anmelden-Link als kleine Pille */
 #contact-fields .wc-block-checkout__login-prompt,#contact-fields .wc-block-components-checkout-step__heading-content a{font-size:12px!important;font-weight:700;text-decoration:none!important;border:1px solid #DCDEE0;border-radius:999px;padding:5px 11px;color:#0D0F12!important;white-space:nowrap}
 #contact-fields .wc-block-components-checkout-step__heading{align-items:center!important}
