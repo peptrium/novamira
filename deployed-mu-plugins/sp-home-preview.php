@@ -395,7 +395,7 @@ html,body{overflow-x:hidden}
 .sp-mq .tr.js>.sp-rv{box-sizing:border-box}
 
 /* 3 Schritte: kurzer Satz + groessere Bilder */
-@media(max-width:767px){body.home .sp-hiw-step-img{height:190px!important;margin-top:12px!important;border-radius:16px!important}body.home .sp-hiw-step-content p{margin:4px 0 0!important}}
+@media(max-width:767px){body.home .sp-hiw-step-img{width:72%!important;height:auto!important;aspect-ratio:282/190;object-fit:cover!important;margin-top:10px!important;border-radius:14px!important}body.home .sp-hiw-step-content p{margin:4px 0 0!important}}
 #sp-hpv-flag{position:fixed;left:12px;top:12px;z-index:99999;background:#FF8A5C;color:#0D0F12;font:700 11px Sora,sans-serif;padding:6px 10px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.3);text-decoration:none!important}
 </style>
     <?php
