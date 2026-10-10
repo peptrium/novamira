@@ -293,6 +293,12 @@ html,body{overflow-x:hidden}
 .sp-mq .tr.go{animation-play-state:running!important}
 .sp-mq:hover .tr.go,.sp-mq:active .tr.go{animation-play-state:paused!important}
 .sp-mq .sp-rv{transform:translateZ(0);-webkit-transform:translateZ(0);backface-visibility:hidden;-webkit-backface-visibility:hidden}
+
+/* Laufband v3 (JS, Karten einzeln) */
+.sp-mq .tr.js{position:relative;display:block!important;width:auto!important;animation:none!important;transform:none!important}
+.sp-mq .tr.js>.sp-rv{position:absolute;top:0;left:0;width:270px;will-change:transform}
+@media(min-width:901px){.sp-mq .tr.js>.sp-rv{width:300px}}
+.sp-mq .tr.js>.sp-rv{box-sizing:border-box}
 /* ===== Produktseite (Entwurf) ===== */
 body.single-product .elementor-340{display:flex;flex-direction:column}
 body.single-product .elementor-340>*{order:50;width:100%}
@@ -567,7 +573,7 @@ document.addEventListener('DOMContentLoaded',function(){
  document.querySelectorAll('[data-id="b221b92"] .rv-card').forEach(function(c){var t=c.querySelector('.rv-text'),n=c.querySelector('.rv-name'),a=c.querySelector('.rv-avatar');if(t)rv.push({t:t.textContent.trim(),n:n?n.textContent.trim():'Verifizierter Kunde',a:a?a.textContent.trim():'✓',s:c.querySelectorAll('.rv-stars > svg').length||5});});
  if(rv.length<4)(D.extraReviews||[]).forEach(function(t){rv.push({t:t,n:'Verifizierter Kunde',a:'✓',s:5});});
  function card(r){return '<div class="sp-rv"><div class="st">'+'★★★★★'.slice(0,r.s)+'</div><p>„'+r.t+'“</p><div class="au"><i>'+r.a+'</i><div><b>'+r.n+'</b><em>✓ Verifizierter Kauf</em></div></div></div>';}
- function row(list,cls){var s=list.map(card).join('');return '<div class="sp-mq '+cls+'"><div class="tr">'+s+s+'</div></div>';}
+ function row(list,cls){return '<div class="sp-mq '+cls+'"><div class="tr">'+list.map(card).join('')+'</div></div>';}
  var h1=rv.filter(function(_,i){return i%2===0;}).slice(0,6),h2=rv.filter(function(_,i){return i%2===1;}).slice(0,6);
  var proof=el('<section id="sp-pp-proof" class="sp-pp sp-hp-sec sp-hp-dark"><div class="in"><div class="hd"><span class="sp-lbl">Kundenstimmen</span><h2>Das sagen Kunden über <span>'+D.name+'</span>.</h2></div>'
   +'<div class="sp-sum"><div class="big">'+D.rt+'</div><div><div class="st">★★★★★</div><div class="t">aus <b>'+D.rc+' Bewertungen</b><br>von verifizierten Käufern</div></div></div>'
@@ -582,9 +588,23 @@ document.addEventListener('DOMContentLoaded',function(){
  window.addEventListener('scroll',kick,{passive:true});cur=tgt=target();paint(cur);
 
  /* Laufband: beide Reihen gleich schnell (Dauer aus der echten Breite, ~28 px/s) */
- /* Laufband: Tempo einmal vor dem Start festlegen (kein Springen), dann starten */
- function mqStart(){document.querySelectorAll('.sp-mq .tr').forEach(function(tr){if(tr.classList.contains('go'))return;var w=tr.scrollWidth/2;if(w<=0)return;tr.style.animationDuration=(w/46).toFixed(1)+'s';tr.classList.add('go');});}
- mqStart();requestAnimationFrame(mqStart);
+ /* Laufband: jede Karte bewegt sich einzeln (kein breiter Streifen -> sofort sichtbar, auch in iOS Safari) */
+ function mqStart(){document.querySelectorAll('.sp-mq').forEach(function(m){if(m.getAttribute('data-go'))return;m.setAttribute('data-go','1');
+   var tr=m.querySelector('.tr');var cards=[].slice.call(tr.children);if(!cards.length)return;
+   var dir=m.classList.contains('r2')?1:-1,speed=46,gap=14,off=0,last=0,vis=true,hold=false,step,total,H;
+   function layout(){var w=cards[0].getBoundingClientRect().width||270;step=w+gap;
+     var need=m.clientWidth+2*step;while(cards.length*step<need){var c=cards.slice(0,Math.max(1,cards.length/2|0)).map(function(x){var y=x.cloneNode(true);tr.appendChild(y);return y;});cards=cards.concat(c);}
+     total=cards.length*step;H=0;cards.forEach(function(c){c.style.height='';H=Math.max(H,c.offsetHeight);});cards.forEach(function(c){c.style.height=H+'px';});tr.style.height=H+'px';}
+   function paint(){cards.forEach(function(c,i){var x=((i*step+dir*off)%total+total)%total-step;c.style.transform='translate3d('+x.toFixed(1)+'px,0,0)';});}
+   function tick(t){if(!vis){last=0;return;}if(last&&!hold)off+=speed*Math.min(.05,(t-last)/1000);last=t;paint();requestAnimationFrame(tick);}
+   tr.classList.add('js');layout();off=dir>0?step*0.45:0;paint();
+   if('IntersectionObserver' in window){new IntersectionObserver(function(e){var v=e[0].isIntersecting;if(v&&!vis){vis=true;requestAnimationFrame(tick);}vis=v;},{rootMargin:'150px 0px'}).observe(m);}
+   m.addEventListener('touchstart',function(){hold=true;},{passive:true});m.addEventListener('touchend',function(){hold=false;},{passive:true});
+   m.addEventListener('mouseenter',function(){hold=true;});m.addEventListener('mouseleave',function(){hold=false;});
+   window.addEventListener('resize',function(){layout();paint();});
+   if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){paint();return;}
+   requestAnimationFrame(tick);});}
+ mqStart();
  /* 2) Passt dazu: Sets */
  var S=D.sets||[];
  if(S.length){var sets=el('<section id="sp-pp-sets" class="sp-pp sp-hp-sec sp-hp-light"><div class="in"><div class="hd"><span class="sp-lbl lt">Passt dazu</span><h2>Komplett in einem Klick.</h2><p class="sub">Alles, was du rund um '+D.name+' brauchst – zusammen in den Warenkorb.</p></div><div class="sp-rail">'

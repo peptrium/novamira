@@ -230,3 +230,9 @@ html,body{overflow-x:hidden}
 .sp-mq .tr.go{animation-play-state:running!important}
 .sp-mq:hover .tr.go,.sp-mq:active .tr.go{animation-play-state:paused!important}
 .sp-mq .sp-rv{transform:translateZ(0);-webkit-transform:translateZ(0);backface-visibility:hidden;-webkit-backface-visibility:hidden}
+
+/* Laufband v3 (JS, Karten einzeln) */
+.sp-mq .tr.js{position:relative;display:block!important;width:auto!important;animation:none!important;transform:none!important}
+.sp-mq .tr.js>.sp-rv{position:absolute;top:0;left:0;width:270px;will-change:transform}
+@media(min-width:901px){.sp-mq .tr.js>.sp-rv{width:300px}}
+.sp-mq .tr.js>.sp-rv{box-sizing:border-box}
