@@ -15,8 +15,7 @@ if (!defined('ABSPATH')) {
 }
 
 function sp_ppv_active() {
-    return defined('SP_HPV_TOKEN') && function_exists('sp_hpv_products') && isset($_GET['sp_vorschau'])
-        && hash_equals(SP_HPV_TOKEN, (string) $_GET['sp_vorschau']) && function_exists('is_product') && is_product()
+    return function_exists('sp_hpv_token_ok') && sp_hpv_token_ok() && function_exists('is_product') && is_product()
         && in_array((int) get_queried_object_id(), [65], true);
 }
 
@@ -77,7 +76,7 @@ body.home .elementor-211>[data-id="77e913a"]{order:9}
 body.home .elementor-211>#sp-hp-faq{order:10}
 body.home .elementor-211>#sp-nlh{order:11}
 body.home .elementor-211>#sp-hp-info{order:12}
-body.home .elementor-211>[data-id="045a884"],body.home .elementor-211>[data-id="a4ab146"]{order:13}
+body.home .elementor-211>[data-id="045a884"],body.home .elementor-211>[data-id="a4ab146"]{display:none!important}
 body.home .elementor-211>[data-id="a9d4d1b"],body.home .elementor-211>[data-id="d60a05b"],body.home .elementor-211>[data-id="spsocial1"],body.home .elementor-211>[data-id="midcta01"],body.home .elementor-211>[data-id="3ca703b"],body.home .elementor-211>[data-id="5c363d8"]{display:none!important}
 body.home .elementor-211>.sp-hp-closed{display:none!important}
 body.home .elementor-location-footer .elementor-element-97108f0{display:none!important}
@@ -192,7 +191,7 @@ body.home [data-id="045a884"] .e-con,body.home [data-id="045a884"]>.e-con-inner{
  body.home .sp-mf-grid{display:flex!important;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 20px;gap:12px!important;margin:0 -20px;padding:4px 20px 12px;scrollbar-width:none}
  body.home .sp-mf-grid::-webkit-scrollbar{display:none}
  body.home .sp-mf-card{flex:0 0 84%;scroll-snap-align:start}
- body.home .sp-hiw-step-img,body.home .sp-hiw-track{display:none!important}
+ body.home .sp-hiw-track{display:none!important}
  body.home .sp-hiw-steps{gap:14px!important}
  body.home .sp-hiw-step{min-height:0!important;height:auto!important;padding:0!important}
 }
@@ -256,6 +255,32 @@ html{overflow-x:clip}
 #sp-hp-proof,#sp-hp-prod,#sp-hp-sets,#sp-hp-faq,#sp-nlh,.sp-stage{overflow:hidden}
 html,body{overflow-x:hidden}
 @supports (overflow:clip){html,body{overflow-x:clip}}
+
+/* Haekchen-Liste: auf dem Handy sauber untereinander */
+@media(max-width:900px){.sp-trust{display:flex;flex-direction:column;align-items:flex-start;width:max-content;max-width:100%;margin:22px auto 0;gap:11px}.sp-trust li{font-size:13px}}
+/* Mehr ueber Peptrium */
+#sp-hp-info .sp-about{max-width:1000px;margin:26px auto 4px;text-align:left}
+#sp-hp-info .sp-about h2{font:700 clamp(22px,3vw,28px)/1.25 Sora,sans-serif;letter-spacing:-.01em;color:#0D0F12;margin:0 0 10px;text-align:center}
+#sp-hp-info .sp-about .lead{font-size:14.5px;line-height:1.65;color:#4A5058;margin:0 auto 20px;max-width:640px;text-align:center}
+#sp-hp-info .sp-about .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+#sp-hp-info .sp-about .grid>div{background:#fff;border:1px solid #E3E6E9;border-radius:16px;padding:16px}
+#sp-hp-info .sp-about h3{font:700 15px/1.3 Sora,sans-serif;color:#0D0F12;margin:0 0 6px}
+#sp-hp-info .sp-about p{font-size:13.5px;line-height:1.6;color:#4A5058;margin:0}
+#sp-hp-info .sp-about a{color:#0D0F12;font-weight:600;text-decoration:underline;text-underline-offset:2px}
+@media(max-width:900px){#sp-hp-info .sp-about .grid{grid-template-columns:1fr}}
+@media(max-width:900px){#sp-hp-prod .sp-trust{margin-left:auto!important;margin-right:auto!important;padding:0!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;width:-webkit-fit-content!important;width:fit-content!important}}
+
+.sp-pc .bd.p{background:#F5A623;color:#0D0F12}
+.sp-pc .bd.p+.bd{top:42px}
+.sp-pc .pre-n{font-size:11px;color:#A86A00;text-align:center;margin-top:-2px}
+.sp-set .vo{display:flex;flex-wrap:wrap;gap:6px}
+.sp-set .vo button{height:30px;padding:0 12px;border-radius:9px;border:1px solid #D5D9DD;background:#fff;font:600 12.5px Sora,sans-serif;color:#3A4048;cursor:pointer}
+.sp-set .vo button.on{background:#0D0F12;border-color:#0D0F12;color:#fff}
+.sp-set .body{display:flex;flex-direction:column;gap:12px;flex:1}
+/* 3 Schritte: Bilder kompakt auf dem Handy */
+@media(max-width:767px){
+ body.home .sp-hiw-step-img{display:block!important;width:100%!important;height:120px!important;object-fit:cover!important;border-radius:14px!important;margin:12px 0 0!important}
+}
 /* ===== Produktseite (Entwurf) ===== */
 body.single-product .elementor-340{display:flex;flex-direction:column}
 body.single-product .elementor-340>*{order:50;width:100%}
@@ -492,7 +517,7 @@ body.single-product .elementor-340>#sp-pp-proof,body.single-product .elementor-3
 #sp-pp-proof,#sp-pp-sets,#sp-pp-more,#sp-pp-info,#sp-nlh,.sp-mq,.sp-stage{overflow:hidden!important}
 html,body{overflow-x:hidden!important}
 @supports (overflow:clip){html,body{overflow-x:clip!important}}
-#sp-hpv-flag{position:fixed;left:12px;top:12px;z-index:200000;background:#FF8A5C;color:#0D0F12;font:700 11px Sora,sans-serif;padding:6px 10px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.3);pointer-events:none}
+#sp-hpv-flag{position:fixed;left:12px;top:12px;z-index:200000;background:#FF8A5C;color:#0D0F12;font:700 11px Sora,sans-serif;padding:6px 10px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.3);text-decoration:none!important}
 </style>
     <?php
 }, 99);
@@ -502,7 +527,7 @@ add_action('wp_footer', function () {
         return;
     }
     ?>
-<div id="sp-hpv-flag">ENTWURF-VORSCHAU</div>
+<a id="sp-hpv-flag" href="<?php echo esc_url(add_query_arg('sp_vorschau', 'aus', home_url('/'))); ?>">ENTWURF-VORSCHAU ✕</a>
 <script id="sp-ppv-js">
 window.SP_PP=<?php echo wp_json_encode(sp_ppv_data()); ?>;
 document.addEventListener('DOMContentLoaded',function(){

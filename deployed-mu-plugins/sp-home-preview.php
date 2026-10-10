@@ -16,8 +16,33 @@ if (!defined('ABSPATH')) {
 
 define('SP_HPV_TOKEN', 'v02dqoyjtv');
 
+/** Vorschau-Modus: per Link (?sp_vorschau=TOKEN) einschalten, bleibt per Cookie 24 h beim Weiterklicken aktiv; ?sp_vorschau=aus beendet ihn. */
+function sp_hpv_token_ok() {
+    static $ok = null;
+    if ($ok !== null) {
+        return $ok;
+    }
+    if (isset($_GET['sp_vorschau'])) {
+        $v = (string) $_GET['sp_vorschau'];
+        if ($v === 'aus') {
+            if (!headers_sent()) {
+                setcookie('sp_vorschau', '', time() - 3600, '/', '', true, true);
+            }
+            return $ok = false;
+        }
+        if (hash_equals(SP_HPV_TOKEN, $v)) {
+            if (!headers_sent()) {
+                setcookie('sp_vorschau', $v, time() + DAY_IN_SECONDS, '/', '', true, true);
+            }
+            return $ok = true;
+        }
+    }
+    return $ok = isset($_COOKIE['sp_vorschau']) && hash_equals(SP_HPV_TOKEN, (string) $_COOKIE['sp_vorschau']);
+}
+add_action('send_headers', 'sp_hpv_token_ok');
+
 function sp_hpv_active() {
-    return isset($_GET['sp_vorschau']) && hash_equals(SP_HPV_TOKEN, (string) $_GET['sp_vorschau']) && is_front_page();
+    return sp_hpv_token_ok() && is_front_page();
 }
 
 /** Bestseller fuer die Produkt-Reihe (Peptide + Pens, nach Verkaufszahl). */
@@ -351,7 +376,7 @@ html,body{overflow-x:hidden}
 @media(max-width:767px){
  body.home .sp-hiw-step-img{display:block!important;width:100%!important;height:120px!important;object-fit:cover!important;border-radius:14px!important;margin:12px 0 0!important}
 }
-#sp-hpv-flag{position:fixed;left:12px;top:12px;z-index:99999;background:#FF8A5C;color:#0D0F12;font:700 11px Sora,sans-serif;padding:6px 10px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.3);pointer-events:none}
+#sp-hpv-flag{position:fixed;left:12px;top:12px;z-index:99999;background:#FF8A5C;color:#0D0F12;font:700 11px Sora,sans-serif;padding:6px 10px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.3);text-decoration:none!important}
 </style>
     <?php
 }, 99);
@@ -361,7 +386,7 @@ add_action('wp_footer', function () {
         return;
     }
     ?>
-<div id="sp-hpv-flag">ENTWURF-VORSCHAU</div>
+<a id="sp-hpv-flag" href="<?php echo esc_url(add_query_arg('sp_vorschau', 'aus', home_url('/'))); ?>">ENTWURF-VORSCHAU ✕</a>
 <script id="sp-hpv-js">
 window.SP_HP_PRODS=<?php echo wp_json_encode(sp_hpv_products()); ?>;
 window.SP_HP_CATS=<?php echo wp_json_encode(sp_hpv_cats()); ?>;
