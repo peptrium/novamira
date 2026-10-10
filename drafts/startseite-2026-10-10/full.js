@@ -116,7 +116,10 @@
  mqStart();
  /* Newsletter in die Seite holen */
  var nl=document.getElementById('sp-nlh'); if(nl) root.appendChild(nl);
- document.querySelectorAll('#sp-how-it-works p').forEach(function(p){if(/48 Stunden/.test(p.textContent))p.textContent='Checkout in wenigen Minuten. Zustellung in der Regel innerhalb von 2 Werktagen – mit Sendungsverfolgung.';});
+ /* 3 Schritte: Stichworte statt Fliesstext, Bild groesser */
+ var KW=[['6 Forschungsbereiche','HPLC-verifiziert','Bewertungen'],['Größe wählen','ab 3 Stück −10 %','Gratisversand ab 100 €'],['Vorkasse · Krypto','2 Werktage Lieferung','Sendungsverfolgung']];
+ document.querySelectorAll('#sp-how-it-works .sp-hiw-step-content').forEach(function(c,i){if(!KW[i]||c.querySelector('.sp-kw'))return;var p=c.querySelector('p');if(p)p.style.display='none';
+   var k=document.createElement('div');k.className='sp-kw';k.innerHTML=KW[i].map(function(t){return '<span>'+t+'</span>';}).join('');var h=c.querySelector('h3');(h&&h.nextSibling)?c.insertBefore(k,h.nextSibling):c.appendChild(k);});
  /* Hinweis + Mehr ueber Peptrium (eigener, strukturierter Text) */
  var info=el('<div id="sp-hp-info"><div class="dis"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A5058" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg><span><b>Nur für Laborforschung.</b> Nicht zur Anwendung am Menschen oder Tier und nicht für diagnostische oder therapeutische Zwecke bestimmt.</span></div><br><button type="button" aria-expanded="false">Mehr über Peptrium <span>▾</span></button>'
   +'<div class="sp-about" hidden><h2>Peptide kaufen in Deutschland – bei Peptrium</h2>'
