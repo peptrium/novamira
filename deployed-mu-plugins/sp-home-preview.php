@@ -210,7 +210,7 @@ body.home .sp-abo-promo-eyebrow:before{background:#FF8A5C;box-shadow:0 0 8px rgb
 .sp-sum .st{color:#F5A623;font-size:17px;letter-spacing:2px}
 .sp-sum .t{font-size:12.5px;color:#5A6068;line-height:1.45}
 .sp-sum .t b{color:#0D0F12}
-.sp-stage{position:relative;margin:0 -20px;padding:40px 0 30px}
+.sp-stage{position:relative;margin:0 -16px;padding:40px 0 30px}
 .sp-mq{position:relative;overflow:hidden;margin:0 0 14px;contain:paint}
 .sp-mq:before,.sp-mq:after{content:'';position:absolute;top:0;bottom:0;width:28px;z-index:1;pointer-events:none}
 .sp-mq:before{left:0;background:linear-gradient(90deg,#F4F5F6,rgba(244,245,246,0))}
@@ -306,6 +306,8 @@ body.home [data-id="045a884"] .e-con,body.home [data-id="045a884"]>.e-con-inner{
 .sp-faq details[open] summary:after{transform:rotate(45deg);background:#0D0F12;color:#fff;border-color:#0D0F12}
 .sp-faq p{margin:0;padding:0 40px 18px 2px;font-size:14px;line-height:1.65;color:#4A5058}
 .sp-faq a{color:#0D0F12;font-weight:600}
+
+html{overflow-x:clip}
 #sp-hpv-flag{position:fixed;left:12px;top:12px;z-index:99999;background:#FF8A5C;color:#0D0F12;font:700 11px Sora,sans-serif;padding:6px 10px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.3);pointer-events:none}
 </style>
     <?php
