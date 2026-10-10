@@ -28,7 +28,7 @@ Vorschau-Plugins (mu-plugins): `sp-ds.php` (gemeinsame Ebene), `sp-home-preview.
 - [x] Alle übrigen Produktseiten (Peptide, Pens, Zubehör) – Entwurf; Pen-Nadeln-Seite (eigener Aufbau) noch offen
 
 ## Phase 3 – Kauf
-- [ ] Warenkorb-Drawer inkl. Geschenkstufen
+- [x] Warenkorb-Drawer inkl. Geschenkstufen (Entwurf, sp-cart-preview.php)
 - [ ] Warenkorb-Seite, Kasse, Danke-Seite (Kasse braucht Freigabe im Modus „Accept edits“)
 
 ## Phase 4 – Kundenkonto
