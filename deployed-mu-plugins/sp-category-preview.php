@@ -14,11 +14,50 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+/** Seiten, die als Produkt-Sammlung dargestellt werden (Ziel-Seiten, Pens, Zubehoer). Preise immer live. */
+function sp_cpv_collections() {
+    return [
+        'gewebe-verletzungsregeneration' => ['Gewebe- & Verletzungsregeneration', 'Forschungspeptide zur Untersuchung von Zellmigration, Kollagenbildung und Geweberegeneration – BPC-157 und TB-500 sind hier die zentralen Werkzeuge.', [428, 431, 68]],
+        'entzuendung-darmgesundheit' => ['Entzündung & Darmgesundheit', 'Forschungspeptide zur Untersuchung entzündungsbezogener Signalwege und der Darmgesundheit.', [428, 515]],
+        'immunmodulation' => ['Immunmodulation', 'Forschungspeptide zur Untersuchung immunmodulatorischer Mechanismen.', [515]],
+        'mitochondrien-energie' => ['Mitochondrien & Energie', 'Forschungspeptide zur Untersuchung mitochondrialer Biogenese und zellulärer Energieproduktion – allen voran Mots-C.', [71, 396]],
+        'zellschutz-anti-aging' => ['Zellschutz & Anti-Aging', 'Forschungspeptide zur Untersuchung zellprotektiver und altersbezogener Signalwege.', [68, 395, 71]],
+        'konzentration-kognitive-leistung' => ['Konzentration & kognitive Leistung', 'Forschungspeptide zur Untersuchung neurotropher Signalwege und kognitiver Prozesse – Semax und Selank zählen zu den am längsten dokumentierten.', [434, 437]],
+        'stress-angstregulation' => ['Stress- & Angstregulation', 'Forschungspeptide zur Untersuchung stress- und angstbezogener neurobiologischer Prozesse.', [437]],
+        'schlaf-erholung' => ['Schlaf & Erholung', 'Forschungspeptide zur Untersuchung der Wachstumshormon-Sekretion und von Erholungsprozessen im Schlaf.', [77]],
+        'appetitkontrolle-gewichtsmanagement' => ['Appetitkontrolle & Gewichtsmanagement', 'Forschungspeptide zur Untersuchung von Appetitregulation und Sättigungssignalwegen – Retatrutide ist eines der meistuntersuchten.', [65, 393, 518]],
+        'fettverbrennung-stoffwechselfunktion' => ['Fettverbrennung & Stoffwechselfunktion', 'Forschungspeptide zur Untersuchung von Lipidstoffwechsel und metabolischer Funktion.', [65, 393, 71, 518]],
+        'wachstumshormon-erholung' => ['Wachstumshormon & Erholung', 'Forschungspeptide zur Untersuchung der Wachstumshormon-Sekretion und regenerativer Signalwege.', [77, 431, 428]],
+        'haut-kollagen' => ['Haut & Kollagen', 'Forschungspeptide zur Untersuchung von Kollagensynthese und Hautstruktur – GHK-Cu ist hier eines der meistuntersuchten.', [68, 395]],
+        'pigmentierung-braeunung' => ['Pigmentierung & Bräunung', 'Forschungspeptide zur Untersuchung von Pigmentierungsprozessen. Dieser Bereich wird gerade aufgebaut – passende Peptide folgen in Kürze.', []],
+        'alle-peptrium-pens' => ['Alle Peptrium-Pens', 'Vorgefüllte Pens mit Dosierrad – kein Anmischen, keine Spritzen. Retatrutide, GHK-Cu und Mots-C in mehreren Stärken.', [393, 395, 396], 'Peptrium-Pen'],
+        'zubehoer' => ['Zubehör', 'Alles für die Arbeit im Labor: Bac Water zum Anmischen, Spritzen, Pen Nadeln und Injektionskit.', 'cat:zubehoer', 'Zubehör'],
+    ];
+}
+
+function sp_cpv_collection() {
+    foreach (sp_cpv_collections() as $slug => $c) {
+        if (is_page($slug)) {
+            return array_merge(['slug' => $slug], ['title' => $c[0], 'desc' => $c[1], 'ids' => $c[2], 'label' => $c[3] ?? 'Forschungsziel']);
+        }
+    }
+    return null;
+}
+
+function sp_cpv_page_is_collection() {
+    foreach (array_keys(sp_cpv_collections()) as $s) {
+        if (is_page($s)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 function sp_cpv_active() {
     if (!function_exists('sp_hpv_token_ok') || !sp_hpv_token_ok() || !function_exists('is_product_category')) {
         return false;
     }
-    return is_product_category() || is_shop() || is_page('alle-produkte');
+    return is_product_category() || is_shop() || is_page('alle-produkte') || sp_cpv_collection() || (is_search() && !is_admin());
 }
 
 function sp_cpv_desc($slug) {
@@ -37,7 +76,12 @@ function sp_cpv_data() {
     $map = function_exists('sp_abo_picker_rating_map') ? sp_abo_picker_rating_map() : [];
     $qd = function_exists('sp_quantity_discount_product_ids') ? sp_quantity_discount_product_ids() : [];
     $pre = function_exists('sp_preorder_product_ids') ? sp_preorder_product_ids() : [];
+    $col = sp_cpv_collection();
     $term = is_product_category() ? get_queried_object() : null;
+    if ($col && is_string($col['ids']) && strpos($col['ids'], 'cat:') === 0) {
+        $term = get_term_by('slug', substr($col['ids'], 4), 'product_cat');
+        $col = null;
+    }
     $args = ['status' => 'publish', 'limit' => -1, 'visibility' => 'catalog', 'orderby' => 'meta_value_num', 'meta_key' => 'total_sales', 'order' => 'DESC'];
     if ($term) {
         $args['category'] = [$term->slug];
@@ -45,7 +89,23 @@ function sp_cpv_data() {
     $hide = [729, 817];
     $items = [];
     $rank = 0;
-    foreach (wc_get_products($args) as $p) {
+    if (is_search()) {
+        $q = get_search_query();
+        $ids = $q === '' ? [] : wc_get_products(['status' => 'publish', 'limit' => 40, 'visibility' => 'search', 's' => $q, 'return' => 'ids']);
+        $col = ['slug' => '', 'title' => 'Suche: „' . $q . '“', 'desc' => $ids ? 'Diese Produkte passen zu deiner Suche.' : 'Zu deiner Suche haben wir leider nichts gefunden. Probier einen anderen Begriff oder stöbere in den Forschungsbereichen.', 'ids' => $ids, 'label' => 'Suche'];
+    }
+    if ($col) {
+        $plist = [];
+        foreach ($col['ids'] as $cid) {
+            $cp = wc_get_product($cid);
+            if ($cp && $cp->get_status() === 'publish') {
+                $plist[] = $cp;
+            }
+        }
+    } else {
+        $plist = wc_get_products($args);
+    }
+    foreach ($plist as $p) {
         $id = $p->get_id();
         if (in_array($id, $hide, true)) {
             continue;
@@ -79,7 +139,7 @@ function sp_cpv_data() {
     $tiles = ['fettverlust' => 65, 'regeneration-heilung' => 428, 'fokus' => 434, 'energie' => 71, 'aesthetik' => 68, 'zubehoer' => 74];
     $all = wc_get_products(['status' => 'publish', 'limit' => -1, 'visibility' => 'catalog', 'return' => 'ids']);
     $all = array_diff($all, $hide);
-    $cats = [['n' => 'Alle', 'u' => home_url('/alle-produkte/'), 'c' => count($all), 'on' => !$term && empty($_GET['vorbestellung'])]];
+    $cats = [['n' => 'Alle', 'u' => home_url('/alle-produkte/'), 'c' => count($all), 'on' => !$term && !$col && !is_search() && empty($_GET['vorbestellung']) && !sp_cpv_page_is_collection()]];
     foreach ($tiles as $slug => $pid) {
         $t = get_term_by('slug', $slug, 'product_cat');
         if (!$t || !$t->count) {
@@ -96,7 +156,25 @@ function sp_cpv_data() {
     if ($npre) {
         $cats[] = ['n' => 'Vorbestellung', 'u' => add_query_arg('vorbestellung', '1', home_url('/alle-produkte/')), 'c' => $npre, 'on' => !$term && !empty($_GET['vorbestellung']), 'pre' => true];
     }
+    if ($col && $col['label'] === 'Forschungsziel') {
+        $cats = [['n' => 'Alle Produkte', 'u' => home_url('/alle-produkte/'), 'c' => null]];
+        foreach (sp_cpv_collections() as $slug => $c) {
+            if (($c[3] ?? '') || $c[2] === []) {
+                if ($slug !== $col['slug']) {
+                    continue;
+                }
+            }
+            $cats[] = ['n' => $c[0], 'u' => home_url('/' . $slug . '/'), 'c' => null, 'on' => $slug === $col['slug']];
+        }
+    }
+    if ($col) {
+        return [
+            'isAll' => false, 'label' => $col['label'], 'title' => $col['title'], 'desc' => $col['desc'],
+            'products' => $items, 'cats' => $cats, 'soon' => !$items, 'search' => is_search(),
+        ];
+    }
     return [
+        'label' => $term ? 'Forschungsbereich' : 'Sortiment',
         'isAll' => !$term,
         'title' => $term ? html_entity_decode($term->name) : 'Alle Produkte',
         'desc' => $term ? sp_cpv_desc($term->slug) : 'Unser komplettes Sortiment: hochreine Forschungspeptide, vorgefüllte Peptrium-Pens und passendes Zubehör – geprüft und schnell aus Deutschland geliefert.',
@@ -221,6 +299,21 @@ body.sp-cat-on .elementor-location-footer .elementor-element-97108f0{display:non
 #sp-cat .bar b{white-space:nowrap}
 @media(max-width:900px){.sp-grid .sp-pc .add svg{display:none}.sp-grid .sp-pc .add{white-space:nowrap;font-size:12.5px;padding:0 6px}}
 
+/* v2: Kopfbereich kompakter */
+#sp-cat .hero{padding:20px 18px 22px;border-radius:0 0 24px 24px}
+#sp-cat .bc{margin:0 0 12px}
+#sp-cat .pill{display:inline-flex;align-items:center;gap:8px;padding:5px 12px;border-radius:999px;font:700 10px/1.2 Sora,sans-serif;letter-spacing:.16em;text-transform:uppercase;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05);color:#E6E9EC;margin:0 0 10px}
+#sp-cat .pill:before{content:'';width:6px;height:6px;border-radius:50%;background:#C7CCD1;box-shadow:0 0 8px rgba(199,204,209,.7)}
+#sp-cat .hero h1{font-size:clamp(28px,4.4vw,42px);margin:0 0 8px}
+#sp-cat .hero p{font-size:14px;margin:0 0 14px}
+#sp-cat .meta{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -18px;padding:0 18px}
+#sp-cat .meta::-webkit-scrollbar{display:none}
+#sp-cat .meta span{flex:0 0 auto;white-space:nowrap;font-size:11.5px;padding:5px 10px}
+#sp-cat .body{padding-top:16px}
+#sp-cat .empty{display:flex;flex-direction:column;align-items:center;gap:8px;padding:34px 20px;border-radius:20px;background:#F6F7F8;border:1px dashed #D5D9DD;color:#4A5058;font-size:14px;line-height:1.55}
+#sp-cat .empty b{font-size:17px;color:#0D0F12}
+#sp-cat .empty a{margin-top:6px;height:42px;display:inline-flex;align-items:center;padding:0 20px;border-radius:999px;background:#0D0F12;color:#fff!important;font-weight:700;text-decoration:none!important}
+
 #sp-hpv-flag{position:fixed;left:12px;top:12px;z-index:200000;background:#FF8A5C;color:#0D0F12;font:700 11px Sora,sans-serif;padding:6px 10px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.3);text-decoration:none!important}
 </style>
     <?php
@@ -258,13 +351,13 @@ document.addEventListener('DOMContentLoaded',function(){
  var others=D.cats.filter(function(c){return !c.on&&c.tile;});
  var root=document.createElement('div');root.id='sp-cat';
  root.innerHTML='<section class="hero"><div class="in"><div class="bc"><a href="/">Start</a> › <a href="/alle-produkte/">Produkte</a>'+(D.isAll?'':' › '+D.title)+'</div>'
-  +'<span class="sp-lbl" style="display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;font:700 10.5px/1.2 Sora,sans-serif;letter-spacing:.16em;text-transform:uppercase;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05);color:#E6E9EC;margin:0 0 14px">'+(D.isAll?'Sortiment':'Forschungsbereich')+'</span>'
+  +'<span class="pill">'+(D.label||'Sortiment')+'</span>'
   +'<h1>'+(pre?'Vorbestellung':D.title)+'</h1><p>'+(pre?'Diese Produkte sind gerade vorbestellbar – mit Preisvorteil. Wir liefern, sobald die neue Ware eintrifft.':D.desc)+'</p>'
   +'<div class="meta"><span>'+list.length+(list.length===1?' Produkt':' Produkte')+'</span><span>🚚 Lieferung in 2 Werktagen</span><span>Gratisversand ab 100 €</span></div></div></section>'
   +'<div class="body"><div class="chips">'+chips+'</div>'
   +'<div class="bar"><b>'+list.length+' Ergebnisse</b><select aria-label="Sortieren"><option value="pop">Beliebteste</option><option value="pa">Preis aufsteigend</option><option value="pd">Preis absteigend</option><option value="az">Name A–Z</option></select></div>'
   +(list.some(function(p){return p.pre;})&&!pre?'<div class="note">⏳ <span>Mit <b>Vorbestellung</b> markierte Produkte werden geliefert, sobald neue Ware eintrifft.</span></div>':'')
-  +'<div class="sp-grid">'+(list.length?list.map(card).join(''):'')+'</div>'+(list.length?'':'<div class="empty">In diesem Bereich gibt es gerade keine Produkte.</div>')
+  +'<div class="sp-grid">'+(list.length?list.map(card).join(''):'')+'</div>'+(list.length?'':D.search?'<div class="empty"><b>Keine Treffer</b>Probier z. B. „Retatrutide“, „GHK-Cu“ oder „Pen“.<a href="/alle-produkte/">Alle Produkte ansehen →</a></div>':'<div class="empty"><b>Bald verfügbar</b>Passende Peptide für diesen Bereich folgen in Kürze. Trag dich unten für den Newsletter ein – dann erfährst du es zuerst.<a href="/alle-produkte/">Zum ganzen Sortiment →</a></div>')
   +(others.length?'<div class="more"><h2>Weitere Forschungsbereiche</h2><div class="cats">'+others.map(function(c){return '<a class="sp-cat" href="'+c.u+'">'+(c.i?'<img loading="lazy" src="'+c.i+'" alt="">':'')+'<span>'+c.n+'<small>'+c.c+(c.c===1?' Produkt':' Produkte')+'</small></span></a>';}).join('')+'</div></div>':'')
   +'<div class="dis"><span>ⓘ</span><span><b>Nur für Laborforschung.</b> Nicht zur Anwendung am Menschen oder Tier und nicht für diagnostische oder therapeutische Zwecke bestimmt.</span></div></div>';
  host.insertBefore(root,host.firstChild);

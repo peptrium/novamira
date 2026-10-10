@@ -22,13 +22,13 @@ document.addEventListener('DOMContentLoaded',function(){
  var others=D.cats.filter(function(c){return !c.on&&c.tile;});
  var root=document.createElement('div');root.id='sp-cat';
  root.innerHTML='<section class="hero"><div class="in"><div class="bc"><a href="/">Start</a> › <a href="/alle-produkte/">Produkte</a>'+(D.isAll?'':' › '+D.title)+'</div>'
-  +'<span class="sp-lbl" style="display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;font:700 10.5px/1.2 Sora,sans-serif;letter-spacing:.16em;text-transform:uppercase;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05);color:#E6E9EC;margin:0 0 14px">'+(D.isAll?'Sortiment':'Forschungsbereich')+'</span>'
+  +'<span class="pill">'+(D.label||'Sortiment')+'</span>'
   +'<h1>'+(pre?'Vorbestellung':D.title)+'</h1><p>'+(pre?'Diese Produkte sind gerade vorbestellbar – mit Preisvorteil. Wir liefern, sobald die neue Ware eintrifft.':D.desc)+'</p>'
   +'<div class="meta"><span>'+list.length+(list.length===1?' Produkt':' Produkte')+'</span><span>🚚 Lieferung in 2 Werktagen</span><span>Gratisversand ab 100 €</span></div></div></section>'
   +'<div class="body"><div class="chips">'+chips+'</div>'
   +'<div class="bar"><b>'+list.length+' Ergebnisse</b><select aria-label="Sortieren"><option value="pop">Beliebteste</option><option value="pa">Preis aufsteigend</option><option value="pd">Preis absteigend</option><option value="az">Name A–Z</option></select></div>'
   +(list.some(function(p){return p.pre;})&&!pre?'<div class="note">⏳ <span>Mit <b>Vorbestellung</b> markierte Produkte werden geliefert, sobald neue Ware eintrifft.</span></div>':'')
-  +'<div class="sp-grid">'+(list.length?list.map(card).join(''):'')+'</div>'+(list.length?'':'<div class="empty">In diesem Bereich gibt es gerade keine Produkte.</div>')
+  +'<div class="sp-grid">'+(list.length?list.map(card).join(''):'')+'</div>'+(list.length?'':D.search?'<div class="empty"><b>Keine Treffer</b>Probier z. B. „Retatrutide“, „GHK-Cu“ oder „Pen“.<a href="/alle-produkte/">Alle Produkte ansehen →</a></div>':'<div class="empty"><b>Bald verfügbar</b>Passende Peptide für diesen Bereich folgen in Kürze. Trag dich unten für den Newsletter ein – dann erfährst du es zuerst.<a href="/alle-produkte/">Zum ganzen Sortiment →</a></div>')
   +(others.length?'<div class="more"><h2>Weitere Forschungsbereiche</h2><div class="cats">'+others.map(function(c){return '<a class="sp-cat" href="'+c.u+'">'+(c.i?'<img loading="lazy" src="'+c.i+'" alt="">':'')+'<span>'+c.n+'<small>'+c.c+(c.c===1?' Produkt':' Produkte')+'</small></span></a>';}).join('')+'</div></div>':'')
   +'<div class="dis"><span>ⓘ</span><span><b>Nur für Laborforschung.</b> Nicht zur Anwendung am Menschen oder Tier und nicht für diagnostische oder therapeutische Zwecke bestimmt.</span></div></div>';
  host.insertBefore(root,host.firstChild);
