@@ -61,6 +61,7 @@ function sp_hpv_products() {
             'qd' => in_array($id, $qd, true) && !$on_sale,
             'rt' => isset($map[$id]['num']) ? $map[$id]['num'] : 4.8, 'rc' => isset($map[$id]['count']) ? $map[$id]['count'] : 0,
             'pen' => stripos($p->get_name(), 'Pen') !== false,
+            'pre' => function_exists('sp_preorder_product_ids') && in_array($id, sp_preorder_product_ids(), true),
         ];
     }
     return $out;
@@ -81,31 +82,44 @@ function sp_hpv_cats() {
     return $out;
 }
 
-/** Kombi-Sets (keine Set-Rabatte - nur bequem zusammen in den Warenkorb). */
+/** Kombi-Sets (nur lieferbare Produkte; keine Set-Rabatte). Optionale Varianten-Auswahl ('opts'). */
+function sp_hpv_set_item($id) {
+    $p = wc_get_product($id);
+    if (!$p || !$p->is_purchasable() || !$p->is_in_stock()) {
+        return null;
+    }
+    $parent = $p->is_type('variation') ? wc_get_product($p->get_parent_id()) : $p;
+    $img = $p->get_image_id() ? $p->get_image_id() : $parent->get_image_id();
+    $name = $parent->get_name() . ($p->is_type('variation') ? ' ' . implode(' ', array_values($p->get_attributes())) : '');
+    return ['id' => $id, 'n' => $name, 'p' => (float) wc_get_price_to_display($p), 'i' => wp_get_attachment_image_url($img, 'thumbnail'), 'w' => in_array($parent->get_id(), [80, 393, 395, 396, 908, 745], true)];
+}
+
 function sp_hpv_sets() {
     $defs = [
-        ['n' => 'Retatrutide Starter', 'd' => 'Alles für den Start: Retatrutide 10 mg plus Bac Water zum Anmischen und Spritzen zum genauen Dosieren.', 'ids' => [555, 74, 80]],
-        ['n' => 'Regenerations-Duo', 'd' => 'Der Klassiker in der Regenerationsforschung: BPC-157 und TB-500 zusammen.', 'ids' => [428, 577, 74]],
-        ['n' => 'Fokus-Duo', 'd' => 'Semax und Selank – die beiden Peptide aus der Fokus- und Kognitionsforschung.', 'ids' => [434, 437, 74]],
-        ['n' => 'Pen-Set', 'd' => 'Der vorgefüllte Retatrutide-Pen (20 mg) mit passenden Pen Nadeln – ohne Anmischen.', 'ids' => [547, 908]],
+        ['n' => 'Retatrutide Starter', 'd' => 'Alles für den Start: Retatrutide 10 mg plus Bac Water zum Anmischen und Spritzen zum genauen Dosieren.', 'opts' => [['l' => '10 mg', 'ids' => [555, 74, 80]], ['l' => '20 mg', 'ids' => [556, 74, 80]]]],
+        ['n' => 'Pen-Set', 'd' => 'Ein vorgefüllter Peptrium-Pen mit passenden Pen Nadeln – ganz ohne Anmischen. Wähle deinen Pen:', 'opts' => [['l' => 'Retatrutide', 'ids' => [547, 908]], ['l' => 'GHK-Cu', 'ids' => [597, 908]], ['l' => 'Mots-C', 'ids' => [544, 908]]]],
+        ['n' => 'GHK-Cu Komplett', 'd' => 'GHK-Cu 50 mg mit Bac Water und Spritzen – alles für deine Forschung in einem Paket.', 'opts' => [['l' => '', 'ids' => [68, 74, 80]]]],
+        ['n' => 'Energie & Ästhetik', 'd' => 'Das oft zusammen gekaufte Duo: Mots-C und GHK-Cu, dazu Bac Water zum Anmischen.', 'opts' => [['l' => '', 'ids' => [71, 68, 74]]]],
     ];
     $out = [];
     foreach ($defs as $d) {
-        $items = [];
-        $t = 0;
-        foreach ($d['ids'] as $id) {
-            $p = wc_get_product($id);
-            if (!$p || !$p->is_purchasable() || !$p->is_in_stock()) {
-                continue 2;
+        $opts = [];
+        foreach ($d['opts'] as $o) {
+            $items = [];
+            $t = 0;
+            foreach ($o['ids'] as $id) {
+                $it = sp_hpv_set_item($id);
+                if (!$it) {
+                    continue 2;
+                }
+                $items[] = $it;
+                $t += $it['p'];
             }
-            $parent = $p->is_type('variation') ? wc_get_product($p->get_parent_id()) : $p;
-            $img = $p->get_image_id() ? $p->get_image_id() : $parent->get_image_id();
-            $name = $parent->get_name() . ($p->is_type('variation') ? ' ' . implode(' ', array_values($p->get_attributes())) : '');
-            $price = (float) wc_get_price_to_display($p);
-            $t += $price;
-            $items[] = ['id' => $id, 'n' => $name, 'p' => $price, 'i' => wp_get_attachment_image_url($img, 'thumbnail'), 'w' => in_array($parent->get_id(), [80, 393, 395, 396, 908, 745], true)];
+            $opts[] = ['l' => $o['l'], 'items' => $items, 't' => round($t, 2)];
         }
-        $out[] = ['n' => $d['n'], 'd' => $d['d'], 'items' => $items, 't' => round($t, 2)];
+        if ($opts) {
+            $out[] = ['n' => $d['n'], 'd' => $d['d'], 'opts' => $opts, 'items' => $opts[0]['items'], 't' => $opts[0]['t']];
+        }
     }
     return $out;
 }
@@ -247,7 +261,7 @@ body.home [data-id="045a884"] .e-con,body.home [data-id="045a884"]>.e-con-inner{
  body.home .sp-mf-grid{display:flex!important;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 20px;gap:12px!important;margin:0 -20px;padding:4px 20px 12px;scrollbar-width:none}
  body.home .sp-mf-grid::-webkit-scrollbar{display:none}
  body.home .sp-mf-card{flex:0 0 84%;scroll-snap-align:start}
- body.home .sp-hiw-step-img,body.home .sp-hiw-track{display:none!important}
+ body.home .sp-hiw-track{display:none!important}
  body.home .sp-hiw-steps{gap:14px!important}
  body.home .sp-hiw-step{min-height:0!important;height:auto!important;padding:0!important}
 }
@@ -325,6 +339,18 @@ html,body{overflow-x:hidden}
 #sp-hp-info .sp-about a{color:#0D0F12;font-weight:600;text-decoration:underline;text-underline-offset:2px}
 @media(max-width:900px){#sp-hp-info .sp-about .grid{grid-template-columns:1fr}}
 @media(max-width:900px){#sp-hp-prod .sp-trust{margin-left:auto!important;margin-right:auto!important;padding:0!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;width:-webkit-fit-content!important;width:fit-content!important}}
+
+.sp-pc .bd.p{background:#F5A623;color:#0D0F12}
+.sp-pc .bd.p+.bd{top:42px}
+.sp-pc .pre-n{font-size:11px;color:#A86A00;text-align:center;margin-top:-2px}
+.sp-set .vo{display:flex;flex-wrap:wrap;gap:6px}
+.sp-set .vo button{height:30px;padding:0 12px;border-radius:9px;border:1px solid #D5D9DD;background:#fff;font:600 12.5px Sora,sans-serif;color:#3A4048;cursor:pointer}
+.sp-set .vo button.on{background:#0D0F12;border-color:#0D0F12;color:#fff}
+.sp-set .body{display:flex;flex-direction:column;gap:12px;flex:1}
+/* 3 Schritte: Bilder kompakt auf dem Handy */
+@media(max-width:767px){
+ body.home .sp-hiw-step-img{display:block!important;width:100%!important;height:120px!important;object-fit:cover!important;border-radius:14px!important;margin:12px 0 0!important}
+}
 #sp-hpv-flag{position:fixed;left:12px;top:12px;z-index:99999;background:#FF8A5C;color:#0D0F12;font:700 11px Sora,sans-serif;padding:6px 10px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.3);pointer-events:none}
 </style>
     <?php
@@ -349,7 +375,7 @@ document.addEventListener('DOMContentLoaded',function(){
  var P=window.SP_HP_PRODS||[];
  var cart='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 002 1.6h9.7a2 2 0 002-1.6L23 6H6"/></svg>';
  var cards=P.map(function(p,i){
-   var bd=p.r?'<span class="bd s">−'+Math.round((1-p.p/p.r)*100)+' %</span>':(i===0?'<span class="bd">★ Bestseller</span>':(p.pen?'<span class="bd n">Neu</span>':''));
+   var bd=(p.pre?'<span class="bd p">Vorbestellung</span>':'')+(p.r?'<span class="bd s">−'+Math.round((1-p.p/p.r)*100)+' %</span>':(i===0?'<span class="bd">★ Bestseller</span>':(p.pen?'<span class="bd n">Neu</span>':'')));
    var vo='';
    if(p.vars&&p.vars.length>1){vo='<div class="vo">'+p.vars.map(function(v,k){return '<button type="button" data-id="'+v.id+'" data-p="'+v.p+'" data-r="'+(v.r||'')+'"'+(k===0?' class="on"':'')+'>'+v.l+'</button>';}).join('')+'</div>';}
    else if(p.vars&&p.vars.length===1){vo='<div class="vo"><span>'+p.vars[0].l+'</span></div>';}
@@ -359,12 +385,12 @@ document.addEventListener('DOMContentLoaded',function(){
      +'<div class="rt"><b>★★★★★</b>'+String(p.rt).replace('.',',')+' ('+p.rc+')</div>'+vo
      +(p.qd?'<div class="qd">ab 3 Stück −10 % Mengenrabatt</div>':'')
      +'<div class="pr"><strong>'+eur(first.p)+'</strong>'+(first.r?'<s>'+eur(first.r)+'</s>':'')+'<small>inkl. MwSt.</small></div>'
-     +'<button type="button" class="add">'+cart+'In den Warenkorb</button></div></div>';
+     +'<button type="button" class="add">'+cart+(p.pre?'Vorbestellen':'In den Warenkorb')+'</button>'+(p.pre?'<div class="pre-n">Lieferung, sobald neue Ware eintrifft</div>':'')+'</div></div>';
  }).join('');
  var prod=el('<section id="sp-hp-prod" class="sp-hp-sec sp-hp-light"><div class="in"><div class="hd"><span class="sp-lbl lt">Bestseller</span><h2>Peptide in Forschungsqualität</h2><p class="sub">Jede Charge HPLC-geprüft, mit Analysezertifikat – Versand aus Deutschland.</p></div>'
   +'<div class="sp-rail">'+cards+'<a class="sp-pc all" href="/alle-produkte/"><div class="ar">→</div><b>Alle Produkte</b><span>Das ganze Sortiment ansehen</span></a></div>'
   +'<div class="sp-cats-h"><b>Nach Forschungsbereich</b><a href="/alle-produkte/">Alle →</a></div><div class="sp-cats">'+(window.SP_HP_CATS||[]).map(function(c){return '<a class="sp-cat'+(c.w?' wide':'')+'" href="'+c.u+'">'+(c.i?'<img loading="lazy" src="'+c.i+'" alt="">':'')+'<span>'+c.n+'<small>'+c.c+(c.c===1?' Produkt':' Produkte')+'</small></span></a>';}).join('')+'</div>'
-  +'<ul class="sp-trust"><li>HPLC ≥ 99 % Reinheit</li><li>Analysezertifikat zu jeder Charge</li><li>Gratisversand ab 100 €</li><li>Neutrale, diskrete Verpackung</li><li class="pay">Vorkasse · Krypto · Guthaben</li></ul>'
+  +'<ul class="sp-trust"><li>HPLC ≥ 99 % Reinheit</li><li>Analysezertifikat zu jeder Charge</li><li>Gratisversand ab 100 €</li><li>Neutrale, diskrete Verpackung</li></ul>'
   +'<div class="sp-hp-more-a"><a href="/alle-produkte/">Alle Produkte ansehen →</a></div></div></section>');
  root.appendChild(prod);
  prod.addEventListener('click',function(e){
@@ -405,18 +431,23 @@ document.addEventListener('DOMContentLoaded',function(){
  if('IntersectionObserver' in window){new IntersectionObserver(function(e){vis=e[0].isIntersecting;if(vis)kick();},{rootMargin:'200px 0px'}).observe(stage);}else{vis=true;}
  window.addEventListener('scroll',kick,{passive:true});cur=tgt=target();paint(cur);
  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){window.removeEventListener('scroll',kick);}
- /* Kombi-Sets */
+ /* Kombi-Sets (mit optionaler Auswahl) */
  var S=window.SP_HP_SETS||[];
+ function setBody(s,o){var t=o.items.map(function(it){return '<span class="'+(it.w?'w':'')+'"><img loading="lazy" src="'+it.i+'" alt=""></span>';}).join('');
+   return '<div class="thumbs">'+t+'<i>'+o.items.length+' Artikel</i></div><ul>'+o.items.map(function(it){return '<li><span>'+it.n+'</span><span>'+eur(it.p)+'</span></li>';}).join('')+'</ul>'
+     +'<div class="sum"><span class="ship'+(o.t>=100?'':' no')+'">'+(o.t>=100?'✓ Gratisversand':'noch '+eur(100-o.t)+' bis Gratisversand')+'</span><strong>'+eur(o.t)+'</strong></div>';}
  if(S.length){
  var sets=el('<section id="sp-hp-sets" class="sp-hp-sec sp-hp-light"><div class="in"><div class="hd"><span class="sp-lbl lt">Beliebte Kombinationen</span><h2>Passt zusammen.</h2><p class="sub">Sinnvoll kombiniert – mit einem Klick komplett im Warenkorb.</p></div><div class="sp-rail">'
-  +S.map(function(s,i){var t=s.items.map(function(it){return '<span class="'+(it.w?'w':'')+'"><img loading="lazy" src="'+it.i+'" alt=""></span>';}).join('');
-    return '<div class="sp-set" data-set="'+i+'"><div class="thumbs">'+t+'<i>'+s.items.length+' Artikel</i></div><h3>'+s.n+'</h3><p class="why">'+s.d+'</p><ul>'+s.items.map(function(it){return '<li><span>'+it.n+'</span><span>'+eur(it.p)+'</span></li>';}).join('')+'</ul>'
-     +'<div class="sum"><span class="ship'+(s.t>=100?'':' no')+'">'+(s.t>=100?'✓ Gratisversand':'noch '+eur(100-s.t)+' bis Gratisversand')+'</span><strong>'+eur(s.t)+'</strong></div><button type="button" class="add">'+cart+'Set in den Warenkorb</button></div>';}).join('')
+  +S.map(function(s,i){var ch=s.opts.length>1?'<div class="vo">'+s.opts.map(function(o,k){return '<button type="button" data-o="'+k+'"'+(k===0?' class="on"':'')+'>'+o.l+'</button>';}).join('')+'</div>':'';
+    return '<div class="sp-set" data-set="'+i+'" data-o="0"><h3>'+s.n+'</h3><p class="why">'+s.d+'</p>'+ch+'<div class="body">'+setBody(s,s.opts[0])+'</div><button type="button" class="add">'+cart+'Set in den Warenkorb</button></div>';}).join('')
   +'</div></div></section>');
  root.appendChild(sets);
- sets.addEventListener('click',function(e){var b=e.target.closest('.add');if(!b)return;var s=S[+b.closest('.sp-set').getAttribute('data-set')],old=b.innerHTML,i=0,last=null;b.disabled=true;b.textContent='…';
-   function next(){if(i>=s.items.length){b.classList.add('ok');b.innerHTML='✓ Set hinzugefügt';if(window.jQuery)jQuery(document.body).trigger('added_to_cart',[last&&last.fragments,last&&last.cart_hash,jQuery(b)]);setTimeout(function(){b.classList.remove('ok');b.innerHTML=old;b.disabled=false;},2400);return;}
-     var fd=new FormData();fd.append('product_id',s.items[i].id);fd.append('quantity','1');
+ sets.addEventListener('click',function(e){
+   var vb=e.target.closest('.vo button');
+   if(vb){var c=vb.closest('.sp-set'),s=S[+c.getAttribute('data-set')],k=+vb.getAttribute('data-o');c.setAttribute('data-o',k);c.querySelectorAll('.vo button').forEach(function(b){b.classList.toggle('on',b===vb);});c.querySelector('.body').innerHTML=setBody(s,s.opts[k]);return;}
+   var b=e.target.closest('.add');if(!b)return;var c2=b.closest('.sp-set'),s2=S[+c2.getAttribute('data-set')],o=s2.opts[+c2.getAttribute('data-o')],old=b.innerHTML,i=0,last=null;b.disabled=true;b.textContent='…';
+   function next(){if(i>=o.items.length){b.classList.add('ok');b.innerHTML='✓ Set hinzugefügt';if(window.jQuery)jQuery(document.body).trigger('added_to_cart',[last&&last.fragments,last&&last.cart_hash,jQuery(b)]);setTimeout(function(){b.classList.remove('ok');b.innerHTML=old;b.disabled=false;},2400);return;}
+     var fd=new FormData();fd.append('product_id',o.items[i].id);fd.append('quantity','1');
      fetch('/?wc-ajax=add_to_cart',{method:'POST',body:fd,credentials:'same-origin'}).then(function(r){return r.json();}).then(function(r){last=r;i++;next();}).catch(function(){b.innerHTML=old;b.disabled=false;});}
    next();});
  }

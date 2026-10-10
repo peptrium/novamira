@@ -182,7 +182,7 @@ add_action('wp_footer', function () {
 #sp-nlh .tk{position:relative;display:flex;max-width:440px;margin:0 auto;border-radius:20px;color:#0D0F12;background:linear-gradient(125deg,#9EA6AF 0%,#E9ECEF 22%,#FFFFFF 38%,#C3C9CF 58%,#F1F3F5 78%,#A7AFB8 100%);box-shadow:0 30px 60px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.35) inset;transform:rotate(-4deg)}
 #sp-nlh .tk .m{flex:1;padding:26px 24px 24px}
 #sp-nlh .tk .lg{display:flex;align-items:center;gap:8px;font-size:10.5px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#2A2F35}
-#sp-nlh .tk .lg img{width:24px;height:24px;display:block;flex:0 0 24px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))}
+#sp-nlh .tk .lg img{width:26px;height:26px;display:block;flex:0 0 26px;box-sizing:border-box;padding:3px;border-radius:7px;background:#0D0F12;box-shadow:0 2px 6px rgba(0,0,0,.3)}
 #sp-nlh .tk .big{font-size:76px;line-height:.95;font-weight:800;letter-spacing:-.04em;margin:18px 0 6px}
 #sp-nlh .tk .big small{font-size:.42em;letter-spacing:-.01em;vertical-align:.9em;margin-left:2px}
 #sp-nlh .tk .d{font-size:13px;font-weight:600;color:#30363D}
@@ -265,7 +265,7 @@ add_action('wp_footer', function () {
 #sp-nlh.mini .tk{max-width:230px;border-radius:14px}
 #sp-nlh.mini .tk .m{padding:16px 14px 14px}
 #sp-nlh.mini .tk .lg{font-size:8px;gap:6px}
-#sp-nlh.mini .tk .lg img{width:17px;height:17px;flex-basis:17px}
+#sp-nlh.mini .tk .lg img{width:19px;height:19px;flex-basis:19px;padding:2px;border-radius:5px}
 #sp-nlh.mini .tk .big{font-size:44px;margin:10px 0 4px}
 #sp-nlh.mini .tk .d{font-size:10px}
 #sp-nlh.mini .tk .st{flex-basis:46px}
