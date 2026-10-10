@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 add_action('wp_footer', function () {
-    if (!function_exists('sp_hpv_token_ok') || !sp_hpv_token_ok() || !function_exists('is_account_page') || !is_account_page()) {
+    if (!function_exists('sp_redesign_on') || !sp_redesign_on('basis') || !function_exists('is_account_page') || !is_account_page()) {
         return;
     }
     ?>

@@ -13,12 +13,12 @@ if (!defined('ABSPATH')) {
 }
 
 function sp_cnp_active() {
-    return function_exists('sp_hpv_token_ok') && sp_hpv_token_ok();
+    return function_exists('sp_redesign_on') && sp_redesign_on('basis');
 }
 
 add_action('template_redirect', function () {
     if (sp_cnp_active() && is_page(394)) {
-        wp_safe_redirect(home_url('/alle-peptrium-pens/'), 302);
+        wp_safe_redirect(home_url('/alle-peptrium-pens/'), function_exists('sp_redesign_live') && sp_redesign_live('basis') ? 301 : 302);
         exit;
     }
 }, 5);

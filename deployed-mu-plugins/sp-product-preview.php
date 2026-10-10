@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
 }
 
 function sp_ppv_active() {
-    return function_exists('sp_hpv_token_ok') && sp_hpv_token_ok() && function_exists('is_product') && is_product()
+    return function_exists('sp_redesign_on') && sp_redesign_on('katalog') && function_exists('is_product') && is_product()
         && !in_array((int) get_queried_object_id(), [729, 817, 745], true);
 }
 
@@ -92,7 +92,9 @@ add_action('wp_head', function () {
     if (!sp_ppv_active()) {
         return;
     }
-    echo '<meta name="robots" content="noindex,nofollow">' . "\n";
+    if (function_exists('sp_redesign_is_draft') && sp_redesign_is_draft('katalog')) {
+        echo '<meta name="robots" content="noindex,nofollow">' . "\n";
+    }
     ?>
 <style id="sp-ppv-css">
 /* ===== Startseite komplett (Entwurf) ===== */
@@ -350,6 +352,10 @@ body.home .elementor-211>[data-id="hiwk001"] .sp-hiw-step{flex:1 1 0!important;f
 body.home .elementor-211>[data-id="hiwk001"] .sp-hiw-step-content{width:100%!important}
 body.home .elementor-211>[data-id="hiwk001"] .sp-hiw-step-img{width:100%!important;height:auto!important;aspect-ratio:282/190;object-fit:cover}
 body.home .elementor-211>[data-id="77e913a"] .sp-tools-grid{max-width:1140px!important;margin-left:auto!important;margin-right:auto!important}
+body.home .elementor-211>[data-id="77e913a"] .sp-tool-card{display:flex!important;flex-direction:column!important}
+body.home .elementor-211>[data-id="77e913a"] .sp-tool-card p{flex:0 0 auto}
+body.home .elementor-211>[data-id="77e913a"] .sp-tool-cta{align-self:flex-start;margin-top:auto!important}
+body.home .elementor-211>[data-id="77e913a"] .sp-tools-grid{align-items:stretch!important}
 }
 /* ===== Produktseite (Entwurf) ===== */
 body.single-product .pp-root{display:flex;flex-direction:column}
@@ -625,7 +631,7 @@ add_action('wp_footer', function () {
         return;
     }
     ?>
-<a id="sp-hpv-flag" href="<?php echo esc_url(add_query_arg('sp_vorschau', 'aus', home_url('/'))); ?>">ENTWURF-VORSCHAU ✕</a>
+<?php if (function_exists('sp_redesign_is_draft') && sp_redesign_is_draft('katalog')): ?><a id="sp-hpv-flag" href="<?php echo esc_url(add_query_arg('sp_vorschau', 'aus', home_url('/'))); ?>">ENTWURF-VORSCHAU ✕</a><?php endif; ?>
 <script id="sp-ppv-js">
 window.SP_PP=<?php echo wp_json_encode(sp_ppv_data()); ?>;
 /* Kombi-Sets: Auswahl Sorte (g) + Menge (l), gemeinsam fuer Startseite und Produktseiten */

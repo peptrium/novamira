@@ -42,7 +42,7 @@ function sp_hpv_token_ok() {
 add_action('send_headers', 'sp_hpv_token_ok');
 
 function sp_hpv_active() {
-    return sp_hpv_token_ok() && is_front_page();
+    return function_exists('sp_redesign_on') && sp_redesign_on('katalog') && is_front_page();
 }
 
 /** Bestseller fuer die Produkt-Reihe (Peptide + Pens, nach Verkaufszahl). */
@@ -172,7 +172,9 @@ add_action('wp_head', function () {
     if (!sp_hpv_active()) {
         return;
     }
-    echo '<meta name="robots" content="noindex,nofollow">' . "\n";
+    if (function_exists('sp_redesign_is_draft') && sp_redesign_is_draft('katalog')) {
+        echo '<meta name="robots" content="noindex,nofollow">' . "\n";
+    }
     ?>
 <style id="sp-hpv-css">
 /* ===== Startseite komplett (Entwurf) ===== */
@@ -445,7 +447,7 @@ add_action('wp_footer', function () {
         return;
     }
     ?>
-<a id="sp-hpv-flag" href="<?php echo esc_url(add_query_arg('sp_vorschau', 'aus', home_url('/'))); ?>">ENTWURF-VORSCHAU ✕</a>
+<?php if (function_exists('sp_redesign_is_draft') && sp_redesign_is_draft('katalog')): ?><a id="sp-hpv-flag" href="<?php echo esc_url(add_query_arg('sp_vorschau', 'aus', home_url('/'))); ?>">ENTWURF-VORSCHAU ✕</a><?php endif; ?>
 <script id="sp-hpv-js">
 window.SP_HP_PRODS=<?php echo wp_json_encode(sp_hpv_products()); ?>;
 window.SP_HP_CATS=<?php echo wp_json_encode(sp_hpv_cats()); ?>;

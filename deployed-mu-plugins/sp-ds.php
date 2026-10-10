@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
 }
 
 function sp_ds_on() {
-    return !is_admin() && function_exists('sp_hpv_token_ok') && sp_hpv_token_ok();
+    return !is_admin() && function_exists('sp_redesign_on') && sp_redesign_on('basis');
 }
 
 /** Ziel-Seite -> Produktkategorie. */
@@ -40,7 +40,7 @@ add_action('template_redirect', function () {
     if (isset($map[$slug])) {
         $t = get_term_by('slug', $map[$slug], 'product_cat');
         if ($t) {
-            wp_safe_redirect(get_term_link($t), 302);
+            wp_safe_redirect(get_term_link($t), function_exists('sp_redesign_live') && sp_redesign_live('basis') ? 301 : 302);
             exit;
         }
     }

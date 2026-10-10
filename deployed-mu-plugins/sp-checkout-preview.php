@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
 }
 
 function sp_cop_active() {
-    return function_exists('sp_hpv_token_ok') && sp_hpv_token_ok() && function_exists('is_checkout') && is_checkout()
+    return function_exists('sp_redesign_on') && sp_redesign_on('kauf') && function_exists('is_checkout') && is_checkout()
         && !is_wc_endpoint_url('order-received') && !is_wc_endpoint_url('order-pay');
 }
 

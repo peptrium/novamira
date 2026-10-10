@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
 }
 
 function sp_ptp_active() {
-    return function_exists('sp_hpv_token_ok') && sp_hpv_token_ok();
+    return function_exists('sp_redesign_on') && sp_redesign_on('basis');
 }
 
 function sp_ptp_strings() {

@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 function sp_cxp_active() {
-    return function_exists('sp_hpv_token_ok') && sp_hpv_token_ok() && !is_admin();
+    return function_exists('sp_redesign_on') && sp_redesign_on('kauf') && !is_admin();
 }
 
 add_action('wp_footer', function () {

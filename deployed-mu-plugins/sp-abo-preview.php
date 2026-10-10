@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
 }
 
 add_action('wp_footer', function () {
-    if (!function_exists('sp_hpv_token_ok') || !sp_hpv_token_ok() || !is_page([735, 743])) {
+    if (!function_exists('sp_redesign_on') || !sp_redesign_on('basis') || !is_page([735, 743])) {
         return;
     }
     ?>

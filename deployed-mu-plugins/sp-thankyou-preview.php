@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
 }
 
 add_action('wp_footer', function () {
-    if (!function_exists('sp_hpv_token_ok') || !sp_hpv_token_ok() || !function_exists('is_order_received_page') || !is_order_received_page()) {
+    if (!function_exists('sp_redesign_on') || !sp_redesign_on('basis') || !function_exists('is_order_received_page') || !is_order_received_page()) {
         return;
     }
     ?>

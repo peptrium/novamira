@@ -54,7 +54,7 @@ function sp_cpv_page_is_collection() {
 }
 
 function sp_cpv_active() {
-    if (!function_exists('sp_hpv_token_ok') || !sp_hpv_token_ok() || !function_exists('is_product_category')) {
+    if (!function_exists('sp_redesign_on') || !sp_redesign_on('katalog') || !function_exists('is_product_category')) {
         return false;
     }
     return is_product_category() || is_shop() || is_page('alle-produkte') || sp_cpv_collection() || (is_search() && !is_admin());
@@ -187,7 +187,9 @@ add_action('wp_head', function () {
     if (!sp_cpv_active()) {
         return;
     }
-    echo '<meta name="robots" content="noindex,nofollow">' . "\n";
+    if (function_exists('sp_redesign_is_draft') && sp_redesign_is_draft('katalog')) {
+        echo '<meta name="robots" content="noindex,nofollow">' . "\n";
+    }
     ?>
 <style id="sp-cpv-css">
 /* ---- Produkte (Bestseller-Reihe) v2 ---- */
@@ -330,7 +332,7 @@ add_action('wp_footer', function () {
         return;
     }
     ?>
-<a id="sp-hpv-flag" href="<?php echo esc_url(add_query_arg('sp_vorschau', 'aus', home_url('/'))); ?>">ENTWURF-VORSCHAU ✕</a>
+<?php if (function_exists('sp_redesign_is_draft') && sp_redesign_is_draft('katalog')): ?><a id="sp-hpv-flag" href="<?php echo esc_url(add_query_arg('sp_vorschau', 'aus', home_url('/'))); ?>">ENTWURF-VORSCHAU ✕</a><?php endif; ?>
 <script id="sp-cpv-js">
 window.SP_CAT=<?php echo wp_json_encode(sp_cpv_data()); ?>;
 document.addEventListener('DOMContentLoaded',function(){
