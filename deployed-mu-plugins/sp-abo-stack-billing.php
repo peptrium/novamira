@@ -94,13 +94,24 @@ function sp_asb_today() {
     return current_time('Y-m-d');
 }
 
-/** Gleiche Datumslogik wie sp_abo_process_single_subscription(). */
+/**
+ * Naechster Termin nach einer Abbuchung. Basis ist der bisherige Termin - lag der
+ * aber schon in der Vergangenheit (Abo war laenger pausiert und laeuft jetzt
+ * wieder), zaehlt ab HEUTE. Sonst laege der neue Termin ebenfalls noch in der
+ * Vergangenheit und der naechste Cron-Lauf wuerde sofort wieder abbuchen
+ * (mehrere Lieferungen an aufeinanderfolgenden Tagen). (2026-10-10)
+ */
 function sp_asb_next_date($sub) {
+    $base = $sub->next_payment_date;
+    $today = sp_asb_today();
+    if ($base < $today) {
+        $base = $today;
+    }
     $months = sp_abo_interval_to_months($sub->interval_days);
     if ($months !== null && $sub->preferred_day_of_month) {
-        return sp_abo_add_calendar_months($sub->next_payment_date, $months, (int) $sub->preferred_day_of_month);
+        return sp_abo_add_calendar_months($base, $months, (int) $sub->preferred_day_of_month);
     }
-    return date('Y-m-d', strtotime($sub->next_payment_date . ' +' . (int) $sub->interval_days . ' days'));
+    return date('Y-m-d', strtotime($base . ' +' . (int) $sub->interval_days . ' days'));
 }
 
 function sp_asb_topup_url($amount = null) {
