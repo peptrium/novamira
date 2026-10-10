@@ -223,3 +223,10 @@ html,body{overflow-x:hidden}
 .sp-pc .bd.p{background:rgba(13,15,18,.82)!important;color:#F5C26B!important;border:1px solid rgba(245,194,107,.45);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .sp-pc .pre-n{color:#8A6A2A!important}
 .sp-pc .coa{font-size:10px!important;letter-spacing:.01em}
+
+/* Laufband robust (iOS): erst laufen, wenn Tempo gesetzt; keine Zeichen-Beschraenkung, Karten eigene Ebene */
+.sp-mq{contain:none!important}
+.sp-mq .tr{animation-play-state:paused!important;will-change:auto!important}
+.sp-mq .tr.go{animation-play-state:running!important}
+.sp-mq:hover .tr.go,.sp-mq:active .tr.go{animation-play-state:paused!important}
+.sp-mq .sp-rv{transform:translateZ(0);-webkit-transform:translateZ(0);backface-visibility:hidden;-webkit-backface-visibility:hidden}

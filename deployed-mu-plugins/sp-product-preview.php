@@ -286,6 +286,13 @@ html,body{overflow-x:hidden}
 .sp-pc .bd.p{background:rgba(13,15,18,.82)!important;color:#F5C26B!important;border:1px solid rgba(245,194,107,.45);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .sp-pc .pre-n{color:#8A6A2A!important}
 .sp-pc .coa{font-size:10px!important;letter-spacing:.01em}
+
+/* Laufband robust (iOS): erst laufen, wenn Tempo gesetzt; keine Zeichen-Beschraenkung, Karten eigene Ebene */
+.sp-mq{contain:none!important}
+.sp-mq .tr{animation-play-state:paused!important;will-change:auto!important}
+.sp-mq .tr.go{animation-play-state:running!important}
+.sp-mq:hover .tr.go,.sp-mq:active .tr.go{animation-play-state:paused!important}
+.sp-mq .sp-rv{transform:translateZ(0);-webkit-transform:translateZ(0);backface-visibility:hidden;-webkit-backface-visibility:hidden}
 /* ===== Produktseite (Entwurf) ===== */
 body.single-product .elementor-340{display:flex;flex-direction:column}
 body.single-product .elementor-340>*{order:50;width:100%}
@@ -561,7 +568,7 @@ document.addEventListener('DOMContentLoaded',function(){
  if(rv.length<4)(D.extraReviews||[]).forEach(function(t){rv.push({t:t,n:'Verifizierter Kunde',a:'✓',s:5});});
  function card(r){return '<div class="sp-rv"><div class="st">'+'★★★★★'.slice(0,r.s)+'</div><p>„'+r.t+'“</p><div class="au"><i>'+r.a+'</i><div><b>'+r.n+'</b><em>✓ Verifizierter Kauf</em></div></div></div>';}
  function row(list,cls){var s=list.map(card).join('');return '<div class="sp-mq '+cls+'"><div class="tr">'+s+s+'</div></div>';}
- var h1=rv.filter(function(_,i){return i%2===0;}),h2=rv.filter(function(_,i){return i%2===1;});
+ var h1=rv.filter(function(_,i){return i%2===0;}).slice(0,6),h2=rv.filter(function(_,i){return i%2===1;}).slice(0,6);
  var proof=el('<section id="sp-pp-proof" class="sp-pp sp-hp-sec sp-hp-dark"><div class="in"><div class="hd"><span class="sp-lbl">Kundenstimmen</span><h2>Das sagen Kunden über <span>'+D.name+'</span>.</h2></div>'
   +'<div class="sp-sum"><div class="big">'+D.rt+'</div><div><div class="st">★★★★★</div><div class="t">aus <b>'+D.rc+' Bewertungen</b><br>von verifizierten Käufern</div></div></div>'
   +'<div class="sp-stage">'+row(h1,'r1')+row(h2,'r2')+'<div class="sp-glow"></div><div class="sp-bshadow"></div><div class="sp-bottle"><img src="'+D.bottle+'" alt="'+D.name+'"></div></div></div></section>');
@@ -575,8 +582,9 @@ document.addEventListener('DOMContentLoaded',function(){
  window.addEventListener('scroll',kick,{passive:true});cur=tgt=target();paint(cur);
 
  /* Laufband: beide Reihen gleich schnell (Dauer aus der echten Breite, ~28 px/s) */
- function mqSpeed(){document.querySelectorAll('.sp-mq .tr').forEach(function(tr){var w=tr.scrollWidth/2;if(w>0)tr.style.animationDuration=(w/46).toFixed(1)+'s';});}
- mqSpeed();window.addEventListener('load',mqSpeed);window.addEventListener('resize',mqSpeed);
+ /* Laufband: Tempo einmal vor dem Start festlegen (kein Springen), dann starten */
+ function mqStart(){document.querySelectorAll('.sp-mq .tr').forEach(function(tr){if(tr.classList.contains('go'))return;var w=tr.scrollWidth/2;if(w<=0)return;tr.style.animationDuration=(w/46).toFixed(1)+'s';tr.classList.add('go');});}
+ mqStart();requestAnimationFrame(mqStart);
  /* 2) Passt dazu: Sets */
  var S=D.sets||[];
  if(S.length){var sets=el('<section id="sp-pp-sets" class="sp-pp sp-hp-sec sp-hp-light"><div class="in"><div class="hd"><span class="sp-lbl lt">Passt dazu</span><h2>Komplett in einem Klick.</h2><p class="sub">Alles, was du rund um '+D.name+' brauchst – zusammen in den Warenkorb.</p></div><div class="sp-rail">'

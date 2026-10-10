@@ -48,7 +48,7 @@
  var seen={};rv=rv.filter(function(r){if(seen[r.t])return false;seen[r.t]=1;return true;});
  var bimg=(document.querySelector('[data-id="spsocial1"] .sps-bottle-img')||{}).src||'/wp-content/uploads/2026/08/retatrutide-tilted-glass-v3.png';
  function card(r){return '<div class="sp-rv"><div class="st">'+'★★★★★'.slice(0,r.s)+'</div><p>„'+r.t+'“</p><div class="au"><i>'+r.a+'</i><div><b>'+r.n+'</b><em>✓ Verifizierter Kauf</em></div></div></div>';}
- var h1=rv.filter(function(_,i){return i%2===0;}),h2=rv.filter(function(_,i){return i%2===1;});
+ var h1=rv.filter(function(_,i){return i%2===0;}).slice(0,6),h2=rv.filter(function(_,i){return i%2===1;}).slice(0,6);
  function row(list,cls){var s=list.map(card).join('');return '<div class="sp-mq '+cls+'"><div class="tr">'+s+s+'</div></div>';}
  var proof=el('<section id="sp-hp-proof" class="sp-hp-sec sp-hp-light"><div class="in"><div class="hd"><span class="sp-lbl lt">Kundenstimmen</span><h2>Was andere nicht liefern, <span>liefert Peptrium.</span></h2></div>'
   +'<div class="sp-sum"><div class="big">4,8</div><div><div class="st">★★★★★</div><div class="t">aus <b>2.500+ Bestellungen</b><br>von verifizierten Käufern</div></div></div>'
@@ -97,8 +97,9 @@
  root.appendChild(faq);
 
  /* Laufband: beide Reihen gleich schnell (Dauer aus der echten Breite, ~28 px/s) */
- function mqSpeed(){document.querySelectorAll('.sp-mq .tr').forEach(function(tr){var w=tr.scrollWidth/2;if(w>0)tr.style.animationDuration=(w/46).toFixed(1)+'s';});}
- mqSpeed();window.addEventListener('load',mqSpeed);window.addEventListener('resize',mqSpeed);
+ /* Laufband: Tempo einmal vor dem Start festlegen (kein Springen), dann starten */
+ function mqStart(){document.querySelectorAll('.sp-mq .tr').forEach(function(tr){if(tr.classList.contains('go'))return;var w=tr.scrollWidth/2;if(w<=0)return;tr.style.animationDuration=(w/46).toFixed(1)+'s';tr.classList.add('go');});}
+ mqStart();requestAnimationFrame(mqStart);
  /* Newsletter in die Seite holen */
  var nl=document.getElementById('sp-nlh'); if(nl) root.appendChild(nl);
  document.querySelectorAll('#sp-how-it-works p').forEach(function(p){if(/48 Stunden/.test(p.textContent))p.textContent='Checkout in wenigen Minuten. Zustellung in der Regel innerhalb von 2 Werktagen – mit Sendungsverfolgung.';});
