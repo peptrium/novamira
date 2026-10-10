@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded',function(){
  /* 0) Oberer Teil: Bild-Badges + Vertrauens-Zeile in der Kaufbox */
  var imc=document.querySelector('[data-id="7269057"]');
  if(imc&&!imc.querySelector('.sp-img-bd')){imc.appendChild(el('<div class="sp-img-bd"><span>★ Bestseller</span><span class="g">✓ HPLC ≥ 99 %</span></div>'));}
- var short={'99 % Reinheit (HPLC)':'99 % Reinheit','LC-MS Identitätsverifizierung':'LC-MS geprüft','Chargenspezifisches Analysezertifikat (COA)':'Mit Zertifikat','Diskrete Verpackung & schneller Versand':'Diskreter Versand'};
+ var short={'99 % Reinheit (HPLC)':'99 % Reinheit','LC-MS Identitätsverifizierung':'LC-MS geprüft','Chargenspezifisches Analysezertifikat (COA)':'Versand aus DE','Diskrete Verpackung & schneller Versand':'Diskret verpackt'};
  var pn=document.querySelector('.sp-pen-promo-name'),pb=document.querySelector('.sp-pen-promo-blurb'),pp=document.querySelector('.sp-pen-promo-price');
  if(pn&&!pn.querySelector('em')){pn.innerHTML='Auch als Peptrium-Pen <em>NEU</em>';}
  if(pb&&pp){pb.textContent='Fertig gemischt, kein Anmischen · '+pp.textContent.trim();}
