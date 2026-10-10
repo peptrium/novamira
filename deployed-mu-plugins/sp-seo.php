@@ -300,3 +300,33 @@ add_filter('wp_sitemaps_posts_query_args', function ($args, $post_type) {
     }
     return $args;
 }, 20, 2);
+
+/**
+ * Menue/Startseite verlinken im HTML noch die alten Ziel-Seiten (301 -> Kategorie, sp_ds_goal_map() in sp-ds.php);
+ * das Menue-JS tauscht sie erst im Browser. Fuer Google die Links schon serverseitig direkt auf die Kategorien
+ * zeigen lassen (wichtig fuer Sitelinks/interne Verlinkung). Das JS erkennt die Gruppe am Text, nicht am Link.
+ */
+add_action('template_redirect', function () {
+    if (is_admin() || wp_doing_ajax() || is_feed() || !function_exists('sp_ds_goal_map') || ($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
+        return;
+    }
+    ob_start(function ($html) {
+        if (!is_string($html) || stripos($html, '<html') === false) {
+            return $html;
+        }
+        static $repl = null;
+        if ($repl === null) {
+            $repl = [];
+            $home = untrailingslashit(home_url());
+            foreach (sp_ds_goal_map() as $goal => $cat) {
+                $t = get_term_by('slug', $cat, 'product_cat');
+                $l = $t ? get_term_link($t) : '';
+                if ($l && !is_wp_error($l)) {
+                    $repl['href="' . $home . '/' . $goal . '/"'] = 'href="' . esc_url($l) . '"';
+                    $repl['href="/' . $goal . '/"'] = 'href="' . esc_url($l) . '"';
+                }
+            }
+        }
+        return strtr($html, $repl);
+    });
+}, 2);
