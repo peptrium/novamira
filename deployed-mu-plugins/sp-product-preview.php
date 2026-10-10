@@ -434,6 +434,33 @@ body.single-product #rx-buybox .rx-stock{font-size:12.5px!important}
 body.single-product #rx-buybox .rx-shipbadges{margin-top:8px!important}
 
 @media(max-width:900px){body.single-product [data-id="825e5c4"]{padding-left:0!important;padding-right:0!important}}
+
+/* ===== v4: kompakteres Produktbild ===== */
+@media(max-width:900px){
+ body.single-product [data-id="7269057"]{padding:10px 0 0!important;background:radial-gradient(60% 55% at 50% 45%,#2A2F35 0%,#14171B 60%,#0B0D10 100%)!important}
+ body.single-product [data-id="7269057"]>.elementor-widget-image{background:transparent!important;display:flex;justify-content:center}
+ body.single-product [data-id="7269057"]>.elementor-widget-image:after{height:30%}
+ body.single-product [data-id="7269057"] img{width:auto!important;max-width:78%!important;height:300px!important;max-height:300px!important;object-fit:contain!important;margin:0 auto!important;-webkit-mask-image:radial-gradient(ellipse 62% 64% at 50% 48%,#000 58%,transparent 100%);mask-image:radial-gradient(ellipse 62% 64% at 50% 48%,#000 58%,transparent 100%)}
+ body.single-product .sp-reta-hero{margin-top:-18px}
+ body.single-product [data-id="5d034e1"]{background:linear-gradient(180deg,#0B0D10 0,#0B0D10 200px,transparent 200px)!important}
+}
+
+/* ===== v4b: Kaufleiste mit Warenkorb-Symbol, Schwebe-Buttons ausblenden ===== */
+body.sp-bar-on #sp-cart-fab,body.sp-bar-on #sp-social-fab{opacity:0!important;pointer-events:none!important;transform:scale(.6)!important;transition:opacity .25s,transform .25s!important}
+#sp-pp-bar .cb{position:relative;flex:0 0 44px;width:44px;height:44px;border-radius:13px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#fff;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer}
+#sp-pp-bar .cb i{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#E8452C;color:#fff;font:700 10.5px/18px Sora,sans-serif;font-style:normal;text-align:center;box-sizing:border-box}
+#sp-pp-bar .cb i.z{display:none}
+#sp-pp-bar img{width:38px;height:38px;flex-basis:38px}
+#sp-pp-bar button.go{padding:0 14px}
+/* Tabs: weniger Leerraum */
+body.single-product .rx-tabcard{padding-top:22px!important}
+body.single-product .rx-tabpanel>*:first-child,body.single-product .sp-reta-desc{margin-top:0!important;padding-top:0!important}
+body.single-product .sp-reta-desc h3{margin-top:0!important}
+/* FAQ: keine Linie ueber der Ueberschrift, weniger Luft unten */
+body.single-product .sp-reta-faq{border:0!important;padding-top:0!important;padding-bottom:0!important}
+body.single-product [data-id="9977f52"]{padding-bottom:30px!important}
+body.single-product [data-id="9977f52"]>.e-con-inner{padding-bottom:0!important;min-height:0!important}
+#sp-pp-bar img{display:none!important}#sp-pp-bar{padding-left:14px}#sp-pp-bar .t b{font-size:14px}
 #sp-hpv-flag{position:fixed;left:12px;top:12px;z-index:200000;background:#FF8A5C;color:#0D0F12;font:700 11px Sora,sans-serif;padding:6px 10px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.3);pointer-events:none}
 </style>
     <?php
@@ -487,7 +514,7 @@ document.addEventListener('DOMContentLoaded',function(){
  window.addEventListener('scroll',kick,{passive:true});cur=tgt=target();paint(cur);
 
  /* Laufband: beide Reihen gleich schnell (Dauer aus der echten Breite, ~28 px/s) */
- function mqSpeed(){document.querySelectorAll('.sp-mq .tr').forEach(function(tr){var w=tr.scrollWidth/2;if(w>0)tr.style.animationDuration=(w/28).toFixed(1)+'s';});}
+ function mqSpeed(){document.querySelectorAll('.sp-mq .tr').forEach(function(tr){var w=tr.scrollWidth/2;if(w>0)tr.style.animationDuration=(w/46).toFixed(1)+'s';});}
  mqSpeed();window.addEventListener('load',mqSpeed);window.addEventListener('resize',mqSpeed);
  /* 2) Passt dazu: Sets */
  var S=D.sets||[];
@@ -510,7 +537,8 @@ document.addEventListener('DOMContentLoaded',function(){
  /* 5) Sticky Kaufleiste */
  var real=document.querySelector('form.cart .single_add_to_cart_button');
  if(real){
-  var bar=el('<div id="sp-pp-bar"><img src="'+D.thumb+'" alt=""><div class="t"><b>'+D.name+'</b><span class="pr">'+eur(D.price)+'</span></div><button type="button">'+cart+'In den Warenkorb</button></div>');
+  var bag='<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>';
+  var bar=el('<div id="sp-pp-bar"><img src="'+D.thumb+'" alt=""><div class="t"><b>'+D.name+'</b><span class="pr">'+eur(D.price)+'</span></div><button type="button" class="cb" aria-label="Warenkorb öffnen">'+bag+'<i class="z">0</i></button><button type="button" class="go">'+cart+'In den Warenkorb</button></div>');
   document.body.appendChild(bar);
   var prEl=bar.querySelector('.pr');
   function total(){var c=null;document.querySelectorAll('form.cart *, .sp-bb *').forEach(function(e){if(!c&&e.children.length===0&&/^gesamt$/i.test(e.textContent.trim()))c=e;});
@@ -519,7 +547,11 @@ document.addEventListener('DOMContentLoaded',function(){
   function vis(){var r=real.getBoundingClientRect();var on=r.bottom<0;bar.classList.toggle('on',on);document.body.classList.toggle('sp-bar-on',on);}
   window.addEventListener('scroll',function(){vis();},{passive:true});
   document.addEventListener('change',sync);document.addEventListener('click',function(){setTimeout(sync,150);});
-  bar.querySelector('button').addEventListener('click',function(){sync();real.click();});
+  bar.querySelector('button.go').addEventListener('click',function(){sync();real.click();});
+  var fab=document.getElementById('sp-cart-fab'),fb=document.getElementById('sp-cart-fab-badge'),cbi=bar.querySelector('.cb i');
+  bar.querySelector('.cb').addEventListener('click',function(){if(fab)fab.click();});
+  function cnt(){if(!fb)return;var n=parseInt(fb.textContent,10)||0;cbi.textContent=n;cbi.classList.toggle('z',n<1);}
+  if(fb){cnt();new MutationObserver(cnt).observe(fb,{childList:true,characterData:true,subtree:true});}
   sync();vis();
  }
 });

@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded',function(){
  window.addEventListener('scroll',kick,{passive:true});cur=tgt=target();paint(cur);
 
  /* Laufband: beide Reihen gleich schnell (Dauer aus der echten Breite, ~28 px/s) */
- function mqSpeed(){document.querySelectorAll('.sp-mq .tr').forEach(function(tr){var w=tr.scrollWidth/2;if(w>0)tr.style.animationDuration=(w/28).toFixed(1)+'s';});}
+ function mqSpeed(){document.querySelectorAll('.sp-mq .tr').forEach(function(tr){var w=tr.scrollWidth/2;if(w>0)tr.style.animationDuration=(w/46).toFixed(1)+'s';});}
  mqSpeed();window.addEventListener('load',mqSpeed);window.addEventListener('resize',mqSpeed);
  /* 2) Passt dazu: Sets */
  var S=D.sets||[];
@@ -61,7 +61,8 @@ document.addEventListener('DOMContentLoaded',function(){
  /* 5) Sticky Kaufleiste */
  var real=document.querySelector('form.cart .single_add_to_cart_button');
  if(real){
-  var bar=el('<div id="sp-pp-bar"><img src="'+D.thumb+'" alt=""><div class="t"><b>'+D.name+'</b><span class="pr">'+eur(D.price)+'</span></div><button type="button">'+cart+'In den Warenkorb</button></div>');
+  var bag='<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>';
+  var bar=el('<div id="sp-pp-bar"><img src="'+D.thumb+'" alt=""><div class="t"><b>'+D.name+'</b><span class="pr">'+eur(D.price)+'</span></div><button type="button" class="cb" aria-label="Warenkorb öffnen">'+bag+'<i class="z">0</i></button><button type="button" class="go">'+cart+'In den Warenkorb</button></div>');
   document.body.appendChild(bar);
   var prEl=bar.querySelector('.pr');
   function total(){var c=null;document.querySelectorAll('form.cart *, .sp-bb *').forEach(function(e){if(!c&&e.children.length===0&&/^gesamt$/i.test(e.textContent.trim()))c=e;});
@@ -70,7 +71,11 @@ document.addEventListener('DOMContentLoaded',function(){
   function vis(){var r=real.getBoundingClientRect();var on=r.bottom<0;bar.classList.toggle('on',on);document.body.classList.toggle('sp-bar-on',on);}
   window.addEventListener('scroll',function(){vis();},{passive:true});
   document.addEventListener('change',sync);document.addEventListener('click',function(){setTimeout(sync,150);});
-  bar.querySelector('button').addEventListener('click',function(){sync();real.click();});
+  bar.querySelector('button.go').addEventListener('click',function(){sync();real.click();});
+  var fab=document.getElementById('sp-cart-fab'),fb=document.getElementById('sp-cart-fab-badge'),cbi=bar.querySelector('.cb i');
+  bar.querySelector('.cb').addEventListener('click',function(){if(fab)fab.click();});
+  function cnt(){if(!fb)return;var n=parseInt(fb.textContent,10)||0;cbi.textContent=n;cbi.classList.toggle('z',n<1);}
+  if(fb){cnt();new MutationObserver(cnt).observe(fb,{childList:true,characterData:true,subtree:true});}
   sync();vis();
  }
 });

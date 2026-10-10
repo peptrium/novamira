@@ -181,3 +181,30 @@ body.single-product #rx-buybox .rx-stock{font-size:12.5px!important}
 body.single-product #rx-buybox .rx-shipbadges{margin-top:8px!important}
 
 @media(max-width:900px){body.single-product [data-id="825e5c4"]{padding-left:0!important;padding-right:0!important}}
+
+/* ===== v4: kompakteres Produktbild ===== */
+@media(max-width:900px){
+ body.single-product [data-id="7269057"]{padding:10px 0 0!important;background:radial-gradient(60% 55% at 50% 45%,#2A2F35 0%,#14171B 60%,#0B0D10 100%)!important}
+ body.single-product [data-id="7269057"]>.elementor-widget-image{background:transparent!important;display:flex;justify-content:center}
+ body.single-product [data-id="7269057"]>.elementor-widget-image:after{height:30%}
+ body.single-product [data-id="7269057"] img{width:auto!important;max-width:78%!important;height:300px!important;max-height:300px!important;object-fit:contain!important;margin:0 auto!important;-webkit-mask-image:radial-gradient(ellipse 62% 64% at 50% 48%,#000 58%,transparent 100%);mask-image:radial-gradient(ellipse 62% 64% at 50% 48%,#000 58%,transparent 100%)}
+ body.single-product .sp-reta-hero{margin-top:-18px}
+ body.single-product [data-id="5d034e1"]{background:linear-gradient(180deg,#0B0D10 0,#0B0D10 200px,transparent 200px)!important}
+}
+
+/* ===== v4b: Kaufleiste mit Warenkorb-Symbol, Schwebe-Buttons ausblenden ===== */
+body.sp-bar-on #sp-cart-fab,body.sp-bar-on #sp-social-fab{opacity:0!important;pointer-events:none!important;transform:scale(.6)!important;transition:opacity .25s,transform .25s!important}
+#sp-pp-bar .cb{position:relative;flex:0 0 44px;width:44px;height:44px;border-radius:13px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#fff;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer}
+#sp-pp-bar .cb i{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#E8452C;color:#fff;font:700 10.5px/18px Sora,sans-serif;font-style:normal;text-align:center;box-sizing:border-box}
+#sp-pp-bar .cb i.z{display:none}
+#sp-pp-bar img{width:38px;height:38px;flex-basis:38px}
+#sp-pp-bar button.go{padding:0 14px}
+/* Tabs: weniger Leerraum */
+body.single-product .rx-tabcard{padding-top:22px!important}
+body.single-product .rx-tabpanel>*:first-child,body.single-product .sp-reta-desc{margin-top:0!important;padding-top:0!important}
+body.single-product .sp-reta-desc h3{margin-top:0!important}
+/* FAQ: keine Linie ueber der Ueberschrift, weniger Luft unten */
+body.single-product .sp-reta-faq{border:0!important;padding-top:0!important;padding-bottom:0!important}
+body.single-product [data-id="9977f52"]{padding-bottom:30px!important}
+body.single-product [data-id="9977f52"]>.e-con-inner{padding-bottom:0!important;min-height:0!important}
+#sp-pp-bar img{display:none!important}#sp-pp-bar{padding-left:14px}#sp-pp-bar .t b{font-size:14px}
