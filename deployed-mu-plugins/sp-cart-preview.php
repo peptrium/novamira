@@ -149,3 +149,42 @@ body.sp-cd-on #sp-hpv-flag{display:none!important}
 </script>
     <?php
 }, 100);
+
+/* Warenkorb-Seite /warenkorb/: mit Inhalt direkt zur Kasse (dort gibt es alle Positionen mit +/−),
+   leer: eigene Leer-Ansicht statt des ungestylten WooCommerce-Blocks. */
+add_action('template_redirect', function () {
+    if (!sp_cxp_active() || !function_exists('is_cart') || !is_cart() || !WC()->cart) {
+        return;
+    }
+    if (!WC()->cart->is_empty()) {
+        wp_safe_redirect(wc_get_checkout_url(), 302);
+        exit;
+    }
+}, 20);
+
+add_action('wp_footer', function () {
+    if (!sp_cxp_active() || !function_exists('is_cart') || !is_cart()) {
+        return;
+    }
+    $cats = function_exists('sp_hpv_cats') ? sp_hpv_cats() : [];
+    ?>
+<style id="sp-cxp-cartpage">
+body.woocommerce-cart .wp-block-woocommerce-cart,body.woocommerce-cart .entry-header,body.woocommerce-cart .woocommerce-notices-wrapper:empty{display:none!important}
+#sp-cx-empty{max-width:560px;margin:28px auto 40px;padding:0 4px;text-align:center;font-family:Sora,sans-serif}
+#sp-cx-empty .ic{width:72px;height:72px;margin:0 auto 16px;border-radius:50%;background:#F2F3F4;display:flex;align-items:center;justify-content:center;color:#0D0F12}
+#sp-cx-empty .ic svg{width:30px;height:30px}
+#sp-cx-empty h1{font:800 26px/1.2 Sora,sans-serif!important;color:#0D0F12!important;margin:0 0 8px!important}
+#sp-cx-empty p{font-size:14.5px;line-height:1.6;color:#5A6068;margin:0 0 22px}
+#sp-cx-empty .btn{display:inline-flex;align-items:center;justify-content:center;height:52px;padding:0 26px;border-radius:14px;background:#0D0F12;color:#fff!important;font-weight:700;font-size:15px;text-decoration:none!important}
+#sp-cx-empty .cats{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:26px 0 0}
+#sp-cx-empty .cats a{padding:9px 14px;border-radius:999px;border:1px solid #E3E6E9;background:#fff;color:#0D0F12!important;font-size:13px;font-weight:700;text-decoration:none!important}
+</style>
+<script>
+(function(){var host=document.querySelector('body.woocommerce-cart .entry-content')||document.querySelector('body.woocommerce-cart main');if(!host||document.getElementById('sp-cx-empty'))return;
+ var d=document.createElement('div');d.id='sp-cx-empty';
+ d.innerHTML='<div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 002 1.6h9.7a2 2 0 002-1.6L23 6H6"/></svg></div><h1>Dein Warenkorb ist leer</h1><p>Entdecke unsere Forschungspeptide – ab 100 € ist der Versand gratis, Lieferung in 2 Werktagen.</p><a class="btn" href="<?php echo esc_url(home_url('/alle-produkte/')); ?>">Zu allen Produkten</a><div class="cats"><?php foreach ($cats as $c) { echo '<a href="' . esc_url($c['u']) . '">' . esc_html($c['n']) . '</a>'; } ?></div>';
+ host.insertBefore(d,host.firstChild);})();
+</script>
+    <?php
+}, 100);
+

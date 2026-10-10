@@ -127,3 +127,23 @@ add_action('wp_footer', function () {
 </script>
     <?php
 }, 97);
+
+/* Sitemap (WP-Core): sobald "basis" live ist, die weitergeleiteten alten Ziel-Seiten, die alte
+   Pen-Seite 394 und reine Funktionsseiten (Warenkorb, Kasse, Konto, Passwort) nicht mehr melden. */
+add_filter('wp_sitemaps_posts_query_args', function ($args, $post_type) {
+    if ($post_type !== 'page' || !function_exists('sp_redesign_live') || !sp_redesign_live('basis')) {
+        return $args;
+    }
+    $ids = [394, 623];
+    foreach (['cart', 'checkout', 'myaccount'] as $p) {
+        $ids[] = (int) wc_get_page_id($p);
+    }
+    foreach (array_keys(sp_ds_goal_map()) as $slug) {
+        $pg = get_page_by_path($slug);
+        if ($pg) {
+            $ids[] = (int) $pg->ID;
+        }
+    }
+    $args['post__not_in'] = array_values(array_unique(array_merge($args['post__not_in'] ?? [], array_filter($ids))));
+    return $args;
+}, 10, 2);
