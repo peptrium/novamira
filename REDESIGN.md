@@ -35,7 +35,7 @@ Vorschau-Plugins (mu-plugins): `sp-ds.php` (gemeinsame Ebene), `sp-home-preview.
 
 ## Phase 4 – Kundenkonto
 - [x] Login, Dashboard, Bestellungen, Abo, Guthaben, Adressen, Kontodaten, Bestellansicht (Entwurf, sp-account-preview.php)
-- [ ] Registrierung prüfen, Partner-Bereich, Bestellstatus-Seite
+- [x] Registrierung (du-Form), Partner-Bereich (sp-partner-preview.php), Bestellstatus (Suche live repariert)
 
 ## Phase 5 – Inhaltsseiten
 - [ ] Abo-Modell, Abo-Stack, Guthaben aufladen, Peptid-Rechner, Reta-Dosierung, Lagerungs-Guide, Peptid-Lexikon

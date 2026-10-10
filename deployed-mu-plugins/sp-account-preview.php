@@ -114,6 +114,8 @@ body.woocommerce-account .woocommerce-form-login__rememberme input{margin:0!impo
  /* Login-Text in Du-Form */
  var hp=document.querySelector('.sp-auth-hero p');
  if(hp&&/Melden Sie sich/.test(hp.textContent)){hp.textContent='Melde dich an, um deine Bestellungen zu verfolgen, Adressen zu speichern und schneller zur Kasse zu gehen. Neu hier? Dein Konto ist in Sekunden erstellt.';}
+ /* Registrierung: Sie -> du */
+ var rf=document.querySelector('form.woocommerce-form-register');if(rf){var w=document.createTreeWalker(rf,NodeFilter.SHOW_TEXT),n;while(n=w.nextNode()){if(/stimmen Sie/.test(n.nodeValue))n.nodeValue=n.nodeValue.replace('stimmen Sie','stimmst du');}}
  /* Adress-Links kurz */
  [].forEach.call(document.querySelectorAll('.woocommerce-Address-title a.edit'),function(a){a.textContent=/hinzuf/i.test(a.textContent)?'Hinzufügen':'Bearbeiten';});
  /* Bestellansicht: Summenzeile + eine Adresskarte */
