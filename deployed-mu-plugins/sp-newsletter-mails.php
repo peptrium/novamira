@@ -16,6 +16,13 @@
  *                  nichts mehr bestellt wurde und kein Abo laeuft. Mit Link, der
  *                  dieselben Artikel wieder in den Warenkorb legt (?sp_nachkauf=).
  * 3. Rueckgewinnung - 75 Tage nach der letzten Bestellung, einmalig, neuer Code.
+ * 4. Code-Erinnerung - 5 Tage (HALLO) bzw. 3 Tage (COMEBACK) vor Ablauf, nur wenn
+ *                  der Code noch nicht benutzt wurde.
+ * 5. Nachkauf 2    - 14 Tage nach der ersten Nachkauf-Mail, wenn immer noch nichts
+ *                  bestellt wurde; kurz, ohne Rabatt.
+ * Zustellbarkeit: Betreff/Vorschauzeile ohne "Gutschein", "%" und Wirkstoffnamen;
+ * hoechstens SP_NLM_DAILY_CAP automatische Mails pro Tag (neue Domain langsam
+ * aufwaermen, Mailgun-Free erlaubt 100/Tag).
  * Links tragen utm_source=newsletter (Analyse-Tab zeigt "newsletter" als Quelle).
  */
 if (!defined('ABSPATH')) {
@@ -27,6 +34,8 @@ define('SP_NLM_REORDER_DAYS', 28);
 define('SP_NLM_WINBACK_DAYS', 75);
 define('SP_NLM_WINBACK_PERCENT', 10);
 define('SP_NLM_WINBACK_COUPON_DAYS', 14);
+define('SP_NLM_REORDER2_AFTER', 14);
+define('SP_NLM_DAILY_CAP', 60);
 
 function sp_nlm_enabled() {
     return (bool) get_option('sp_nlm_enabled', 0);
@@ -105,10 +114,11 @@ function sp_nlm_welcome_html($subscriber, $code) {
     $first = trim((string) ($subscriber->first_name ?? ''));
     $body = sp_em_p(($first ? 'Hallo ' . esc_html($first) . ',' : 'Hallo,') . '<br>schön, dass du dabei bist! Ab jetzt bekommst du Neuheiten, Aktionen und Forschungs-Updates direkt in dein Postfach. Als Dankeschön ist hier dein Willkommensgeschenk:')
         . sp_nlm_coupon_card($code, SP_NL_COUPON_PERCENT . ' % auf deine nächste Bestellung · ' . SP_NL_COUPON_DAYS . ' Tage gültig', sp_nlm_url('/alle-produkte/', 'willkommen'))
+        . sp_em_card('<p style="margin:0 0 8px;font-size:15px;font-weight:700;color:' . SP_EM_INK . ';">Wer hinter Peptrium steht</p><p style="margin:0;font-size:14px;line-height:1.6;color:' . SP_EM_MUTED . ';">Hinter Peptrium steht ein kleines Team mit einem Anspruch: Forschungspeptide in geprüfter Qualität, ehrlich beschrieben und schnell bei dir. Jede Charge wird LC-MS-geprüft, bevor sie in den Versand geht. Wenn du Fragen hast, antworte einfach auf diese E-Mail – wir lesen jede Nachricht selbst.<br><br>– Dein Peptrium-Team</p>', '#FFFFFF')
         . sp_em_label('Beliebt bei unseren Kunden')
         . sp_nlm_product_grid([65, 68, 393, 71], 'willkommen')
         . sp_nlm_usps();
-    return sp_nlm_wrap('Schön, dass du da bist.', ['eyebrow' => 'Willkommen bei Peptrium', 'sub' => 'Dein ' . SP_NL_COUPON_PERCENT . ' %-Gutschein für die nächste Bestellung ist da.', 'preheader' => 'Dein ' . SP_NL_COUPON_PERCENT . ' %-Code ist da – ' . SP_NL_COUPON_DAYS . ' Tage gültig.'], $body, $subscriber);
+    return sp_nlm_wrap('Schön, dass du da bist.', ['eyebrow' => 'Willkommen bei Peptrium', 'sub' => 'Dein Willkommensgeschenk für die nächste Bestellung ist da.', 'preheader' => 'Schön, dass du dabei bist – dein Willkommensgeschenk wartet.'], $body, $subscriber);
 }
 
 /* ---------------- 2) Nachkauf ---------------- */
@@ -204,7 +214,42 @@ function sp_nlm_winback_html($subscriber, $code) {
         . sp_em_label('Das ist neu und beliebt')
         . sp_nlm_product_grid([65, 68, 393, 908], 'rueckgewinnung')
         . sp_nlm_usps();
-    return sp_nlm_wrap('Wir vermissen dich', ['eyebrow' => 'Peptrium', 'sub' => 'Dein persönlicher ' . SP_NLM_WINBACK_PERCENT . ' %-Gutschein wartet – nur ' . SP_NLM_WINBACK_COUPON_DAYS . ' Tage.', 'preheader' => 'Dein persönlicher ' . SP_NLM_WINBACK_PERCENT . ' %-Gutschein – nur ' . SP_NLM_WINBACK_COUPON_DAYS . ' Tage gültig.'], $body, $subscriber);
+    return sp_nlm_wrap('Wir vermissen dich', ['eyebrow' => 'Peptrium', 'sub' => 'Wir haben etwas für dich – nur für kurze Zeit.', 'preheader' => 'Wir haben etwas für dich – nur für kurze Zeit.'], $body, $subscriber);
+}
+
+/* ---------------- 4) Code-Erinnerung ---------------- */
+function sp_nlm_expiry_html($subscriber, $code, $days_left, $percent) {
+    $first = trim((string) ($subscriber->first_name ?? ''));
+    $body = sp_em_p(($first ? 'Hallo ' . esc_html($first) . ',' : 'Hallo,') . '<br>kurze Erinnerung: Dein persönlicher Code läuft in <strong>' . (int) $days_left . ' ' . ($days_left === 1 ? 'Tag' : 'Tagen') . '</strong> ab und ist noch nicht eingelöst.')
+        . sp_nlm_coupon_card($code, $percent . ' % auf deine Bestellung · gilt nur noch ' . (int) $days_left . ' ' . ($days_left === 1 ? 'Tag' : 'Tage'), sp_nlm_url('/alle-produkte/', 'code-erinnerung'))
+        . sp_em_p('Gib den Code im Warenkorb unter „Rabattcode eingeben“ ein. Er gilt mit deiner E-Mail-Adresse.', 'font-size:13px;color:' . SP_EM_MUTED . ';text-align:center;');
+    return sp_nlm_wrap('Dein Code läuft bald ab', ['eyebrow' => 'Peptrium', 'sub' => 'Nur noch ' . (int) $days_left . ' ' . ($days_left === 1 ? 'Tag' : 'Tage') . ' – danach verfällt er.', 'preheader' => 'Kurze Erinnerung, bevor es zu spät ist.'], $body, $subscriber);
+}
+
+/* ---------------- 5) Nachkauf 2 (kurzer Stups, ohne Rabatt) ---------------- */
+function sp_nlm_reorder2_html($subscriber, $order) {
+    $first = trim((string) ($subscriber->first_name ?? '')) ?: $order->get_billing_first_name();
+    $again = sp_nlm_url('/', 'nachkauf-2', ['sp_nachkauf' => sp_nlm_reorder_token($order)]);
+    $body = sp_em_p(($first ? 'Hallo ' . esc_html($first) . ',' : 'Hallo,') . '<br>nur ein kurzer Hinweis: Deine letzte Bestellung liegt mit einem Klick wieder im Warenkorb – Menge und Artikel kannst du an der Kasse noch anpassen.')
+        . '<div style="text-align:center;margin:8px 0 26px;">' . sp_em_button('Gleiche Bestellung nochmal &rarr;', $again) . '</div>'
+        . sp_em_p('Lieber automatisch? Mit dem <a href="' . esc_url(sp_nlm_url('/abo-modell/', 'nachkauf-2')) . '" style="color:' . SP_EM_INK . ';font-weight:700;">Abo</a> kommt deine Lieferung von selbst – ab der 2. Lieferung 15 % günstiger.', 'font-size:14px;color:' . SP_EM_MUTED . ';');
+    return sp_nlm_wrap('Noch alles da?', ['eyebrow' => 'Peptrium', 'sub' => 'Deine letzte Bestellung – mit einem Klick wieder im Warenkorb.', 'preheader' => 'Mit einem Klick wieder im Warenkorb.'], $body, $subscriber);
+}
+
+/* Unbenutzter Code des Abonnenten mit Restlaufzeit (Tage) oder null. */
+function sp_nlm_open_coupon($subscriber, $meta_key) {
+    $code = (string) $subscriber->getMeta($meta_key, 'peptrium');
+    $id = $code ? wc_get_coupon_id_by_code($code) : 0;
+    if (!$id) {
+        return null;
+    }
+    $c = new WC_Coupon($id);
+    $exp = $c->get_date_expires();
+    if (!$exp || $c->get_usage_count() > 0) {
+        return null;
+    }
+    $left = (int) ceil(($exp->getTimestamp() - time()) / DAY_IN_SECONDS);
+    return $left > 0 ? [$code, $left, (int) $c->get_amount()] : null;
 }
 
 /* ---------------- Versand ---------------- */
@@ -212,6 +257,12 @@ function sp_nlm_send($subscriber, $subject, $html) {
     if (!sp_nlm_enabled() || !$subscriber || $subscriber->status !== 'subscribed') {
         return false;
     }
+    $day = 'sp_nlm_sent_' . current_time('Ymd');
+    $count = (int) get_transient($day);
+    if ($count >= SP_NLM_DAILY_CAP) {
+        return false; // Rest kommt am naechsten Tag dran (Flags werden erst nach Erfolg gesetzt)
+    }
+    set_transient($day, $count + 1, 2 * DAY_IN_SECONDS);
     return wp_mail($subscriber->email, $subject, $html, [
         'Content-Type: text/html; charset=UTF-8',
         'From: ' . SP_NLM_FROM,
@@ -230,7 +281,7 @@ add_action('fluentcrm_subscriber_status_to_subscribed', function ($subscriber) {
         return;
     }
     $code = sp_nl_ensure_coupon($subscriber);
-    if ($code && sp_nlm_send($subscriber, 'Willkommen bei Peptrium – dein ' . SP_NL_COUPON_PERCENT . ' %-Gutschein', sp_nlm_welcome_html($subscriber, $code))) {
+    if ($code && sp_nlm_send($subscriber, 'Willkommen bei Peptrium 👋', sp_nlm_welcome_html($subscriber, $code))) {
         $subscriber->updateMeta('sp_nlm_welcome_sent', current_time('mysql'), 'peptrium');
     }
 }, 30, 1);
@@ -251,6 +302,15 @@ add_action('sp_nlm_daily', function () {
     })->get();
     $now = time();
     foreach ($subs as $sub) {
+        /* Code-Erinnerungen: HALLO 5 Tage, COMEBACK 3 Tage vor Ablauf, je einmal. */
+        foreach ([['sp_nl_coupon', 5, 'sp_nlm_exp1_sent'], ['sp_nlm_winback', 3, 'sp_nlm_exp2_sent']] as $cfg) {
+            $open = sp_nlm_open_coupon($sub, $cfg[0]);
+            if ($open && $open[1] <= $cfg[1] && $sub->getMeta($cfg[2], 'peptrium') !== $open[0]) {
+                if (sp_nlm_send($sub, 'Dein Code läuft bald ab', sp_nlm_expiry_html($sub, $open[0], $open[1], $open[2]))) {
+                    $sub->updateMeta($cfg[2], $open[0], 'peptrium');
+                }
+            }
+        }
         $orders = wc_get_orders(['billing_email' => $sub->email, 'status' => ['processing', 'completed'], 'limit' => 1, 'orderby' => 'date', 'order' => 'DESC']);
         $last = $orders ? $orders[0] : null;
         if (!$last || $last->get_meta('_sp_is_test')) {
@@ -263,13 +323,22 @@ add_action('sp_nlm_daily', function () {
         if ($kind === 'topup' || $has_abo) {
             continue;
         }
-        if ($days >= SP_NLM_REORDER_DAYS && $days < SP_NLM_WINBACK_DAYS && !$last->get_meta('_sp_nlm_reorder_sent')) {
+        $first_sent = $last->get_meta('_sp_nlm_reorder_sent');
+        if ($first_sent && !$last->get_meta('_sp_nlm_reorder2_sent') && $days < SP_NLM_WINBACK_DAYS
+            && (time() - strtotime($first_sent)) >= SP_NLM_REORDER2_AFTER * DAY_IN_SECONDS) {
+            if (sp_nlm_send($sub, 'Noch alles da?', sp_nlm_reorder2_html($sub, $last))) {
+                $last->update_meta_data('_sp_nlm_reorder2_sent', current_time('mysql'));
+                $last->save();
+            }
+            continue;
+        }
+        if ($days >= SP_NLM_REORDER_DAYS && $days < SP_NLM_WINBACK_DAYS && !$first_sent) {
             if (sp_nlm_send($sub, 'Zeit für Nachschub?', sp_nlm_reorder_html($sub, $last))) {
                 $last->update_meta_data('_sp_nlm_reorder_sent', current_time('mysql'));
                 $last->save();
             }
         } elseif ($days >= SP_NLM_WINBACK_DAYS && !$last->get_meta('_sp_nlm_winback_sent')) {
-            if (sp_nlm_send($sub, 'Wir vermissen dich – dein persönlicher Gutschein', sp_nlm_winback_html($sub, sp_nlm_winback_coupon($sub)))) {
+            if (sp_nlm_send($sub, 'Wir vermissen dich', sp_nlm_winback_html($sub, sp_nlm_winback_coupon($sub)))) {
                 $last->update_meta_data('_sp_nlm_winback_sent', current_time('mysql'));
                 $last->save();
             }
