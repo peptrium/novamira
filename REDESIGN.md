@@ -25,7 +25,7 @@ Vorschau-Plugins (mu-plugins): `sp-ds.php` (gemeinsame Ebene), `sp-home-preview.
 - [x] Startseite (Entwurf)
 - [x] Kategorie-Seiten, Alle Produkte, Vorbestellung, Pens-Seite, Zubehör-Seite (Entwurf, Live-Preise)
 - [x] Produktseite Retatrutide (Entwurf)
-- [ ] Alle übrigen Produktseiten (Peptide, Pens, Zubehör)
+- [x] Alle übrigen Produktseiten (Peptide, Pens, Zubehör) – Entwurf; Pen-Nadeln-Seite (eigener Aufbau) noch offen
 
 ## Phase 3 – Kauf
 - [ ] Warenkorb-Drawer inkl. Geschenkstufen

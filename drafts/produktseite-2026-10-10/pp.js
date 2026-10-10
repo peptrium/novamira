@@ -1,5 +1,22 @@
 document.addEventListener('DOMContentLoaded',function(){
- var root=document.querySelector('body.single-product .elementor-340'); if(!root)return;
+ /* Abschnitte am Inhalt erkennen (jede Produktvorlage hat eigene Elementor-IDs) */
+ var root=document.querySelector('body.single-product [data-elementor-type="product"]'); if(!root)return;
+ root.classList.add('pp-root');
+ [].slice.call(root.children).forEach(function(t){
+   if(t.querySelector('#rx-buybox'))t.classList.add('pp-main');
+   else if(t.querySelector('.rv-card')||/kundenstimmen/i.test(t.id||''))t.classList.add('pp-rev');
+   else if(t.querySelector('.sp-sci-card'))t.classList.add('pp-lex');
+   else if(t.querySelector('.sp-faq-item'))t.classList.add('pp-faq');
+   else if(t.querySelector('.sp-rel-section'))t.classList.add('pp-rel');
+   else if(/^vsvcont/.test(t.getAttribute('data-id')||''))t.classList.add('pp-vid');
+   else if(/Wichtiger Hinweis/.test(t.textContent)&&t.textContent.length<600)t.classList.add('pp-dis');
+ });
+ function wid(sel){var e=root.querySelector(sel);return e?e.closest('.elementor-widget'):null;}
+ var main=root.querySelector('.pp-main');
+ if(main){var iw=main.querySelector('.elementor-widget-image');if(iw&&iw.parentElement)iw.parentElement.classList.add('pp-img');
+   var bb=main.querySelector('#rx-buybox');var col=bb;while(col&&col.parentElement&&!col.parentElement.classList.contains('e-con-inner')&&col.parentElement!==main)col=col.parentElement;if(col)col.classList.add('pp-col');
+   [['.sp-reta-hero','pp-herow'],['.sp-reta-qualitybox','pp-qual'],['#rx-buybox','pp-bbw'],['.sp-pen-promo','pp-penw']].forEach(function(x){var w=wid(x[0]);if(w)w.classList.add(x[1]);});}
+ document.body.classList.add('pp-ready');
  var D=window.SP_PP||{};
  function el(h){var d=document.createElement('div');d.innerHTML=h.trim();return d.firstChild;}
  function eur(v){return String(Number(v).toFixed(2)).replace('.',',')+' €';}
@@ -9,8 +26,9 @@ document.addEventListener('DOMContentLoaded',function(){
      var fd=new FormData();fd.append('product_id',ids[i]);fd.append('quantity','1');
      fetch('/?wc-ajax=add_to_cart',{method:'POST',body:fd,credentials:'same-origin'}).then(function(r){return r.json();}).then(function(r){last=r;i++;next();}).catch(function(){b.innerHTML=old;b.disabled=false;});})();}
  /* 0) Oberer Teil: Bild-Badges + Vertrauens-Zeile in der Kaufbox */
- var imc=document.querySelector('[data-id="7269057"]');
- if(imc&&!imc.querySelector('.sp-img-bd')){imc.appendChild(el('<div class="sp-img-bd"><span>★ Bestseller</span><span class="g">✓ HPLC ≥ 99 %</span></div>'));}
+ var imc=document.querySelector('.pp-img');
+ var bdh=(D.pre?'<span class="p">Vorbestellung</span>':(D.best?'<span>★ Bestseller</span>':(D.pen?'<span>Neu</span>':'')))+(D.acc?'':'<span class="g">✓ HPLC ≥ 99 %</span>');
+ if(imc&&bdh&&!imc.querySelector('.sp-img-bd')){imc.appendChild(el('<div class="sp-img-bd">'+bdh+'</div>'));}
  var short={'99 % Reinheit (HPLC)':'99 % Reinheit','LC-MS Identitätsverifizierung':'LC-MS geprüft','Chargenspezifisches Analysezertifikat (COA)':'Versand aus DE','Diskrete Verpackung & schneller Versand':'Diskret verpackt'};
  var pn=document.querySelector('.sp-pen-promo-name'),pb=document.querySelector('.sp-pen-promo-blurb'),pp=document.querySelector('.sp-pen-promo-price');
  if(pn&&!pn.querySelector('em')){pn.innerHTML='Auch als Peptrium-Pen <em>NEU</em>';}
@@ -18,24 +36,27 @@ document.addEventListener('DOMContentLoaded',function(){
  document.querySelectorAll('.sp-reta-check-item span').forEach(function(s){var t=s.textContent.trim();if(short[t])s.textContent=short[t];});
  var cta=document.querySelector('#rx-buybox .rx-buycta');
  if(cta&&!document.querySelector('.sp-bb-trust')){cta.parentNode.insertBefore(el('<div class="sp-bb-trust"><div><b>🚚</b>Gratisversand ab 100 €</div><div><b>📦</b>Neutral verpackt</div><div><b>🔒</b>Sicher bezahlen</div></div>'),cta.nextSibling);}
+ /* Vorbestellung: Hinweis + Button-Text */
+ if(D.pre){var cta2=document.querySelector('#rx-buybox .rx-buycta');if(cta2&&!document.querySelector('.sp-pre-note')&&!/vorbestellbar/i.test(document.getElementById('rx-buybox').textContent))cta2.parentNode.insertBefore(el('<div class="sp-pre-note"><i>Vorbestellung</i><span><b>Jetzt mit Preisvorteil sichern.</b> Wir liefern, sobald die neue Ware eintrifft.</span></div>'),cta2);
+   var rb=document.querySelector('form.cart .single_add_to_cart_button');if(rb)rb.textContent='Vorbestellen';}
  /* 1) Kundenstimmen: dunkel, Laufband + Flasche */
  var rv=[];
- document.querySelectorAll('[data-id="b221b92"] .rv-card').forEach(function(c){var t=c.querySelector('.rv-text'),n=c.querySelector('.rv-name'),a=c.querySelector('.rv-avatar');if(t)rv.push({t:t.textContent.trim(),n:n?n.textContent.trim():'Verifizierter Kunde',a:a?a.textContent.trim():'✓',s:c.querySelectorAll('.rv-stars > svg').length||5});});
+ document.querySelectorAll('.pp-rev .rv-card').forEach(function(c){var t=c.querySelector('.rv-text'),n=c.querySelector('.rv-name'),a=c.querySelector('.rv-avatar');if(t)rv.push({t:t.textContent.trim(),n:n?n.textContent.trim():'Verifizierter Kunde',a:a?a.textContent.trim():'✓',s:c.querySelectorAll('.rv-stars > svg').length||5});});
  if(rv.length<4)(D.extraReviews||[]).forEach(function(t){rv.push({t:t,n:'Verifizierter Kunde',a:'✓',s:5});});
  function card(r){return '<div class="sp-rv"><div class="st">'+'★★★★★'.slice(0,r.s)+'</div><p>„'+r.t+'“</p><div class="au"><i>'+r.a+'</i><div><b>'+r.n+'</b><em>✓ Verifizierter Kauf</em></div></div></div>';}
  function row(list,cls){return '<div class="sp-mq '+cls+'"><div class="tr">'+list.map(card).join('')+'</div></div>';}
  var h1=rv.filter(function(_,i){return i%2===0;}).slice(0,6),h2=rv.filter(function(_,i){return i%2===1;}).slice(0,6);
- var proof=el('<section id="sp-pp-proof" class="sp-pp sp-hp-sec sp-hp-dark"><div class="in"><div class="hd"><span class="sp-lbl">Kundenstimmen</span><h2>Das sagen Kunden über <span>'+D.name+'</span>.</h2></div>'
+ var proof=el('<section id="sp-pp-proof" class="sp-pp sp-hp-sec sp-hp-dark'+(D.bottle?'':' nob')+'"><div class="in"><div class="hd"><span class="sp-lbl">Kundenstimmen</span><h2>Das sagen Kunden über <span>'+D.name+'</span>.</h2></div>'
   +'<div class="sp-sum"><div class="big">'+D.rt+'</div><div><div class="st">★★★★★</div><div class="t">aus <b>'+D.rc+' Bewertungen</b><br>von verifizierten Käufern</div></div></div>'
-  +'<div class="sp-stage">'+row(h1,'r1')+row(h2,'r2')+'<div class="sp-glow"></div><div class="sp-bshadow"></div><div class="sp-bottle"><img src="'+D.bottle+'" alt="'+D.name+'"></div></div></div></section>');
+  +'<div class="sp-stage">'+row(h1,'r1')+row(h2,'r2')+(D.bottle?'<div class="sp-glow"></div><div class="sp-bshadow"></div><div class="sp-bottle"><img src="'+D.bottle+'" alt="'+D.name+'"></div>':'')+'</div></div></section>');
  root.appendChild(proof);
- var stage=proof.querySelector('.sp-stage'),bottle=proof.querySelector('.sp-bottle'),bsh=proof.querySelector('.sp-bshadow'),cur=0,tgt=0,run=false,vis=false;
+ if(D.bottle){var stage=proof.querySelector('.sp-stage'),bottle=proof.querySelector('.sp-bottle'),bsh=proof.querySelector('.sp-bshadow'),cur=0,tgt=0,run=false,vis=false;
  function target(){var r=stage.getBoundingClientRect(),vh=window.innerHeight;var p=((r.top+r.height/2)-vh/2)/vh;return Math.max(-1,Math.min(1,p));}
  function paint(p){bottle.style.transform='translate3d(0,'+(p*110).toFixed(1)+'px,0) rotate('+(p*-22+6).toFixed(2)+'deg)';bsh.style.transform='translate3d(0,'+(p*40).toFixed(1)+'px,0) scale('+(1-Math.abs(p)*0.25).toFixed(3)+')';bsh.style.opacity=(1-Math.abs(p)*0.5).toFixed(2);}
  function loop(){cur+=(tgt-cur)*0.12;paint(cur);if(Math.abs(tgt-cur)>0.0005&&vis){requestAnimationFrame(loop);}else{run=false;}}
  function kick(){tgt=target();if(!run&&vis){run=true;requestAnimationFrame(loop);}}
  if('IntersectionObserver' in window){new IntersectionObserver(function(e){vis=e[0].isIntersecting;if(vis)kick();},{rootMargin:'200px 0px'}).observe(stage);}else{vis=true;}
- window.addEventListener('scroll',kick,{passive:true});cur=tgt=target();paint(cur);
+ window.addEventListener('scroll',kick,{passive:true});cur=tgt=target();paint(cur);}
 
  /* Laufband: beide Reihen gleich schnell (Dauer aus der echten Breite, ~28 px/s) */
  /* Laufband: jede Karte bewegt sich einzeln (kein breiter Streifen -> sofort sichtbar, auch in iOS Safari) */
@@ -77,7 +98,7 @@ document.addEventListener('DOMContentLoaded',function(){
  var real=document.querySelector('form.cart .single_add_to_cart_button');
  if(real){
   var bag='<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>';
-  var bar=el('<div id="sp-pp-bar"><img src="'+D.thumb+'" alt=""><div class="t"><b>'+D.name+'</b><span class="pr">'+eur(D.price)+'</span></div><button type="button" class="cb" aria-label="Warenkorb öffnen">'+bag+'<i class="z">0</i></button><button type="button" class="go">'+cart+'In den Warenkorb</button></div>');
+  var bar=el('<div id="sp-pp-bar"><img src="'+D.thumb+'" alt=""><div class="t"><b>'+D.name+'</b><span class="pr">'+eur(D.price)+'</span></div><button type="button" class="cb" aria-label="Warenkorb öffnen">'+bag+'<i class="z">0</i></button><button type="button" class="go">'+cart+(D.pre?'Vorbestellen':'In den Warenkorb')+'</button></div>');
   document.body.appendChild(bar);
   var prEl=bar.querySelector('.pr');
   function total(){var c=null;document.querySelectorAll('form.cart *, .sp-bb *').forEach(function(e){if(!c&&e.children.length===0&&/^gesamt$/i.test(e.textContent.trim()))c=e;});
