@@ -353,7 +353,7 @@ function sp_vorkasse_send_payment_reminder($order) {
     }
     ob_start();
     ?>
-    <p style="margin:0 0 20px;font-size:15px;line-height:1.6;color:#0D0F12;">Für deine Bestellung <strong>#<?php echo esc_html($order->get_order_number()); ?></strong> vom <?php echo esc_html($order->get_date_created()->date_i18n('d.m.Y')); ?> ist bei uns noch keine Zahlung eingegangen. Sobald die Überweisung da ist, versenden wir deine Bestellung &ndash; diskret per DHL.</p>
+    <p style="margin:0 0 20px;font-size:15px;line-height:1.6;color:#0D0F12;">Deine Bestellung <strong>#<?php echo esc_html($order->get_order_number()); ?></strong> vom <?php echo esc_html($order->get_date_created()->date_i18n('d.m.Y')); ?> ist für dich reserviert. Sobald deine Überweisung da ist, versenden wir sie &ndash; diskret per DHL. Hier nochmal alle Daten:</p>
     <?php if (function_exists('sp_em_pay_box')) : ?>
       <?php echo sp_em_pay_box($order); // Neues Mail-Design (2026-10-10): gleiche Ueberweisungs-Karte wie in der Bestellbestaetigung ?>
     <?php else : ?>
