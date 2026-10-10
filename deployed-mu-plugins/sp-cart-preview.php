@@ -46,12 +46,12 @@ body.sp-cd-on #sp-hpv-flag{display:none!important}
 #sp-gx .hd p{margin:0;font-size:13.5px;line-height:1.4;color:#C9CDD2}
 #sp-gx .hd p b{color:#fff;font-weight:700}
 #sp-gx .hd p small{display:block;font-size:11.5px;color:#7DDBA0;font-weight:600;margin-top:2px}
-#sp-gx .tr{position:relative;height:6px;border-radius:99px;background:rgba(255,255,255,.12);margin:0 10px 0 4px}
+#sp-gx .tr{position:relative;height:6px;border-radius:99px;background:rgba(255,255,255,.12);margin:0}
 #sp-gx .fl{position:absolute;left:0;top:0;bottom:0;border-radius:99px;background:linear-gradient(90deg,#8E96A0,#F2F3F4);transition:width .6s cubic-bezier(.34,1.2,.4,1)}
 #sp-gx .ms{position:absolute;top:50%;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;background:#2A2F35;border:2px solid #4B5157;display:flex;align-items:center;justify-content:center;font:800 10px/1 Sora,sans-serif;color:#fff;transition:all .3s}
 #sp-gx .ms.done{background:#2E9B57;border-color:#7DDBA0}
 #sp-gx .ms.next{border-color:#F2F3F4;box-shadow:0 0 0 4px rgba(242,243,244,.12)}
-#sp-gx .lb{position:relative;height:30px;margin:12px 10px 0 4px}
+#sp-gx .lb{position:relative;height:30px;margin:12px 0 0}
 #sp-gx .ms img{width:100%;height:100%;border-radius:50%;object-fit:cover;filter:grayscale(1);opacity:.55;transition:all .3s}
 #sp-gx .ms svg{width:13px;height:13px;color:#C9CDD2}
 #sp-gx .ms.done img{filter:none;opacity:1}
@@ -60,8 +60,7 @@ body.sp-cd-on #sp-hpv-flag{display:none!important}
 #sp-gx .ms.done.im:after{content:'✓';position:absolute;right:-5px;bottom:-5px;width:14px;height:14px;border-radius:50%;background:#2E9B57;border:1.5px solid #15181C;font:800 8px/14px Sora,sans-serif;text-align:center;color:#fff}
 #sp-gx .ms.im{background:#15181C;padding:0}
 #sp-gx .lb span{position:absolute;top:0;transform:translateX(-50%);text-align:center;font-size:10.5px;line-height:1.25;color:#80868E;white-space:nowrap;font-weight:600}
-#sp-gx .lb span:last-child{transform:translateX(calc(-100% + 10px));text-align:right}
-#sp-gx .lb span:first-child{transform:translateX(-50%)}
+
 #sp-gx .lb span em{display:block;font-style:normal;font-weight:700;color:#C9CDD2}
 #sp-gx .lb span.done,#sp-gx .lb span.done em{color:#7DDBA0}
 #sp-gx .lb span.next em{color:#fff}
@@ -135,7 +134,7 @@ body.sp-cd-on #sp-hpv-flag{display:none!important}
    if(nx<0){msg='<span class="ic ok">'+CHECK+'</span><p><b>Alle Geschenke freigeschaltet!</b><small>Sie liegen automatisch in deinem Warenkorb.</small></p>';}
    else{var t=T[nx];msg='<span class="ic">'+icon(t)+'</span><p>Noch <b>'+eur(t.a-total)+'</b> bis <b>'+t.l+'</b>'+(done.length?'<small>✓ '+done.map(function(d){return d.l;}).join(' · ')+'</small>':'')+'</p>';}
    /* Stufen gleichmaessig verteilt, Fuellung stueckweise zwischen den Schwellen */
-   var n=T.length,pos=function(i){return (i+1)/n*100;},pct=100;
+   var n=T.length,pos=function(i){return (i+.5)/n*100;},pct=100; /* jede Stufe mittig in ihrer Spalte */
    for(var i=0;i<n;i++){if(total<T[i].a){var pa=i?T[i-1].a:0,pp=i?pos(i-1):0;pct=pp+Math.max(0,total-pa)/(T[i].a-pa)*(pos(i)-pp);break;}}
    var ms='',lb='';
    T.forEach(function(t,i){var p=pos(i).toFixed(2),c=t.done?'done':(i===nx?'next':'');var im=!!IMG[Math.round(t.a)];ms+='<span class="ms '+c+(im?' im':'')+'" style="left:'+p+'%">'+(im?icon(t):(t.done?CHECK:icon(t)))+'</span>';lb+='<span class="'+c+'" style="left:'+p+'%">'+shortL(t.l)+'<em>'+eur(t.a)+'</em></span>';});
