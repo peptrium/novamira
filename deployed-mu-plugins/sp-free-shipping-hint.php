@@ -58,7 +58,7 @@ define('SP_FSH_SKIP_IDS', '729,745,817'); // Aufladung, reine Geschenk-Produkte
  * 12 h zwischengespeichert; die Kaufdaten aendern sich nur langsam.
  */
 function sp_fsh_catalog() {
-    $cached = get_transient('sp_fsh_catalog_v2');
+    $cached = get_transient('sp_fsh_catalog_v3');
     if (is_array($cached)) {
         return $cached;
     }
@@ -69,6 +69,10 @@ function sp_fsh_catalog() {
     foreach (wc_get_products(array('status' => 'publish', 'limit' => -1)) as $p) {
         $pid = $p->get_id();
         if (in_array($pid, $skip, true) || !$p->is_purchasable() || !$p->is_in_stock()) {
+            continue;
+        }
+        // Vorbestell-Produkte nicht vorschlagen (Kunde muesste warten).
+        if (function_exists('sp_preorder_product_ids') && in_array($pid, array_map('intval', sp_preorder_product_ids()), true)) {
             continue;
         }
         $vars = array();
@@ -146,11 +150,11 @@ function sp_fsh_catalog() {
         'sale' => $on_sale,
     );
     $data = array('products' => $products, 'var2parent' => $var2parent, 'comp' => $comp, 'qty' => $qty);
-    set_transient('sp_fsh_catalog_v2', $data, 12 * HOUR_IN_SECONDS);
+    set_transient('sp_fsh_catalog_v3', $data, 12 * HOUR_IN_SECONDS);
     return $data;
 }
 add_action('woocommerce_update_product', function () {
-    delete_transient('sp_fsh_catalog_v2');
+    delete_transient('sp_fsh_catalog_v3');
 });
 
 /* Messung: Vorschlaege gesehen / "+" getippt -> wp_sp_stats (type fshview / fshclick, campaign "add|more:<Preis>"). */

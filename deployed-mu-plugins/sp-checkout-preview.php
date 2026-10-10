@@ -6,7 +6,7 @@
  * Nur Optik: reduzierter Kopf (Suche/Menue/Konto weg, "Sichere Kasse"), Schritt-Anzeige
  * Warenkorb -> Kasse -> Fertig (ausserhalb des React-Formulars eingefuegt), nummerierte Abschnitte
  * per CSS-Zaehler, Vorname/Nachname und PLZ/Ort nebeneinander (PLZ vor Ort per CSS order),
- * Zahlungsarten als Karten, Vertrauenszeile unter dem Bestell-Button. Keine Aenderung an Feldern,
+ * Zahlungsarten als Karten. Keine Aenderung an Feldern,
  * Validierung oder Bestelllogik. Datei loeschen = Vorschau weg.
  */
 if (!defined('ABSPATH')) {
@@ -61,14 +61,7 @@ body.woocommerce-checkout #sp-header-bar .sp-hb-right:before{content:'Sichere Ka
 /* Bestell-Button + Vertrauenszeile */
 .wc-block-checkout__actions_row{display:flex!important;flex-direction:column!important;align-items:stretch!important}
 .wc-block-components-checkout-place-order-button{min-height:56px!important;border-radius:14px!important;font-size:16px!important;font-weight:800!important;box-shadow:0 8px 20px rgba(13,15,18,.2)!important}
-/* Vertrauens-Leiste unter dem Bestell-Button (eigenes Element nach dem Checkout-Block) */
-#sp-cop-trust{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:14px 0 8px;padding:14px 8px;border-radius:16px;background:#F6F7F8;border:1px solid #EEF0F2;font-family:Sora,sans-serif}
-#sp-cop-trust div{display:flex;flex-direction:column;align-items:center;text-align:center;gap:3px;min-width:0}
-#sp-cop-trust i{width:34px;height:34px;border-radius:50%;background:#fff;border:1px solid #E3E6E9;display:flex;align-items:center;justify-content:center;margin-bottom:4px;color:#0D0F12}
-#sp-cop-trust i svg{width:16px;height:16px}
-#sp-cop-trust b{font-size:11.5px;font-weight:800;color:#0D0F12;line-height:1.25}
-#sp-cop-trust span{font-size:10.5px;color:#80868E;line-height:1.3}
-/* Abstand Button -> Vertrauens-Leiste */
+/* kein grosser Leerraum unter dem Bestell-Button */
 .wp-block-woocommerce-checkout,.wc-block-components-sidebar-layout,.wc-block-checkout__main,.wc-block-checkout__form,.wc-block-checkout__actions{margin-bottom:0!important;padding-bottom:0!important}
 /* Anmelden-Link als kleine Pille */
 #contact-fields .wc-block-checkout__login-prompt,#contact-fields .wc-block-components-checkout-step__heading-content a{font-size:12px!important;font-weight:700;text-decoration:none!important;border:1px solid #DCDEE0;border-radius:999px;padding:5px 11px;color:#0D0F12!important;white-space:nowrap}
@@ -83,11 +76,6 @@ body.woocommerce-checkout #sp-header-bar .sp-hb-right:before{content:'Sichere Ka
  var st=document.createElement('nav');st.id='sp-cop-steps';st.setAttribute('aria-label','Bestellschritte');
  st.innerHTML='<a class="s ok" href="<?php echo esc_url(wc_get_cart_url()); ?>" onclick="var b=document.getElementById(\'sp-cart-fab\');if(b){b.click();return false;}"><i>✓</i>Warenkorb</a><span class="ln ok"></span><span class="s on"><i>2</i>Kasse</span><span class="ln"></span><span class="s"><i>3</i>Fertig</span>';
  co.parentNode.insertBefore(st,co);
- var tr=document.createElement('div');tr.id='sp-cop-trust';
- var ic={lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>',box:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>',truck:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4h14v12H1zM15 9h4l3 3v4h-7"/><circle cx="5.5" cy="18.5" r="2"/><circle cx="18.5" cy="18.5" r="2"/></svg>'};
- tr.innerHTML='<div><i>'+ic.lock+'</i><b>Sicher bezahlen</b><span>SSL-verschlüsselt</span></div><div><i>'+ic.box+'</i><b>Diskret</b><span>Neutral verpackt</span></div><div><i>'+ic.truck+'</i><b>In 2 Werktagen</b><span>Versand mit DHL</span></div>';
- function place(){if(!tr.isConnected||tr.previousElementSibling!==co){co.parentNode.insertBefore(tr,co.nextSibling);}}
- place();new MutationObserver(place).observe(co.parentNode,{childList:true});
 })();
 </script>
     <?php
