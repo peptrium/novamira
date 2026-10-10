@@ -32,7 +32,7 @@ body.woocommerce-order-received .woocommerce-order>p.woocommerce-thankyou-order-
 #sp-ty-hero .meta{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 #sp-ty-hero .meta div{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 6px}
 #sp-ty-hero .meta span{display:block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#80868E;margin-bottom:3px}
-#sp-ty-hero .meta b{display:block;font-size:13.5px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#sp-ty-hero .meta b{display:block;font-size:12.5px;font-weight:800;color:#fff;white-space:nowrap;letter-spacing:-.01em}
 /* Bankdaten-Karte */
 .sp-ty-bank{border-radius:18px!important;border-color:#E3E6E9!important;box-shadow:0 10px 26px rgba(13,15,18,.07)}
 .sp-ty-bank .sp-ty-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
