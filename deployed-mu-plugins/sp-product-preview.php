@@ -253,6 +253,9 @@ body.home [data-id="045a884"] .e-con,body.home [data-id="045a884"]>.e-con-inner{
 .sp-faq a{color:#0D0F12;font-weight:600}
 
 html{overflow-x:clip}
+#sp-hp-proof,#sp-hp-prod,#sp-hp-sets,#sp-hp-faq,#sp-nlh,.sp-stage{overflow:hidden}
+html,body{overflow-x:hidden}
+@supports (overflow:clip){html,body{overflow-x:clip}}
 /* ===== Produktseite (Entwurf) ===== */
 body.single-product .elementor-340{display:flex;flex-direction:column}
 body.single-product .elementor-340>*{order:50;width:100%}
@@ -483,6 +486,12 @@ body.single-product #rx-buybox .rx-pay-in{text-align:center!important;align-item
 body.single-product #rx-buybox .rx-pay-in__k{display:block;text-align:center!important}
 body.single-product #rx-buybox .rx-pay-in__row{justify-content:center!important}
 @media(max-width:900px){body.single-product [data-id="7269057"] .elementor-widget-image{text-align:center!important}body.single-product [data-id="7269057"] img{display:inline-block!important}.sp-img-bd{left:0;right:0;justify-content:center;top:14px}}
+
+/* ===== v7: Vollbreite ohne 100vw (Safari/iPhone) ===== */
+body.single-product .elementor-340>#sp-pp-proof,body.single-product .elementor-340>#sp-pp-sets,body.single-product .elementor-340>#sp-pp-more,body.single-product .elementor-340>#sp-pp-info{width:auto!important;max-width:none!important;margin-left:-20px!important;margin-right:-20px!important;align-self:stretch!important}
+#sp-pp-proof,#sp-pp-sets,#sp-pp-more,#sp-pp-info,#sp-nlh,.sp-mq,.sp-stage{overflow:hidden!important}
+html,body{overflow-x:hidden!important}
+@supports (overflow:clip){html,body{overflow-x:clip!important}}
 #sp-hpv-flag{position:fixed;left:12px;top:12px;z-index:200000;background:#FF8A5C;color:#0D0F12;font:700 11px Sora,sans-serif;padding:6px 10px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.3);pointer-events:none}
 </style>
     <?php

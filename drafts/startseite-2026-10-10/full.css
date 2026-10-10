@@ -189,3 +189,6 @@ body.home [data-id="045a884"] .e-con,body.home [data-id="045a884"]>.e-con-inner{
 .sp-faq a{color:#0D0F12;font-weight:600}
 
 html{overflow-x:clip}
+#sp-hp-proof,#sp-hp-prod,#sp-hp-sets,#sp-hp-faq,#sp-nlh,.sp-stage{overflow:hidden}
+html,body{overflow-x:hidden}
+@supports (overflow:clip){html,body{overflow-x:clip}}

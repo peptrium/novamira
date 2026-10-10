@@ -228,3 +228,9 @@ body.single-product #rx-buybox .rx-pay-in{text-align:center!important;align-item
 body.single-product #rx-buybox .rx-pay-in__k{display:block;text-align:center!important}
 body.single-product #rx-buybox .rx-pay-in__row{justify-content:center!important}
 @media(max-width:900px){body.single-product [data-id="7269057"] .elementor-widget-image{text-align:center!important}body.single-product [data-id="7269057"] img{display:inline-block!important}.sp-img-bd{left:0;right:0;justify-content:center;top:14px}}
+
+/* ===== v7: Vollbreite ohne 100vw (Safari/iPhone) ===== */
+body.single-product .elementor-340>#sp-pp-proof,body.single-product .elementor-340>#sp-pp-sets,body.single-product .elementor-340>#sp-pp-more,body.single-product .elementor-340>#sp-pp-info{width:auto!important;max-width:none!important;margin-left:-20px!important;margin-right:-20px!important;align-self:stretch!important}
+#sp-pp-proof,#sp-pp-sets,#sp-pp-more,#sp-pp-info,#sp-nlh,.sp-mq,.sp-stage{overflow:hidden!important}
+html,body{overflow-x:hidden!important}
+@supports (overflow:clip){html,body{overflow-x:clip!important}}
