@@ -66,21 +66,14 @@
  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){window.removeEventListener('scroll',kick);}
  /* Kombi-Sets (mit optionaler Auswahl) */
  var S=window.SP_HP_SETS||[];
- function setBody(s,o){var t=o.items.map(function(it){return '<span class="'+(it.w?'w':'')+'"><img loading="lazy" src="'+it.i+'" alt=""></span>';}).join('');
-   return '<div class="thumbs">'+t+'<i>'+o.items.length+' Artikel</i></div><ul>'+o.items.map(function(it){return '<li><span>'+it.n+'</span><span>'+eur(it.p)+'</span></li>';}).join('')+'</ul>'
-     +'<div class="sum"><span class="ship'+(o.t>=100?'':' no')+'">'+(o.t>=100?'✓ Gratisversand':'noch '+eur(100-o.t)+' bis Gratisversand')+'</span><strong>'+eur(o.t)+'</strong></div>';}
  if(S.length){
  var sets=el('<section id="sp-hp-sets" class="sp-hp-sec sp-hp-light"><div class="in"><div class="hd"><span class="sp-lbl lt">Beliebte Kombinationen</span><h2>Passt zusammen.</h2><p class="sub">Sinnvoll kombiniert – mit einem Klick komplett im Warenkorb.</p></div><div class="sp-rail">'
-  +S.map(function(s,i){var ch=s.opts.length>1?'<div class="vo">'+s.opts.map(function(o,k){return '<button type="button" data-o="'+k+'"'+(k===0?' class="on"':'')+'>'+o.l+'</button>';}).join('')+'</div>':'';
-    return '<div class="sp-set" data-set="'+i+'" data-o="0"><h3>'+s.n+'</h3><p class="why">'+s.d+'</p>'+ch+'<div class="body">'+setBody(s,s.opts[0])+'</div><button type="button" class="add">'+cart+'Set in den Warenkorb</button></div>';}).join('')
+  +S.map(function(s,i){return SPSETS.card(s,i,cart);}).join('')
   +'</div></div></section>');
  root.appendChild(sets);
- sets.addEventListener('click',function(e){
-   var vb=e.target.closest('.vo button');
-   if(vb){var c=vb.closest('.sp-set'),s=S[+c.getAttribute('data-set')],k=+vb.getAttribute('data-o');c.setAttribute('data-o',k);c.querySelectorAll('.vo button').forEach(function(b){b.classList.toggle('on',b===vb);});c.querySelector('.body').innerHTML=setBody(s,s.opts[k]);return;}
-   var b=e.target.closest('.add');if(!b)return;var c2=b.closest('.sp-set'),s2=S[+c2.getAttribute('data-set')],o=s2.opts[+c2.getAttribute('data-o')],old=b.innerHTML,i=0,last=null;b.disabled=true;b.textContent='…';
-   function next(){if(i>=o.items.length){b.classList.add('ok');b.innerHTML='✓ Set hinzugefügt';if(window.jQuery)jQuery(document.body).trigger('added_to_cart',[last&&last.fragments,last&&last.cart_hash,jQuery(b)]);setTimeout(function(){b.classList.remove('ok');b.innerHTML=old;b.disabled=false;},2400);return;}
-     var fd=new FormData();fd.append('product_id',o.items[i].id);fd.append('quantity','1');
+ SPSETS.bind(sets,S,function(ids,b){var old=b.innerHTML,i=0,last=null;b.disabled=true;b.textContent='…';
+   function next(){if(i>=ids.length){b.classList.add('ok');b.innerHTML='✓ Set hinzugefügt';if(window.jQuery)jQuery(document.body).trigger('added_to_cart',[last&&last.fragments,last&&last.cart_hash,jQuery(b)]);setTimeout(function(){b.classList.remove('ok');b.innerHTML=old;b.disabled=false;},2400);return;}
+     var fd=new FormData();fd.append('product_id',ids[i]);fd.append('quantity','1');
      fetch('/?wc-ajax=add_to_cart',{method:'POST',body:fd,credentials:'same-origin'}).then(function(r){return r.json();}).then(function(r){last=r;i++;next();}).catch(function(){b.innerHTML=old;b.disabled=false;});}
    next();});
  }

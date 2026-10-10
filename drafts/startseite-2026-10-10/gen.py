@@ -1,7 +1,7 @@
 import sys,re
 tok=open('hp/token.txt').read().strip()
 css=open('hp/full.css').read().strip()
-js=open('hp/full.js').read().strip()
+js=open('common/sets.js').read().strip()+"\n"+open('hp/full.js').read().strip()
 js=js.replace("(function(){\n var root","document.addEventListener('DOMContentLoaded',function(){\n var root",1)
 assert js.endswith("})();"); js=js[:-5]+"});"
 php=r"""<?php
@@ -125,10 +125,29 @@ function sp_hpv_set_item($id) {
     return ['id' => $id, 'n' => $name, 'p' => (float) wc_get_price_to_display($p), 'i' => wp_get_attachment_image_url($img, 'thumbnail'), 'w' => in_array($parent->get_id(), [80, 393, 395, 396, 908, 745], true)];
 }
 
+/* Varianten eines Produkts als Set-Optionen: je Variante (lieferbar) eine Option mit Mengen-Label */
+function sp_hpv_set_vars($pid, $g, $extra) {
+    $p = wc_get_product($pid);
+    if (!$p) {
+        return [];
+    }
+    $out = [];
+    $kids = $p->is_type('variable') ? $p->get_children() : [$pid];
+    foreach ($kids as $vid) {
+        $v = wc_get_product($vid);
+        if (!$v || !$v->is_purchasable() || !$v->is_in_stock()) {
+            continue;
+        }
+        $l = $v->is_type('variation') ? preg_replace('/(\d)\s*mg$/i', '$1 mg', implode(' ', array_values($v->get_attributes()))) : '';
+        $out[] = ['g' => $g, 'l' => $l, 'ids' => array_merge([$vid], $extra)];
+    }
+    return $out;
+}
+
 function sp_hpv_sets() {
     $defs = [
-        ['n' => 'Retatrutide Starter', 'd' => 'Alles für den Start: Retatrutide 10 mg plus Bac Water zum Anmischen und Spritzen zum genauen Dosieren.', 'opts' => [['l' => '10 mg', 'ids' => [555, 74, 80]], ['l' => '20 mg', 'ids' => [556, 74, 80]]]],
-        ['n' => 'Pen-Set', 'd' => 'Ein vorgefüllter Peptrium-Pen mit passenden Pen Nadeln – ganz ohne Anmischen. Wähle deinen Pen:', 'opts' => [['l' => 'Retatrutide', 'ids' => [547, 908]], ['l' => 'GHK-Cu', 'ids' => [597, 908]], ['l' => 'Mots-C', 'ids' => [544, 908]]]],
+        ['n' => 'Retatrutide Starter', 'd' => 'Alles für den Start: Retatrutide plus Bac Water zum Anmischen und Spritzen zum genauen Dosieren.', 'opts' => sp_hpv_set_vars(65, '', [74, 80])],
+        ['n' => 'Pen-Set', 'd' => 'Ein vorgefüllter Peptrium-Pen mit passenden Pen Nadeln – ganz ohne Anmischen. Wähle Pen und Menge:', 'opts' => array_merge(sp_hpv_set_vars(393, 'Retatrutide', [908]), sp_hpv_set_vars(395, 'GHK-Cu', [908]), sp_hpv_set_vars(396, 'Mots-C', [908]))],
         ['n' => 'GHK-Cu Komplett', 'd' => 'GHK-Cu 50 mg mit Bac Water und Spritzen – alles für deine Forschung in einem Paket.', 'opts' => [['l' => '', 'ids' => [68, 74, 80]]]],
         ['n' => 'Energie & Ästhetik', 'd' => 'Das oft zusammen gekaufte Duo: Mots-C und GHK-Cu, dazu Bac Water zum Anmischen.', 'opts' => [['l' => '', 'ids' => [71, 68, 74]]]],
     ];
@@ -146,10 +165,10 @@ function sp_hpv_sets() {
                 $items[] = $it;
                 $t += $it['p'];
             }
-            $opts[] = ['l' => $o['l'], 'items' => $items, 't' => round($t, 2)];
+            $opts[] = ['g' => $o['g'] ?? '', 'l' => $o['l'], 'items' => $items, 't' => round($t, 2)];
         }
         if ($opts) {
-            $out[] = ['n' => $d['n'], 'd' => $d['d'], 'opts' => $opts, 'items' => $opts[0]['items'], 't' => $opts[0]['t']];
+            $out[] = ['n' => $d['n'], 'd' => $d['d'], 'opts' => $opts, 'sel' => 0];
         }
     }
     return $out;

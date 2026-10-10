@@ -1,5 +1,5 @@
 css=open('hp/full.css').read().strip()+"\n"+open('pp/pp.css').read().strip()
-js=open('pp/pp.js').read().strip()
+js=open('common/sets.js').read().strip()+"\n"+open('pp/pp.js').read().strip()
 php=r"""<?php
 /**
  * Plugin Name: SP Produktseiten-Vorschau
@@ -32,9 +32,8 @@ function sp_ppv_data() {
         foreach ($s['opts'] as $k => $o) {
             foreach ($o['items'] as $it) {
                 if (in_array((int) $it['id'], $family, true)) {
-                    /* passende Option zuerst anzeigen */
-                    $s['items'] = $o['items'];
-                    $s['t'] = $o['t'];
+                    /* passende Option vorauswaehlen */
+                    $s['sel'] = $k;
                     $sets[] = $s;
                     continue 3;
                 }
@@ -43,19 +42,23 @@ function sp_ppv_data() {
     }
     if (!$sets && !in_array($id, [74, 80, 908], true)) {
         /* Fallback: Produkt + Bac Water + Spritzen (bei Vials) bzw. + Pen Nadeln (bei Pens) */
-        $first = $p->is_type('variable') && $p->get_children() ? $p->get_children()[0] : $id;
-        $ids = in_array($id, [393, 395, 396], true) ? [$first, 908] : [$first, 74, 80];
-        $items = [];
-        $t = 0;
-        foreach ($ids as $iid) {
-            $it = sp_hpv_set_item($iid);
-            if ($it) {
+        $extra = in_array($id, [393, 395, 396], true) ? [908] : [74, 80];
+        $opts = [];
+        foreach (sp_hpv_set_vars($id, '', $extra) as $o) {
+            $items = [];
+            $t = 0;
+            foreach ($o['ids'] as $iid) {
+                $it = sp_hpv_set_item($iid);
+                if (!$it) {
+                    continue 2;
+                }
                 $items[] = $it;
                 $t += $it['p'];
             }
+            $opts[] = ['g' => '', 'l' => $o['l'], 'items' => $items, 't' => round($t, 2)];
         }
-        if (count($items) === count($ids)) {
-            $sets[] = ['n' => $p->get_name() . ' komplett', 'd' => in_array($id, [393, 395, 396], true) ? 'Der Pen mit passenden Pen Nadeln.' : 'Mit Bac Water zum Anmischen und Spritzen zum genauen Dosieren.', 'items' => $items, 't' => round($t, 2), 'opts' => [['l' => '', 'items' => $items, 't' => round($t, 2)]]];
+        if ($opts) {
+            $sets[] = ['n' => $p->get_name() . ' komplett', 'd' => in_array($id, [393, 395, 396], true) ? 'Der Pen mit passenden Pen Nadeln.' : 'Mit Bac Water zum Anmischen und Spritzen zum genauen Dosieren.', 'opts' => $opts, 'sel' => 0];
         }
     }
     $more = [];

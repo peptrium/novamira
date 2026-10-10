@@ -30,9 +30,8 @@ function sp_ppv_data() {
         foreach ($s['opts'] as $k => $o) {
             foreach ($o['items'] as $it) {
                 if (in_array((int) $it['id'], $family, true)) {
-                    /* passende Option zuerst anzeigen */
-                    $s['items'] = $o['items'];
-                    $s['t'] = $o['t'];
+                    /* passende Option vorauswaehlen */
+                    $s['sel'] = $k;
                     $sets[] = $s;
                     continue 3;
                 }
@@ -41,19 +40,23 @@ function sp_ppv_data() {
     }
     if (!$sets && !in_array($id, [74, 80, 908], true)) {
         /* Fallback: Produkt + Bac Water + Spritzen (bei Vials) bzw. + Pen Nadeln (bei Pens) */
-        $first = $p->is_type('variable') && $p->get_children() ? $p->get_children()[0] : $id;
-        $ids = in_array($id, [393, 395, 396], true) ? [$first, 908] : [$first, 74, 80];
-        $items = [];
-        $t = 0;
-        foreach ($ids as $iid) {
-            $it = sp_hpv_set_item($iid);
-            if ($it) {
+        $extra = in_array($id, [393, 395, 396], true) ? [908] : [74, 80];
+        $opts = [];
+        foreach (sp_hpv_set_vars($id, '', $extra) as $o) {
+            $items = [];
+            $t = 0;
+            foreach ($o['ids'] as $iid) {
+                $it = sp_hpv_set_item($iid);
+                if (!$it) {
+                    continue 2;
+                }
                 $items[] = $it;
                 $t += $it['p'];
             }
+            $opts[] = ['g' => '', 'l' => $o['l'], 'items' => $items, 't' => round($t, 2)];
         }
-        if (count($items) === count($ids)) {
-            $sets[] = ['n' => $p->get_name() . ' komplett', 'd' => in_array($id, [393, 395, 396], true) ? 'Der Pen mit passenden Pen Nadeln.' : 'Mit Bac Water zum Anmischen und Spritzen zum genauen Dosieren.', 'items' => $items, 't' => round($t, 2), 'opts' => [['l' => '', 'items' => $items, 't' => round($t, 2)]]];
+        if ($opts) {
+            $sets[] = ['n' => $p->get_name() . ' komplett', 'd' => in_array($id, [393, 395, 396], true) ? 'Der Pen mit passenden Pen Nadeln.' : 'Mit Bac Water zum Anmischen und Spritzen zum genauen Dosieren.', 'opts' => $opts, 'sel' => 0];
         }
     }
     $more = [];
@@ -306,6 +309,10 @@ html,body{overflow-x:hidden}
 .sp-set .vo{display:flex;flex-wrap:wrap;gap:6px}
 .sp-set .vo button{height:30px;padding:0 12px;border-radius:9px;border:1px solid #D5D9DD;background:#fff;font:600 12.5px Sora,sans-serif;color:#3A4048;cursor:pointer}
 .sp-set .vo button.on{background:#0D0F12;border-color:#0D0F12;color:#fff}
+.sp-set .ch{display:flex;flex-direction:column;gap:8px}
+.sp-set .ch:empty{display:none}
+.sp-set .vm button{height:28px;padding:0 11px;border-radius:999px;font-size:12px;background:#F4F5F6;border-color:#E3E6E9}
+.sp-set .vm button.on{background:#fff;border:1.5px solid #0D0F12;color:#0D0F12}
 .sp-set .body{display:flex;flex-direction:column;gap:12px;flex:1}
 /* 3 Schritte: Bilder kompakt auf dem Handy */
 @media(max-width:767px){
@@ -332,6 +339,8 @@ html,body{overflow-x:hidden}
 
 /* 3 Schritte: kurzer Satz + groessere Bilder */
 @media(max-width:767px){body.home .sp-hiw-step-img{width:72%!important;height:auto!important;aspect-ratio:282/190;object-fit:cover!important;margin-top:10px!important;border-radius:14px!important}body.home .sp-hiw-step-content p{margin:4px 0 0!important}}
+.sp-set .vg{flex-wrap:nowrap!important;gap:6px}
+.sp-set .vg button{flex:1 1 auto;padding:0 6px;font-size:11.5px;white-space:nowrap}
 /* ===== Produktseite (Entwurf) ===== */
 body.single-product .pp-root{display:flex;flex-direction:column}
 body.single-product .pp-root>*{order:50;width:100%}
@@ -601,6 +610,28 @@ add_action('wp_footer', function () {
 <a id="sp-hpv-flag" href="<?php echo esc_url(add_query_arg('sp_vorschau', 'aus', home_url('/'))); ?>">ENTWURF-VORSCHAU ✕</a>
 <script id="sp-ppv-js">
 window.SP_PP=<?php echo wp_json_encode(sp_ppv_data()); ?>;
+/* Kombi-Sets: Auswahl Sorte (g) + Menge (l), gemeinsam fuer Startseite und Produktseiten */
+window.SPSETS=(function(){
+ function eur(v){return String(Number(v).toFixed(2)).replace('.',',')+' €';}
+ function q(t){return String(t).replace(/&/g,'&amp;').replace(/"/g,'&quot;');}
+ function groups(s){var g=[];s.opts.forEach(function(o){var k=o.g||'';if(g.indexOf(k)<0)g.push(k);});return g;}
+ function body(o){var t=o.items.map(function(it){return '<span class="'+(it.w?'w':'')+'"><img loading="lazy" src="'+it.i+'" alt=""></span>';}).join('');
+  return '<div class="thumbs">'+t+'<i>'+o.items.length+' Artikel</i></div><ul>'+o.items.map(function(it){return '<li><span>'+it.n+'</span><span>'+eur(it.p)+'</span></li>';}).join('')+'</ul>'
+   +'<div class="sum"><span class="ship'+(o.t>=100?'':' no')+'">'+(o.t>=100?'✓ Gratisversand':'noch '+eur(100-o.t)+' bis Gratisversand')+'</span><strong>'+eur(o.t)+'</strong></div>';}
+ function chips(s,k){var o=s.opts[k],G=groups(s),h='',V=[];
+  if(G.length>1)h+='<div class="vo vg">'+G.map(function(g){return '<button type="button" data-g="'+q(g)+'"'+((o.g||'')===g?' class="on"':'')+'>'+g+'</button>';}).join('')+'</div>';
+  s.opts.forEach(function(x,j){if((x.g||'')===(o.g||'')&&x.l)V.push(j);});
+  if(V.length>1)h+='<div class="vo vm">'+V.map(function(j){return '<button type="button" data-o="'+j+'"'+(j===k?' class="on"':'')+'>'+s.opts[j].l+'</button>';}).join('')+'</div>';
+  return h;}
+ function card(s,i,cart){var k=s.sel||0;return '<div class="sp-set" data-set="'+i+'" data-o="'+k+'"><h3>'+s.n+'</h3><p class="why">'+s.d+'</p><div class="ch">'+chips(s,k)+'</div><div class="body">'+body(s.opts[k])+'</div><button type="button" class="add">'+cart+'Set in den Warenkorb</button></div>';}
+ function bind(sec,S,add){sec.addEventListener('click',function(e){var c=e.target.closest('.sp-set');if(!c)return;var s=S[+c.getAttribute('data-set')],cur=s.opts[+c.getAttribute('data-o')],k=-1;
+  var gb=e.target.closest('.vg button'),vb=e.target.closest('.vm button');
+  if(gb){var g=gb.getAttribute('data-g');s.opts.forEach(function(o,j){if(k<0&&(o.g||'')===g&&o.l===cur.l)k=j;});if(k<0)s.opts.forEach(function(o,j){if(k<0&&(o.g||'')===g)k=j;});}
+  else if(vb)k=+vb.getAttribute('data-o');
+  if(k>=0){c.setAttribute('data-o',k);c.querySelector('.ch').innerHTML=chips(s,k);c.querySelector('.body').innerHTML=body(s.opts[k]);return;}
+  var b=e.target.closest('.add');if(b)add(cur.items.map(function(x){return x.id;}),b);});}
+ return {card:card,bind:bind};
+})();
 document.addEventListener('DOMContentLoaded',function(){
  /* Abschnitte am Inhalt erkennen (jede Produktvorlage hat eigene Elementor-IDs) */
  var root=document.querySelector('body.single-product [data-elementor-type="product"]')||document.querySelector('body.single-product div.product.ast-article-single'); if(!root)return;
@@ -687,12 +718,10 @@ document.addEventListener('DOMContentLoaded',function(){
  /* 2) Passt dazu: Sets */
  var S=D.sets||[];
  if(S.length){var sets=el('<section id="sp-pp-sets" class="sp-pp sp-hp-sec sp-hp-light"><div class="in"><div class="hd"><span class="sp-lbl lt">Passt dazu</span><h2>Komplett in einem Klick.</h2><p class="sub">Alles, was du rund um '+(D.short||D.name)+' brauchst – zusammen in den Warenkorb.</p></div><div class="sp-rail">'
-  +S.map(function(s,i){var t=s.items.map(function(it){return '<span class="'+(it.w?'w':'')+'"><img loading="lazy" src="'+it.i+'" alt=""></span>';}).join('');
-    return '<div class="sp-set" data-set="'+i+'"><div class="thumbs">'+t+'<i>'+s.items.length+' Artikel</i></div><h3>'+s.n+'</h3><p class="why">'+s.d+'</p><ul>'+s.items.map(function(it){return '<li><span>'+it.n+'</span><span>'+eur(it.p)+'</span></li>';}).join('')+'</ul>'
-     +'<div class="sum"><span class="ship'+(s.t>=100?'':' no')+'">'+(s.t>=100?'✓ Gratisversand':'noch '+eur(100-s.t)+' bis Gratisversand')+'</span><strong>'+eur(s.t)+'</strong></div><button type="button" class="add">'+cart+'Set in den Warenkorb</button></div>';}).join('')
+  +S.map(function(s,i){return SPSETS.card(s,i,cart);}).join('')
   +'</div></div></section>');
   root.appendChild(sets);
-  sets.addEventListener('click',function(e){var b=e.target.closest('.add');if(!b)return;var s=S[+b.closest('.sp-set').getAttribute('data-set')];addIds(s.items.map(function(x){return x.id;}),b,'✓ Set hinzugefügt');});}
+  SPSETS.bind(sets,S,function(ids,b){addIds(ids,b,'✓ Set hinzugefügt');});}
  /* 3) Weitere Produkte (statt "Wird haeufig zusammen gekauft") */
  var P=D.more||[];
  if(P.length){var more=el('<section id="sp-pp-more" class="sp-pp sp-hp-sec sp-hp-dark"><div class="in"><div class="hd"><span class="sp-lbl">Auch beliebt</span><h2>Das könnte dich auch interessieren.</h2></div><div class="sp-rail">'

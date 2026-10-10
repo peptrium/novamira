@@ -119,10 +119,29 @@ function sp_hpv_set_item($id) {
     return ['id' => $id, 'n' => $name, 'p' => (float) wc_get_price_to_display($p), 'i' => wp_get_attachment_image_url($img, 'thumbnail'), 'w' => in_array($parent->get_id(), [80, 393, 395, 396, 908, 745], true)];
 }
 
+/* Varianten eines Produkts als Set-Optionen: je Variante (lieferbar) eine Option mit Mengen-Label */
+function sp_hpv_set_vars($pid, $g, $extra) {
+    $p = wc_get_product($pid);
+    if (!$p) {
+        return [];
+    }
+    $out = [];
+    $kids = $p->is_type('variable') ? $p->get_children() : [$pid];
+    foreach ($kids as $vid) {
+        $v = wc_get_product($vid);
+        if (!$v || !$v->is_purchasable() || !$v->is_in_stock()) {
+            continue;
+        }
+        $l = $v->is_type('variation') ? preg_replace('/(\d)\s*mg$/i', '$1 mg', implode(' ', array_values($v->get_attributes()))) : '';
+        $out[] = ['g' => $g, 'l' => $l, 'ids' => array_merge([$vid], $extra)];
+    }
+    return $out;
+}
+
 function sp_hpv_sets() {
     $defs = [
-        ['n' => 'Retatrutide Starter', 'd' => 'Alles für den Start: Retatrutide 10 mg plus Bac Water zum Anmischen und Spritzen zum genauen Dosieren.', 'opts' => [['l' => '10 mg', 'ids' => [555, 74, 80]], ['l' => '20 mg', 'ids' => [556, 74, 80]]]],
-        ['n' => 'Pen-Set', 'd' => 'Ein vorgefüllter Peptrium-Pen mit passenden Pen Nadeln – ganz ohne Anmischen. Wähle deinen Pen:', 'opts' => [['l' => 'Retatrutide', 'ids' => [547, 908]], ['l' => 'GHK-Cu', 'ids' => [597, 908]], ['l' => 'Mots-C', 'ids' => [544, 908]]]],
+        ['n' => 'Retatrutide Starter', 'd' => 'Alles für den Start: Retatrutide plus Bac Water zum Anmischen und Spritzen zum genauen Dosieren.', 'opts' => sp_hpv_set_vars(65, '', [74, 80])],
+        ['n' => 'Pen-Set', 'd' => 'Ein vorgefüllter Peptrium-Pen mit passenden Pen Nadeln – ganz ohne Anmischen. Wähle Pen und Menge:', 'opts' => array_merge(sp_hpv_set_vars(393, 'Retatrutide', [908]), sp_hpv_set_vars(395, 'GHK-Cu', [908]), sp_hpv_set_vars(396, 'Mots-C', [908]))],
         ['n' => 'GHK-Cu Komplett', 'd' => 'GHK-Cu 50 mg mit Bac Water und Spritzen – alles für deine Forschung in einem Paket.', 'opts' => [['l' => '', 'ids' => [68, 74, 80]]]],
         ['n' => 'Energie & Ästhetik', 'd' => 'Das oft zusammen gekaufte Duo: Mots-C und GHK-Cu, dazu Bac Water zum Anmischen.', 'opts' => [['l' => '', 'ids' => [71, 68, 74]]]],
     ];
@@ -140,10 +159,10 @@ function sp_hpv_sets() {
                 $items[] = $it;
                 $t += $it['p'];
             }
-            $opts[] = ['l' => $o['l'], 'items' => $items, 't' => round($t, 2)];
+            $opts[] = ['g' => $o['g'] ?? '', 'l' => $o['l'], 'items' => $items, 't' => round($t, 2)];
         }
         if ($opts) {
-            $out[] = ['n' => $d['n'], 'd' => $d['d'], 'opts' => $opts, 'items' => $opts[0]['items'], 't' => $opts[0]['t']];
+            $out[] = ['n' => $d['n'], 'd' => $d['d'], 'opts' => $opts, 'sel' => 0];
         }
     }
     return $out;
@@ -370,6 +389,10 @@ html,body{overflow-x:hidden}
 .sp-set .vo{display:flex;flex-wrap:wrap;gap:6px}
 .sp-set .vo button{height:30px;padding:0 12px;border-radius:9px;border:1px solid #D5D9DD;background:#fff;font:600 12.5px Sora,sans-serif;color:#3A4048;cursor:pointer}
 .sp-set .vo button.on{background:#0D0F12;border-color:#0D0F12;color:#fff}
+.sp-set .ch{display:flex;flex-direction:column;gap:8px}
+.sp-set .ch:empty{display:none}
+.sp-set .vm button{height:28px;padding:0 11px;border-radius:999px;font-size:12px;background:#F4F5F6;border-color:#E3E6E9}
+.sp-set .vm button.on{background:#fff;border:1.5px solid #0D0F12;color:#0D0F12}
 .sp-set .body{display:flex;flex-direction:column;gap:12px;flex:1}
 /* 3 Schritte: Bilder kompakt auf dem Handy */
 @media(max-width:767px){
@@ -396,6 +419,8 @@ html,body{overflow-x:hidden}
 
 /* 3 Schritte: kurzer Satz + groessere Bilder */
 @media(max-width:767px){body.home .sp-hiw-step-img{width:72%!important;height:auto!important;aspect-ratio:282/190;object-fit:cover!important;margin-top:10px!important;border-radius:14px!important}body.home .sp-hiw-step-content p{margin:4px 0 0!important}}
+.sp-set .vg{flex-wrap:nowrap!important;gap:6px}
+.sp-set .vg button{flex:1 1 auto;padding:0 6px;font-size:11.5px;white-space:nowrap}
 #sp-hpv-flag{position:fixed;left:12px;top:12px;z-index:99999;background:#FF8A5C;color:#0D0F12;font:700 11px Sora,sans-serif;padding:6px 10px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.3);text-decoration:none!important}
 </style>
     <?php
@@ -411,6 +436,28 @@ add_action('wp_footer', function () {
 window.SP_HP_PRODS=<?php echo wp_json_encode(sp_hpv_products()); ?>;
 window.SP_HP_CATS=<?php echo wp_json_encode(sp_hpv_cats()); ?>;
 window.SP_HP_SETS=<?php echo wp_json_encode(sp_hpv_sets()); ?>;
+/* Kombi-Sets: Auswahl Sorte (g) + Menge (l), gemeinsam fuer Startseite und Produktseiten */
+window.SPSETS=(function(){
+ function eur(v){return String(Number(v).toFixed(2)).replace('.',',')+' €';}
+ function q(t){return String(t).replace(/&/g,'&amp;').replace(/"/g,'&quot;');}
+ function groups(s){var g=[];s.opts.forEach(function(o){var k=o.g||'';if(g.indexOf(k)<0)g.push(k);});return g;}
+ function body(o){var t=o.items.map(function(it){return '<span class="'+(it.w?'w':'')+'"><img loading="lazy" src="'+it.i+'" alt=""></span>';}).join('');
+  return '<div class="thumbs">'+t+'<i>'+o.items.length+' Artikel</i></div><ul>'+o.items.map(function(it){return '<li><span>'+it.n+'</span><span>'+eur(it.p)+'</span></li>';}).join('')+'</ul>'
+   +'<div class="sum"><span class="ship'+(o.t>=100?'':' no')+'">'+(o.t>=100?'✓ Gratisversand':'noch '+eur(100-o.t)+' bis Gratisversand')+'</span><strong>'+eur(o.t)+'</strong></div>';}
+ function chips(s,k){var o=s.opts[k],G=groups(s),h='',V=[];
+  if(G.length>1)h+='<div class="vo vg">'+G.map(function(g){return '<button type="button" data-g="'+q(g)+'"'+((o.g||'')===g?' class="on"':'')+'>'+g+'</button>';}).join('')+'</div>';
+  s.opts.forEach(function(x,j){if((x.g||'')===(o.g||'')&&x.l)V.push(j);});
+  if(V.length>1)h+='<div class="vo vm">'+V.map(function(j){return '<button type="button" data-o="'+j+'"'+(j===k?' class="on"':'')+'>'+s.opts[j].l+'</button>';}).join('')+'</div>';
+  return h;}
+ function card(s,i,cart){var k=s.sel||0;return '<div class="sp-set" data-set="'+i+'" data-o="'+k+'"><h3>'+s.n+'</h3><p class="why">'+s.d+'</p><div class="ch">'+chips(s,k)+'</div><div class="body">'+body(s.opts[k])+'</div><button type="button" class="add">'+cart+'Set in den Warenkorb</button></div>';}
+ function bind(sec,S,add){sec.addEventListener('click',function(e){var c=e.target.closest('.sp-set');if(!c)return;var s=S[+c.getAttribute('data-set')],cur=s.opts[+c.getAttribute('data-o')],k=-1;
+  var gb=e.target.closest('.vg button'),vb=e.target.closest('.vm button');
+  if(gb){var g=gb.getAttribute('data-g');s.opts.forEach(function(o,j){if(k<0&&(o.g||'')===g&&o.l===cur.l)k=j;});if(k<0)s.opts.forEach(function(o,j){if(k<0&&(o.g||'')===g)k=j;});}
+  else if(vb)k=+vb.getAttribute('data-o');
+  if(k>=0){c.setAttribute('data-o',k);c.querySelector('.ch').innerHTML=chips(s,k);c.querySelector('.body').innerHTML=body(s.opts[k]);return;}
+  var b=e.target.closest('.add');if(b)add(cur.items.map(function(x){return x.id;}),b);});}
+ return {card:card,bind:bind};
+})();
 document.addEventListener('DOMContentLoaded',function(){
  var root=document.querySelector('body.home .elementor-211'); if(!root)return;
  function el(h){var d=document.createElement('div');d.innerHTML=h.trim();return d.firstChild;}
@@ -479,21 +526,14 @@ document.addEventListener('DOMContentLoaded',function(){
  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){window.removeEventListener('scroll',kick);}
  /* Kombi-Sets (mit optionaler Auswahl) */
  var S=window.SP_HP_SETS||[];
- function setBody(s,o){var t=o.items.map(function(it){return '<span class="'+(it.w?'w':'')+'"><img loading="lazy" src="'+it.i+'" alt=""></span>';}).join('');
-   return '<div class="thumbs">'+t+'<i>'+o.items.length+' Artikel</i></div><ul>'+o.items.map(function(it){return '<li><span>'+it.n+'</span><span>'+eur(it.p)+'</span></li>';}).join('')+'</ul>'
-     +'<div class="sum"><span class="ship'+(o.t>=100?'':' no')+'">'+(o.t>=100?'✓ Gratisversand':'noch '+eur(100-o.t)+' bis Gratisversand')+'</span><strong>'+eur(o.t)+'</strong></div>';}
  if(S.length){
  var sets=el('<section id="sp-hp-sets" class="sp-hp-sec sp-hp-light"><div class="in"><div class="hd"><span class="sp-lbl lt">Beliebte Kombinationen</span><h2>Passt zusammen.</h2><p class="sub">Sinnvoll kombiniert – mit einem Klick komplett im Warenkorb.</p></div><div class="sp-rail">'
-  +S.map(function(s,i){var ch=s.opts.length>1?'<div class="vo">'+s.opts.map(function(o,k){return '<button type="button" data-o="'+k+'"'+(k===0?' class="on"':'')+'>'+o.l+'</button>';}).join('')+'</div>':'';
-    return '<div class="sp-set" data-set="'+i+'" data-o="0"><h3>'+s.n+'</h3><p class="why">'+s.d+'</p>'+ch+'<div class="body">'+setBody(s,s.opts[0])+'</div><button type="button" class="add">'+cart+'Set in den Warenkorb</button></div>';}).join('')
+  +S.map(function(s,i){return SPSETS.card(s,i,cart);}).join('')
   +'</div></div></section>');
  root.appendChild(sets);
- sets.addEventListener('click',function(e){
-   var vb=e.target.closest('.vo button');
-   if(vb){var c=vb.closest('.sp-set'),s=S[+c.getAttribute('data-set')],k=+vb.getAttribute('data-o');c.setAttribute('data-o',k);c.querySelectorAll('.vo button').forEach(function(b){b.classList.toggle('on',b===vb);});c.querySelector('.body').innerHTML=setBody(s,s.opts[k]);return;}
-   var b=e.target.closest('.add');if(!b)return;var c2=b.closest('.sp-set'),s2=S[+c2.getAttribute('data-set')],o=s2.opts[+c2.getAttribute('data-o')],old=b.innerHTML,i=0,last=null;b.disabled=true;b.textContent='…';
-   function next(){if(i>=o.items.length){b.classList.add('ok');b.innerHTML='✓ Set hinzugefügt';if(window.jQuery)jQuery(document.body).trigger('added_to_cart',[last&&last.fragments,last&&last.cart_hash,jQuery(b)]);setTimeout(function(){b.classList.remove('ok');b.innerHTML=old;b.disabled=false;},2400);return;}
-     var fd=new FormData();fd.append('product_id',o.items[i].id);fd.append('quantity','1');
+ SPSETS.bind(sets,S,function(ids,b){var old=b.innerHTML,i=0,last=null;b.disabled=true;b.textContent='…';
+   function next(){if(i>=ids.length){b.classList.add('ok');b.innerHTML='✓ Set hinzugefügt';if(window.jQuery)jQuery(document.body).trigger('added_to_cart',[last&&last.fragments,last&&last.cart_hash,jQuery(b)]);setTimeout(function(){b.classList.remove('ok');b.innerHTML=old;b.disabled=false;},2400);return;}
+     var fd=new FormData();fd.append('product_id',ids[i]);fd.append('quantity','1');
      fetch('/?wc-ajax=add_to_cart',{method:'POST',body:fd,credentials:'same-origin'}).then(function(r){return r.json();}).then(function(r){last=r;i++;next();}).catch(function(){b.innerHTML=old;b.disabled=false;});}
    next();});
  }

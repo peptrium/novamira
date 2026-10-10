@@ -84,12 +84,10 @@ document.addEventListener('DOMContentLoaded',function(){
  /* 2) Passt dazu: Sets */
  var S=D.sets||[];
  if(S.length){var sets=el('<section id="sp-pp-sets" class="sp-pp sp-hp-sec sp-hp-light"><div class="in"><div class="hd"><span class="sp-lbl lt">Passt dazu</span><h2>Komplett in einem Klick.</h2><p class="sub">Alles, was du rund um '+(D.short||D.name)+' brauchst – zusammen in den Warenkorb.</p></div><div class="sp-rail">'
-  +S.map(function(s,i){var t=s.items.map(function(it){return '<span class="'+(it.w?'w':'')+'"><img loading="lazy" src="'+it.i+'" alt=""></span>';}).join('');
-    return '<div class="sp-set" data-set="'+i+'"><div class="thumbs">'+t+'<i>'+s.items.length+' Artikel</i></div><h3>'+s.n+'</h3><p class="why">'+s.d+'</p><ul>'+s.items.map(function(it){return '<li><span>'+it.n+'</span><span>'+eur(it.p)+'</span></li>';}).join('')+'</ul>'
-     +'<div class="sum"><span class="ship'+(s.t>=100?'':' no')+'">'+(s.t>=100?'✓ Gratisversand':'noch '+eur(100-s.t)+' bis Gratisversand')+'</span><strong>'+eur(s.t)+'</strong></div><button type="button" class="add">'+cart+'Set in den Warenkorb</button></div>';}).join('')
+  +S.map(function(s,i){return SPSETS.card(s,i,cart);}).join('')
   +'</div></div></section>');
   root.appendChild(sets);
-  sets.addEventListener('click',function(e){var b=e.target.closest('.add');if(!b)return;var s=S[+b.closest('.sp-set').getAttribute('data-set')];addIds(s.items.map(function(x){return x.id;}),b,'✓ Set hinzugefügt');});}
+  SPSETS.bind(sets,S,function(ids,b){addIds(ids,b,'✓ Set hinzugefügt');});}
  /* 3) Weitere Produkte (statt "Wird haeufig zusammen gekauft") */
  var P=D.more||[];
  if(P.length){var more=el('<section id="sp-pp-more" class="sp-pp sp-hp-sec sp-hp-dark"><div class="in"><div class="hd"><span class="sp-lbl">Auch beliebt</span><h2>Das könnte dich auch interessieren.</h2></div><div class="sp-rail">'

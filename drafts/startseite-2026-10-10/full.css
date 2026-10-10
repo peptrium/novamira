@@ -212,6 +212,10 @@ html,body{overflow-x:hidden}
 .sp-set .vo{display:flex;flex-wrap:wrap;gap:6px}
 .sp-set .vo button{height:30px;padding:0 12px;border-radius:9px;border:1px solid #D5D9DD;background:#fff;font:600 12.5px Sora,sans-serif;color:#3A4048;cursor:pointer}
 .sp-set .vo button.on{background:#0D0F12;border-color:#0D0F12;color:#fff}
+.sp-set .ch{display:flex;flex-direction:column;gap:8px}
+.sp-set .ch:empty{display:none}
+.sp-set .vm button{height:28px;padding:0 11px;border-radius:999px;font-size:12px;background:#F4F5F6;border-color:#E3E6E9}
+.sp-set .vm button.on{background:#fff;border:1.5px solid #0D0F12;color:#0D0F12}
 .sp-set .body{display:flex;flex-direction:column;gap:12px;flex:1}
 /* 3 Schritte: Bilder kompakt auf dem Handy */
 @media(max-width:767px){
@@ -238,3 +242,5 @@ html,body{overflow-x:hidden}
 
 /* 3 Schritte: kurzer Satz + groessere Bilder */
 @media(max-width:767px){body.home .sp-hiw-step-img{width:72%!important;height:auto!important;aspect-ratio:282/190;object-fit:cover!important;margin-top:10px!important;border-radius:14px!important}body.home .sp-hiw-step-content p{margin:4px 0 0!important}}
+.sp-set .vg{flex-wrap:nowrap!important;gap:6px}
+.sp-set .vg button{flex:1 1 auto;padding:0 6px;font-size:11.5px;white-space:nowrap}
