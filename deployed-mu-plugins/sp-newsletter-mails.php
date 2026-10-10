@@ -15,7 +15,7 @@
  * 2. Nachkauf    - 28 Tage nach einer bezahlten Peptid-Bestellung, wenn seitdem
  *                  nichts mehr bestellt wurde und kein Abo laeuft. Mit Link, der
  *                  dieselben Artikel wieder in den Warenkorb legt (?sp_nachkauf=).
- * 3. Rueckgewinnung - 75 Tage nach der letzten Bestellung, einmalig, neuer Code.
+ * 3. Rueckgewinnung - 56 Tage nach der letzten Bestellung, einmalig, neuer Code.
  * 4. Code-Erinnerung - 5 Tage (HALLO) bzw. 3 Tage (COMEBACK) vor Ablauf, nur wenn
  *                  der Code noch nicht benutzt wurde.
  * 5. Nachkauf 2    - 14 Tage nach der ersten Nachkauf-Mail, wenn immer noch nichts
@@ -31,7 +31,7 @@ if (!defined('ABSPATH')) {
 
 define('SP_NLM_FROM', 'Peptrium <newsletter@news.peptrium.com>');
 define('SP_NLM_REORDER_DAYS', 28);
-define('SP_NLM_WINBACK_DAYS', 75);
+define('SP_NLM_WINBACK_DAYS', 56);
 define('SP_NLM_WINBACK_PERCENT', 10);
 define('SP_NLM_WINBACK_COUPON_DAYS', 14);
 define('SP_NLM_REORDER2_AFTER', 14);
