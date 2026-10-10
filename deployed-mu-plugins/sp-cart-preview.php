@@ -89,10 +89,10 @@ body.sp-cd-on #sp-hpv-flag{display:none!important}
 #sp-cart-drawer .sp-cd-subtotal{font-size:16px;font-weight:700;margin:2px 0 6px}
 #sp-cart-drawer .sp-cd-subtotal span{font-size:18px;font-weight:800}
 #sp-cart-drawer .sp-cd-dhl{font-size:12px;color:#5A6068;margin:0 0 12px}
-#sp-cart-drawer .sp-cx-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#sp-cart-drawer .sp-cx-btns{display:flex;flex-direction:column;gap:8px}
 #sp-cart-drawer #sp-cd-checkout-btn{height:54px;margin:0!important;display:flex;align-items:center;justify-content:center;gap:10px;border-radius:14px;font-size:16px;font-weight:700;padding:0 18px;margin-bottom:4px;box-shadow:0 6px 14px rgba(13,15,18,.16)}
 #sp-cart-drawer #sp-cd-checkout-btn:before{content:'';width:16px;height:16px;flex:0 0 16px;background:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4' y='11' width='16' height='10' rx='2'/%3E%3Cpath d='M8 11V7a4 4 0 018 0v4'/%3E%3C/svg%3E")}
-#sp-cart-drawer #sp-cd-continue{height:54px;margin:0!important;background:#fff!important;border:1.5px solid #DCDEE0!important;border-radius:14px!important;box-shadow:none!important;padding:0 10px!important;font-size:14px!important;font-weight:700!important;color:#0D0F12!important;line-height:1.2}
+#sp-cart-drawer #sp-cd-continue{height:46px;margin:0!important;background:#F4F5F6!important;border:1px solid #E3E6E9!important;border-radius:14px!important;box-shadow:none!important;padding:0 10px!important;font-size:14px!important;font-weight:700!important;color:#0D0F12!important;line-height:1.2}
 #sp-cart-drawer #sp-cd-continue:hover{border-color:#0D0F12!important}
 #sp-cart-drawer .sp-cd-coupon-toggle{font-size:12.5px;display:inline-flex;align-items:center;gap:6px}
 #sp-cart-drawer .sp-cd-empty{padding:56px 10px}
@@ -143,7 +143,7 @@ body.sp-cd-on #sp-hpv-flag{display:none!important}
  function queue(){if(!raf)raf=requestAnimationFrame(paint);}
  /* Weiter einkaufen + Zur Kasse nebeneinander */
  var co=document.getElementById('sp-cd-checkout-btn'),cn=document.getElementById('sp-cd-continue');
- if(co&&cn&&co.parentNode===cn.parentNode){var w=document.createElement('div');w.className='sp-cx-btns';co.parentNode.insertBefore(w,co);w.appendChild(cn);w.appendChild(co);}
+ if(co&&cn&&co.parentNode===cn.parentNode){var w=document.createElement('div');w.className='sp-cx-btns';co.parentNode.insertBefore(w,co);w.appendChild(co);w.appendChild(cn);}
  new MutationObserver(queue).observe(rb,{childList:true,subtree:true,attributes:true,characterData:true});queue();
 })();
 </script>
