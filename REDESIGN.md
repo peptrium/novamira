@@ -29,7 +29,8 @@ Vorschau-Plugins (mu-plugins): `sp-ds.php` (gemeinsame Ebene), `sp-home-preview.
 
 ## Phase 3 – Kauf
 - [x] Warenkorb-Drawer inkl. Geschenkstufen (Entwurf, sp-cart-preview.php)
-- [ ] Warenkorb-Seite, Kasse, Danke-Seite (Kasse braucht Freigabe im Modus „Accept edits“)
+- [x] Kasse (Entwurf, sp-checkout-preview.php, nur Optik)
+- [ ] Danke-Seite, Warenkorb-Seite
 
 ## Phase 4 – Kundenkonto
 - [ ] Login/Registrierung, Dashboard, Bestellungen, Abo, Guthaben, Adressen, Kontodaten, Partner-Bereich, Bestellstatus
