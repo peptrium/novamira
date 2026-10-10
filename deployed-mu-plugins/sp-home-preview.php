@@ -132,7 +132,7 @@ body.home .elementor-211>[data-id="77e913a"]{order:9}
 body.home .elementor-211>#sp-hp-faq{order:10}
 body.home .elementor-211>#sp-nlh{order:11}
 body.home .elementor-211>#sp-hp-info{order:12}
-body.home .elementor-211>[data-id="045a884"],body.home .elementor-211>[data-id="a4ab146"]{order:13}
+body.home .elementor-211>[data-id="045a884"],body.home .elementor-211>[data-id="a4ab146"]{display:none!important}
 body.home .elementor-211>[data-id="a9d4d1b"],body.home .elementor-211>[data-id="d60a05b"],body.home .elementor-211>[data-id="spsocial1"],body.home .elementor-211>[data-id="midcta01"],body.home .elementor-211>[data-id="3ca703b"],body.home .elementor-211>[data-id="5c363d8"]{display:none!important}
 body.home .elementor-211>.sp-hp-closed{display:none!important}
 body.home .elementor-location-footer .elementor-element-97108f0{display:none!important}
@@ -311,6 +311,20 @@ html{overflow-x:clip}
 #sp-hp-proof,#sp-hp-prod,#sp-hp-sets,#sp-hp-faq,#sp-nlh,.sp-stage{overflow:hidden}
 html,body{overflow-x:hidden}
 @supports (overflow:clip){html,body{overflow-x:clip}}
+
+/* Haekchen-Liste: auf dem Handy sauber untereinander */
+@media(max-width:900px){.sp-trust{display:flex;flex-direction:column;align-items:flex-start;width:max-content;max-width:100%;margin:22px auto 0;gap:11px}.sp-trust li{font-size:13px}}
+/* Mehr ueber Peptrium */
+#sp-hp-info .sp-about{max-width:1000px;margin:26px auto 4px;text-align:left}
+#sp-hp-info .sp-about h2{font:700 clamp(22px,3vw,28px)/1.25 Sora,sans-serif;letter-spacing:-.01em;color:#0D0F12;margin:0 0 10px;text-align:center}
+#sp-hp-info .sp-about .lead{font-size:14.5px;line-height:1.65;color:#4A5058;margin:0 auto 20px;max-width:640px;text-align:center}
+#sp-hp-info .sp-about .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+#sp-hp-info .sp-about .grid>div{background:#fff;border:1px solid #E3E6E9;border-radius:16px;padding:16px}
+#sp-hp-info .sp-about h3{font:700 15px/1.3 Sora,sans-serif;color:#0D0F12;margin:0 0 6px}
+#sp-hp-info .sp-about p{font-size:13.5px;line-height:1.6;color:#4A5058;margin:0}
+#sp-hp-info .sp-about a{color:#0D0F12;font-weight:600;text-decoration:underline;text-underline-offset:2px}
+@media(max-width:900px){#sp-hp-info .sp-about .grid{grid-template-columns:1fr}}
+@media(max-width:900px){#sp-hp-prod .sp-trust{margin-left:auto!important;margin-right:auto!important;padding:0!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;width:-webkit-fit-content!important;width:fit-content!important}}
 #sp-hpv-flag{position:fixed;left:12px;top:12px;z-index:99999;background:#FF8A5C;color:#0D0F12;font:700 11px Sora,sans-serif;padding:6px 10px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.3);pointer-events:none}
 </style>
     <?php
@@ -408,7 +422,7 @@ document.addEventListener('DOMContentLoaded',function(){
  }
  /* FAQ */
  var F=[
-  ['Wie schnell kommt meine Bestellung?','Wir versenden mit DHL. Sobald dein Paket unterwegs ist, bekommst du die Sendungsnummer per E-Mail. Ab 100 € Bestellwert ist der Versand gratis. Mehr unter <a href="/versand-lieferzeit/">Versand &amp; Lieferzeit</a>.'],
+  ['Wie schnell kommt meine Bestellung?','Nach Zahlungseingang ist dein Paket in der Regel innerhalb von <b>2 Werktagen</b> bei dir. Wir versenden mit DHL, die Sendungsnummer bekommst du per E-Mail. Ab 100 € Bestellwert ist der Versand gratis. Mehr unter <a href="/versand-lieferzeit/">Versand &amp; Lieferzeit</a>.'],
   ['Wie kann ich bezahlen?','Per Vorkasse (Überweisung), mit Kryptowährung oder mit deinem Peptrium-Guthaben. Bei Vorkasse verschicken wir, sobald deine Zahlung eingegangen ist.'],
   ['Ist die Verpackung neutral?','Ja. Wir verschicken neutral und unauffällig – von außen ist nicht zu erkennen, was im Paket ist.'],
   ['Gibt es Mengenrabatt oder Geschenke?','Bei ausgewählten Peptiden sparst du ab 3 Stück 10 %, ab 5 Stück 15 % und ab 10 Stück 20 %. Ab 200 € Bestellwert legen wir ein Injektionskit gratis dazu, ab 350 € GHK-Cu und ab 500 € Retatrutide.'],
@@ -423,12 +437,22 @@ document.addEventListener('DOMContentLoaded',function(){
  mqSpeed();window.addEventListener('load',mqSpeed);window.addEventListener('resize',mqSpeed);
  /* Newsletter in die Seite holen */
  var nl=document.getElementById('sp-nlh'); if(nl) root.appendChild(nl);
- /* Hinweis + Mehr ueber Peptrium */
- var info=el('<div id="sp-hp-info"><div class="dis"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A5058" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg><span><b>Nur für Laborforschung.</b> Nicht zur Anwendung am Menschen oder Tier und nicht für diagnostische oder therapeutische Zwecke bestimmt.</span></div><br><button type="button">Mehr über Peptrium <span>▾</span></button></div>');
+ document.querySelectorAll('#sp-how-it-works p').forEach(function(p){if(/48 Stunden/.test(p.textContent))p.textContent='Checkout in wenigen Minuten. Zustellung in der Regel innerhalb von 2 Werktagen – mit Sendungsverfolgung.';});
+ /* Hinweis + Mehr ueber Peptrium (eigener, strukturierter Text) */
+ var info=el('<div id="sp-hp-info"><div class="dis"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A5058" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg><span><b>Nur für Laborforschung.</b> Nicht zur Anwendung am Menschen oder Tier und nicht für diagnostische oder therapeutische Zwecke bestimmt.</span></div><br><button type="button" aria-expanded="false">Mehr über Peptrium <span>▾</span></button>'
+  +'<div class="sp-about" hidden><h2>Peptide kaufen in Deutschland – bei Peptrium</h2>'
+  +'<p class="lead">Peptrium ist ein Fachshop für hochreine Forschungspeptide. Wir verbinden geprüfte Qualität mit einfachem Bestellen, schnellem Versand und persönlichem Support.</p>'
+  +'<div class="grid">'
+  +'<div><h3>Geprüfte Qualität</h3><p>Unsere Peptide haben eine Reinheit von über 99 %, bestimmt per HPLC, die Identität wird per LC-MS bestätigt. Jede Charge ist eindeutig gekennzeichnet.</p></div>'
+  +'<div><h3>Schnell &amp; diskret geliefert</h3><p>Versand aus Deutschland mit DHL – in der Regel innerhalb von 2 Werktagen nach Zahlungseingang. Neutral verpackt, ab 100 € versandkostenfrei.</p></div>'
+  +'<div><h3>Breites Sortiment</h3><p>Peptide für die Forschungsbereiche <a href="/produktkategorie/fettverlust/">Stoffwechsel</a>, <a href="/produktkategorie/regeneration-heilung/">Regeneration</a>, <a href="/produktkategorie/fokus/">Fokus</a>, <a href="/produktkategorie/energie/">Energie</a> und <a href="/produktkategorie/aesthetik/">Ästhetik</a> – dazu passendes <a href="/produktkategorie/zubehoer/">Zubehör</a> und vorgefüllte Peptrium-Pens.</p></div>'
+  +'<div><h3>Einfach bestellen</h3><p>Bezahlen per Vorkasse, Krypto oder Guthaben. Mengenrabatt ab 3 Stück, Geschenke ab 200 € und auf Wunsch ein Abo mit 15 % Ersparnis ab der 2. Lieferung.</p></div>'
+  +'<div><h3>Kostenlose Tools</h3><p>Mit dem <a href="/peptid-rechner/">Peptid-Rechner</a>, dem <a href="/lagerungs-guide/">Lagerungs-Guide</a> und dem Peptid-Lexikon planst du deine Forschung genauer.</p></div>'
+  +'<div><h3>Persönlicher Support</h3><p>Fragen zu Produkt oder Bestellung? Schreib uns über die <a href="/kontakt/">Kontaktseite</a> oder auf Telegram (<a href="https://t.me/peptrium">@peptrium</a>) – wir antworten schnell und auf Deutsch.</p></div>'
+  +'</div></div></div>');
  root.appendChild(info);
- var seo=['045a884','a4ab146'].map(function(id){return root.querySelector('[data-id="'+id+'"]');}).filter(Boolean);
- seo.forEach(function(e){e.classList.add('sp-hp-closed');});
- var ib=info.querySelector('button');ib.onclick=function(){var o=ib.classList.toggle('open');seo.forEach(function(e){e.classList.toggle('sp-hp-closed',!o);});};
+ var about=info.querySelector('.sp-about');
+ var ib=info.querySelector('button');ib.onclick=function(){var o=ib.classList.toggle('open');about.hidden=!o;ib.setAttribute('aria-expanded',o?'true':'false');};
 });
 </script>
     <?php

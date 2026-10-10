@@ -182,8 +182,7 @@ add_action('wp_footer', function () {
 #sp-nlh .tk{position:relative;display:flex;max-width:440px;margin:0 auto;border-radius:20px;color:#0D0F12;background:linear-gradient(125deg,#9EA6AF 0%,#E9ECEF 22%,#FFFFFF 38%,#C3C9CF 58%,#F1F3F5 78%,#A7AFB8 100%);box-shadow:0 30px 60px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.35) inset;transform:rotate(-4deg)}
 #sp-nlh .tk .m{flex:1;padding:26px 24px 24px}
 #sp-nlh .tk .lg{display:flex;align-items:center;gap:8px;font-size:10.5px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#2A2F35}
-#sp-nlh .tk .lg span{width:18px;height:18px;border-radius:5px;background:#0D0F12;display:inline-block;position:relative}
-#sp-nlh .tk .lg span:after{content:'';position:absolute;inset:5px;border:1.5px solid #E6E9EC;border-radius:2px;transform:rotate(45deg)}
+#sp-nlh .tk .lg img{width:24px;height:24px;display:block;flex:0 0 24px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))}
 #sp-nlh .tk .big{font-size:76px;line-height:.95;font-weight:800;letter-spacing:-.04em;margin:18px 0 6px}
 #sp-nlh .tk .big small{font-size:.42em;letter-spacing:-.01em;vertical-align:.9em;margin-left:2px}
 #sp-nlh .tk .d{font-size:13px;font-weight:600;color:#30363D}
@@ -266,8 +265,7 @@ add_action('wp_footer', function () {
 #sp-nlh.mini .tk{max-width:230px;border-radius:14px}
 #sp-nlh.mini .tk .m{padding:16px 14px 14px}
 #sp-nlh.mini .tk .lg{font-size:8px;gap:6px}
-#sp-nlh.mini .tk .lg span{width:13px;height:13px;border-radius:4px}
-#sp-nlh.mini .tk .lg span:after{inset:3.5px;border-width:1.2px}
+#sp-nlh.mini .tk .lg img{width:17px;height:17px;flex-basis:17px}
 #sp-nlh.mini .tk .big{font-size:44px;margin:10px 0 4px}
 #sp-nlh.mini .tk .d{font-size:10px}
 #sp-nlh.mini .tk .st{flex-basis:46px}
@@ -301,7 +299,7 @@ add_action('wp_footer', function () {
         if(!anchor)return;
         var s=document.createElement('section');s.id='sp-nlh';if(!FULL)s.className='mini';
         s.innerHTML='<div class="w">'
-          +'<div class="tkw"><div class="tk"><div class="sh"></div><div class="m"><div class="lg"><span></span>Peptrium Insider</div><div class="big">10<small>%</small></div><div class="d">auf deine nächste Bestellung</div></div>'
+          +'<div class="tkw"><div class="tk"><div class="sh"></div><div class="m"><div class="lg"><img src="<?php echo esc_url(content_url('/uploads/2026/08/IMG_2644-cropped-300x300.png')); ?>" alt="" width="24" height="24">Peptrium Insider</div><div class="big">10<small>%</small></div><div class="d">auf deine nächste Bestellung</div></div>'
           +'<div class="seal">Persönlich</div><div class="st"><div class="code">HALLO-<em>•••••</em></div></div></div></div>'
           +'<div class="c"><div class="ey"><i></i>Newsletter</div>'
           +'<h2>10 % für <span>Insider</span>.</h2>'
