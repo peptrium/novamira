@@ -232,22 +232,42 @@ function sp_cr_send_mail($row) {
     $restore = add_query_arg('sp_warenkorb', $row->token, home_url('/'));
     $unsub = add_query_arg('sp_warenkorb_abmelden', $row->token, home_url('/'));
     $box = function_exists('sp_email_box_style') ? sp_email_box_style() : 'background:#F9FAFA;border:1px solid #DCDEE0;border-radius:12px;padding:20px 22px;margin:0 0 22px;';
+    $count = count($items);
     ob_start();
     ?>
     <p style="margin:0 0 18px;font-size:15px;line-height:1.6;color:#0D0F12;">Du hast deine Bestellung noch nicht abgeschlossen &ndash; dein Warenkorb ist für dich gespeichert.</p>
     <div style="<?php echo esc_attr($box); ?>">
-      <?php foreach ($items as $i => $it) : ?>
-        <div style="<?php echo $i < count($items) - 1 ? 'border-bottom:1px solid #F2F3F4;padding-bottom:9px;margin-bottom:9px;' : ''; ?>">
-          <p style="margin:0;font-size:15px;font-weight:700;color:#0D0F12;"><?php echo (int) $it['quantity']; ?>&times; <?php echo esc_html($it['name']); ?><?php echo !empty($it['abo']) ? ' <span style="color:#E5342B;font-size:12px;">(Abo)</span>' : ''; ?></p>
-        </div>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+      <?php foreach ($items as $i => $it) :
+          /* Produktbild: Variante, sonst Elternprodukt, sonst Platzhalter (2026-10-10). */
+          $p = wc_get_product(!empty($it['variation_id']) ? $it['variation_id'] : $it['product_id']);
+          $img_id = $p ? $p->get_image_id() : 0;
+          if (!$img_id && !empty($it['product_id'])) {
+              $parent = wc_get_product($it['product_id']);
+              $img_id = $parent ? $parent->get_image_id() : 0;
+          }
+          $img = $img_id ? wp_get_attachment_image_url($img_id, 'woocommerce_thumbnail') : wc_placeholder_img_src('woocommerce_thumbnail');
+          $line = $i < $count - 1 ? 'border-bottom:1px solid #E4E6E9;' : '';
+      ?>
+        <tr>
+          <td width="68" valign="middle" style="width:68px;padding:10px 0;<?php echo $line; ?>"><div style="width:56px;height:56px;border-radius:12px;background:#FFFFFF;overflow:hidden;text-align:center;"><img src="<?php echo esc_url($img); ?>" alt="" height="56" style="height:56px;width:auto;max-width:56px;display:inline-block;border:0;margin:0;" /></div></td>
+          <td valign="middle" style="padding:10px 8px;<?php echo $line; ?>font-size:14px;font-weight:700;line-height:1.35;color:#0D0F12;"><?php echo esc_html($it['name']); ?><?php echo !empty($it['abo']) ? ' <span style="color:#E5342B;font-size:12px;">(Abo)</span>' : ''; ?><div style="font-size:12px;font-weight:500;color:#5B6169;margin-top:3px;">Menge: <?php echo (int) $it['quantity']; ?></div></td>
+          <td align="right" valign="middle" style="padding:10px 0;<?php echo $line; ?>font-size:14px;font-weight:700;white-space:nowrap;color:#0D0F12;"><?php echo isset($it['price']) ? wp_kses_post(wc_price($it['price'])) : ''; ?></td>
+        </tr>
       <?php endforeach; ?>
-      <p style="margin:12px 0 0;font-size:14px;color:#4B5157;">Summe: <strong style="color:#0D0F12;"><?php echo wp_kses_post(wc_price($row->cart_total)); ?></strong></p>
+      </table>
+      <p style="margin:12px 0 0;font-size:15px;color:#5B6169;text-align:right;">Summe: <strong style="color:#0D0F12;"><?php echo wp_kses_post(wc_price($row->cart_total)); ?></strong></p>
     </div>
-    <a href="<?php echo esc_url($restore); ?>" style="display:inline-block;background:linear-gradient(135deg,#0D0F12 0%,#2A2E33 100%);color:#FFFFFF;text-decoration:none;font-weight:700;font-size:14px;padding:12px 22px;border-radius:9px;">Zurück zum Warenkorb &rarr;</a>
-    <p style="margin:16px 0 0;font-size:13px;line-height:1.6;color:#4B5157;">Fragen zu Produkt, Versand oder Bezahlung? Antworte einfach auf diese Mail oder schreib uns auf <a href="https://t.me/peptrium" style="color:#4B5157;">Telegram</a>.</p>
+    <div style="text-align:center;margin:0 0 20px;">
+    <?php if (function_exists('sp_em_button')) : ?>
+      <?php echo sp_em_button('Zurück zum Warenkorb &rarr;', $restore); ?>
+    <?php else : ?>
+      <a href="<?php echo esc_url($restore); ?>" style="display:inline-block;background:linear-gradient(135deg,#0D0F12 0%,#2A2E33 100%);color:#FFFFFF;text-decoration:none;font-weight:700;font-size:14px;padding:12px 22px;border-radius:9px;">Zurück zum Warenkorb &rarr;</a>
+    <?php endif; ?>
+    </div>
     <p style="margin:14px 0 0;font-size:11px;line-height:1.5;color:#8A9099;">Du bekommst diese einmalige Erinnerung, weil du an der Kasse deine E-Mail-Adresse angegeben hast. <a href="<?php echo esc_url($unsub); ?>" style="color:#8A9099;">Keine Erinnerungen mehr erhalten</a></p>
     <?php
-    sp_abo_send_branded_email($row->email, 'Dein Warenkorb wartet noch auf dich', 'Noch etwas vergessen?', ob_get_clean());
+    sp_abo_send_branded_email($row->email, 'Dein Warenkorb wartet noch auf dich', 'Noch etwas vergessen?', ob_get_clean(), null, 'dark');
 }
 
 /* ---------------------------------------------------------------------

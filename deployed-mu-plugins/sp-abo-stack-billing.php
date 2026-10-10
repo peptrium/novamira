@@ -396,7 +396,7 @@ function sp_asb_cron_reminders() {
                     'ES FEHLEN' => wc_price(max(0, $needed - $balance)),
                 ),
                 'topup',
-                'Tipp: Eine Überweisung braucht meist 1&ndash;2 Werktage &ndash; lade am besten gleich auf. Passt es gerade nicht? Du kannst deinen Stack in deinem Konto verschieben oder pausieren.',
+                'Tipp: Lade am besten gleich auf &ndash; gutgeschrieben wird, sobald deine Zahlung bei uns eingegangen ist. Passt es gerade nicht? Du kannst deinen Stack in deinem Konto verschieben oder pausieren.',
                 max(0, $needed - $balance)
             );
         }

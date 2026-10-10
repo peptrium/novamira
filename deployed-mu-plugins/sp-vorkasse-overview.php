@@ -348,9 +348,15 @@ function sp_vorkasse_send_payment_reminder($order) {
     if (!empty($acc['bic'])) { $rows['BIC'] = esc_html($acc['bic']); }
     if (!empty($acc['bank_name'])) { $rows['BANK'] = esc_html($acc['bank_name']); }
     $box = function_exists('sp_email_box_style') ? sp_email_box_style() : 'background:#F9FAFA;border:1px solid #DCDEE0;border-radius:12px;padding:20px 22px;margin:0 0 22px;';
+    if (function_exists('sp_em_hero')) {
+        sp_em_hero(['eyebrow' => 'Bestellung #' . $order->get_order_number(), 'sub' => 'Für deine Bestellung ist noch keine Zahlung bei uns eingegangen.']);
+    }
     ob_start();
     ?>
-    <p style="margin:0 0 20px;font-size:15px;line-height:1.6;color:#0D0F12;">Für deine Bestellung <strong>#<?php echo esc_html($order->get_order_number()); ?></strong> vom <?php echo esc_html($order->get_date_created()->date_i18n('d.m.Y')); ?> ist bei uns noch keine Zahlung eingegangen. Sobald die Überweisung da ist, verschicken wir deine Bestellung sofort.</p>
+    <p style="margin:0 0 20px;font-size:15px;line-height:1.6;color:#0D0F12;">Für deine Bestellung <strong>#<?php echo esc_html($order->get_order_number()); ?></strong> vom <?php echo esc_html($order->get_date_created()->date_i18n('d.m.Y')); ?> ist bei uns noch keine Zahlung eingegangen. Sobald die Überweisung da ist, versenden wir deine Bestellung &ndash; diskret per DHL.</p>
+    <?php if (function_exists('sp_em_pay_box')) : ?>
+      <?php echo sp_em_pay_box($order); // Neues Mail-Design (2026-10-10): gleiche Ueberweisungs-Karte wie in der Bestellbestaetigung ?>
+    <?php else : ?>
     <div style="<?php echo esc_attr($box); ?>">
       <?php $n = 0; foreach ($rows as $label => $value) : $n++; ?>
         <div style="<?php echo $n < count($rows) ? 'border-bottom:1px solid #F2F3F4;padding-bottom:9px;margin-bottom:9px;' : ''; ?>">
@@ -359,11 +365,12 @@ function sp_vorkasse_send_payment_reminder($order) {
         </div>
       <?php endforeach; ?>
     </div>
-    <p style="margin:0 0 12px;font-size:13px;line-height:1.6;color:#4B5157;">Bitte gib als Verwendungszweck nur die Bestellnummer an. Du hast schon überwiesen? Dann ist alles gut &ndash; die Zahlung ist vermutlich noch unterwegs, du kannst diese Mail ignorieren.</p>
-    <p style="margin:0 0 12px;font-size:13px;line-height:1.6;color:#4B5157;">Ohne Zahlungseingang wird die Bestellung nach <?php echo (int) SP_VORKASSE_CANCEL_AFTER_DAYS; ?> Tagen storniert.</p>
+    <?php endif; ?>
+    <p style="margin:0 0 12px;font-size:13px;line-height:1.6;color:#4B5157;">Du hast schon überwiesen? Dann ist alles gut &ndash; die Zahlung ist vermutlich noch unterwegs, du kannst diese Mail ignorieren.</p>
+    <p style="margin:0 0 12px;font-size:13px;line-height:1.6;color:#4B5157;">Geht innerhalb von <?php echo (int) SP_VORKASSE_CANCEL_AFTER_DAYS; ?> Tagen nach der Bestellung keine Zahlung ein, kann die Bestellung storniert werden.</p>
     <?php if (function_exists('sp_abo_email_support_line')) { echo sp_abo_email_support_line(); } ?>
     <?php
-    sp_abo_send_branded_email($to, 'Zahlungserinnerung zu deiner Bestellung #' . $order->get_order_number(), 'Deine Zahlung fehlt noch', ob_get_clean());
+    sp_abo_send_branded_email($to, 'Zahlungserinnerung zu deiner Bestellung #' . $order->get_order_number(), 'Deine Zahlung fehlt noch', ob_get_clean(), null, 'dark');
     $sent = (array) $order->get_meta('_sp_vorkasse_reminders');
     $sent[] = time();
     $order->update_meta_data('_sp_vorkasse_reminders', $sent);
