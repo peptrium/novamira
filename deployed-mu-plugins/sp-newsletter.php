@@ -154,7 +154,8 @@ function sp_nl_ajax_subscribe() {
     if (!is_email($email)) {
         wp_send_json_error(['msg' => 'Bitte gib eine gültige E-Mail-Adresse ein.']);
     }
-    $res = sp_nl_subscribe($email, '', '', 'footer');
+    $src = (isset($_POST['src']) && $_POST['src'] === 'startseite') ? 'startseite' : 'footer';
+    $res = sp_nl_subscribe($email, '', '', $src);
     if ($res === 'already') {
         wp_send_json_success(['msg' => 'Du bist schon angemeldet – danke! 💌']);
     }
@@ -169,54 +170,167 @@ add_action('wp_footer', function () {
         return;
     }
     $privacy = get_permalink(410);
+    $full = is_front_page();
     ?>
-    <style>
-    #sp-nl{background:#0D0F12;padding:34px 16px 6px;font-family:Sora,sans-serif}
-    #sp-nl .in{max-width:640px;margin:0 auto;border:1px solid #2A2E33;border-radius:18px;padding:22px 20px;background:linear-gradient(135deg,#15181C 0%,#1E2226 100%)}
-    #sp-nl .ey{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#FF8A5C;margin:0 0 6px}
-    #sp-nl h3{color:#fff;font-size:20px;line-height:1.25;margin:0 0 6px;font-weight:700}
-    #sp-nl p.sub{color:#B9BEC5;font-size:14px;line-height:1.55;margin:0 0 14px}
-    #sp-nl form{display:flex;gap:8px;flex-wrap:wrap}
-    #sp-nl input[type=email]{flex:1 1 200px;min-width:0;height:46px;box-sizing:border-box;border:1px solid #3A3F45;border-radius:12px;background:#0D0F12;color:#fff;padding:0 14px;font:500 15px Sora,sans-serif}
-    #sp-nl input[type=email]::placeholder{color:#80868E}
-    #sp-nl button{flex:0 0 auto;height:46px;border:0;border-radius:12px;padding:0 20px;font:700 15px Sora,sans-serif;color:#0D0F12;background:#fff;cursor:pointer}
-    #sp-nl button[disabled]{opacity:.6}
-    #sp-nl .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
-    #sp-nl .msg{margin:12px 0 0;font-size:14px;line-height:1.5;color:#fff;display:none}
-    #sp-nl .msg.err{color:#FF8A7A}
-    #sp-nl .legal{margin:12px 0 0;font-size:11.5px;line-height:1.55;color:#80868E}
-    #sp-nl .legal a{color:#B9BEC5}
-    @media(max-width:480px){#sp-nl button{flex:1 1 100%}}
+    <style id="sp-nlh-css">
+#sp-nlh{position:relative;overflow:hidden;background:#0B0D10;padding:80px 24px;font-family:Sora,sans-serif;color:#fff}
+#sp-nlh:before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:44px 44px;-webkit-mask-image:radial-gradient(ellipse 70% 70% at 50% 50%,#000 30%,transparent 75%);mask-image:radial-gradient(ellipse 70% 70% at 50% 50%,#000 30%,transparent 75%)}
+#sp-nlh:after{content:'';position:absolute;width:620px;height:620px;left:12%;top:50%;transform:translateY(-50%);background:radial-gradient(circle,rgba(210,215,220,.13),transparent 65%);pointer-events:none}
+#sp-nlh *{box-sizing:border-box}
+#sp-nlh .w{position:relative;z-index:1;max-width:1100px;margin:0 auto;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:64px;align-items:center}
+/* Ticket */
+#sp-nlh .tk{position:relative;display:flex;max-width:440px;margin:0 auto;border-radius:20px;color:#0D0F12;background:linear-gradient(125deg,#9EA6AF 0%,#E9ECEF 22%,#FFFFFF 38%,#C3C9CF 58%,#F1F3F5 78%,#A7AFB8 100%);box-shadow:0 30px 60px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.35) inset;transform:rotate(-4deg)}
+#sp-nlh .tk .m{flex:1;padding:26px 24px 24px}
+#sp-nlh .tk .lg{display:flex;align-items:center;gap:8px;font-size:10.5px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#2A2F35}
+#sp-nlh .tk .lg span{width:18px;height:18px;border-radius:5px;background:#0D0F12;display:inline-block;position:relative}
+#sp-nlh .tk .lg span:after{content:'';position:absolute;inset:5px;border:1.5px solid #E6E9EC;border-radius:2px;transform:rotate(45deg)}
+#sp-nlh .tk .big{font-size:76px;line-height:.95;font-weight:800;letter-spacing:-.04em;margin:18px 0 6px}
+#sp-nlh .tk .big small{font-size:.42em;letter-spacing:-.01em;vertical-align:.9em;margin-left:2px}
+#sp-nlh .tk .d{font-size:13px;font-weight:600;color:#30363D}
+#sp-nlh .tk .st{position:relative;flex:0 0 92px;border-left:2px dashed rgba(13,15,18,.28);display:flex;align-items:center;justify-content:center}
+#sp-nlh .tk .st:before,#sp-nlh .tk .st:after{content:'';position:absolute;left:-12px;width:22px;height:22px;border-radius:50%;background:#0B0D10}
+#sp-nlh .tk .st:before{top:-11px}#sp-nlh .tk .st:after{bottom:-11px}
+#sp-nlh .tk .code{writing-mode:vertical-rl;transform:rotate(180deg);font:800 13px/1 ui-monospace,Menlo,monospace;letter-spacing:.18em;color:#0D0F12}
+#sp-nlh .tk .code em{font-style:normal;color:rgba(13,15,18,.35)}
+#sp-nlh .tk .seal{position:absolute;right:104px;bottom:18px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#4A5058;border:1px solid rgba(13,15,18,.25);border-radius:999px;padding:4px 9px}
+/* Inhalt */
+#sp-nlh .ey{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#9AA0A8;margin:0 0 14px}
+#sp-nlh .ey i{width:6px;height:6px;border-radius:50%;background:#FF8A5C;box-shadow:0 0 10px rgba(255,138,92,.9)}
+#sp-nlh h2{font-size:clamp(28px,3.4vw,40px);line-height:1.12;font-weight:700;letter-spacing:-.02em;margin:0 0 14px;color:#fff}
+#sp-nlh h2 span{background:linear-gradient(90deg,#9AA3AD,#F4F6F8 50%,#B8BFC6);-webkit-background-clip:text;background-clip:text;color:transparent}
+#sp-nlh .lead{font-size:15.5px;line-height:1.65;color:#A9AFB6;margin:0 0 26px;max-width:520px}
+#sp-nlh form{display:flex;align-items:center;gap:6px;max-width:520px;padding:6px;border-radius:16px;background:#14171B;border:1px solid #2C3137;transition:border-color .2s,box-shadow .2s}
+#sp-nlh form:focus-within{border-color:#8E969F;box-shadow:0 0 0 4px rgba(199,204,209,.10)}
+#sp-nlh input[type=email]{flex:1;min-width:0;height:48px;border:0;background:transparent;color:#fff;padding:0 14px;font:500 15px Sora,sans-serif;outline:none}
+#sp-nlh input[type=email]::placeholder{color:#6E747C}
+#sp-nlh button{flex:0 0 auto;height:48px;border:0;border-radius:12px;padding:0 22px;font:700 14.5px Sora,sans-serif;color:#0D0F12;background:linear-gradient(120deg,#C7CCD1,#FFFFFF 45%,#C7CCD1);cursor:pointer;white-space:nowrap}
+#sp-nlh .steps{display:flex;gap:0;margin:26px 0 0;max-width:520px;padding:0;list-style:none}
+#sp-nlh .steps li{flex:1;position:relative;padding-top:34px;font-size:12.5px;line-height:1.4;color:#C9CDD2}
+#sp-nlh .steps li b{display:block;color:#fff;font-size:13px;margin-bottom:2px}
+#sp-nlh .steps li:before{content:attr(data-n);position:absolute;top:0;left:0;width:24px;height:24px;border-radius:50%;border:1px solid #4A5058;background:#0B0D10;color:#E6E9EC;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;z-index:1}
+#sp-nlh .steps li:after{content:'';position:absolute;top:12px;left:30px;right:10px;height:1px;background:linear-gradient(90deg,#4A5058,rgba(74,80,88,.2))}
+#sp-nlh .steps li:last-child:after{display:none}
+#sp-nlh .steps li:last-child:before{background:#E6E9EC;color:#0D0F12;border-color:#E6E9EC}
+#sp-nlh .legal{font-size:11px;line-height:1.55;color:#6A7077;margin:22px 0 0;max-width:520px}
+#sp-nlh .legal a{color:#9AA0A8}
+@media(max-width:900px){
+ #sp-nlh{padding:56px 16px 52px}
+ #sp-nlh .w{grid-template-columns:1fr;gap:40px}
+ #sp-nlh:after{left:50%;top:150px;transform:translateX(-50%);width:440px;height:440px}
+ #sp-nlh .tk{max-width:330px;transform:rotate(-2deg)}
+ #sp-nlh .tk .m{padding:20px 18px 18px}
+ #sp-nlh .tk .big{font-size:58px;margin:14px 0 4px}
+ #sp-nlh .tk .st{flex-basis:72px}
+ #sp-nlh .tk .seal{display:none}
+ #sp-nlh .tk .code{font-size:11.5px}
+ #sp-nlh .c{text-align:left}
+ #sp-nlh form{flex-direction:column;align-items:stretch;padding:6px;gap:6px}
+ #sp-nlh input[type=email]{height:50px;text-align:center}
+ #sp-nlh button{width:100%}
+ #sp-nlh .steps li{font-size:11.5px;padding-right:6px}
+ #sp-nlh .steps li b{font-size:12px}
+}
+
+#sp-nlh .tkw{position:relative;perspective:900px}
+#sp-nlh .tk{overflow:hidden;animation:spTkFloat 6s ease-in-out infinite}
+#sp-nlh .tk .sh{position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.75) 48%,transparent 60%);transform:translateX(-120%);animation:spTkShine 4.5s ease-in-out infinite;pointer-events:none;mix-blend-mode:soft-light}
+@keyframes spTkShine{0%,55%{transform:translateX(-120%)}85%,100%{transform:translateX(120%)}}
+@keyframes spTkFloat{0%,100%{transform:rotate(-4deg) translateY(0)}50%{transform:rotate(-3deg) translateY(-8px)}}
+#sp-nlh .tkw:after{content:'';position:absolute;left:12%;right:12%;bottom:-38px;height:26px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.6),transparent 70%);filter:blur(4px)}
+#sp-nlh .tk .st:before,#sp-nlh .tk .st:after{z-index:2}
+#sp-nlh .tk .code{font-size:14px}
+#sp-nlh .tk.ok .code em{color:#0D0F12}
+#sp-nlh .perks{display:flex;flex-wrap:wrap;gap:8px 18px;margin:0 0 24px;padding:0;list-style:none}
+#sp-nlh .perks li{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:#D5D9DD}
+#sp-nlh .perks li:before{content:'';width:16px;height:16px;border-radius:50%;background:rgba(230,233,236,.12) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23E6E9EC' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E") center/9px no-repeat}
+#sp-nlh .legal{color:#7A8087}
+@media (prefers-reduced-motion:reduce){#sp-nlh .tk,#sp-nlh .tk .sh{animation:none}}
+@media(max-width:900px){
+ #sp-nlh{padding:48px 16px 44px}
+ #sp-nlh .w{gap:34px}
+ #sp-nlh .tk{max-width:320px}
+ @keyframes spTkFloat{0%,100%{transform:rotate(-2deg) translateY(0)}50%{transform:rotate(-1.5deg) translateY(-6px)}}
+ #sp-nlh .tk .big{font-size:54px}
+ #sp-nlh form{background:transparent;border:0;padding:0;gap:10px;box-shadow:none!important}
+ #sp-nlh input[type=email]{flex:none;width:100%;height:52px;text-align:left;padding:0 16px;background:#14171B;border:1px solid #2C3137;border-radius:14px}
+ #sp-nlh input[type=email]:focus{border-color:#8E969F}
+ #sp-nlh button{height:52px;border-radius:14px}
+ #sp-nlh .perks{gap:8px 14px;margin-bottom:20px}
+ #sp-nlh .perks li{font-size:12.5px}
+ #sp-nlh .steps{margin-top:22px}
+}
+/* Schmale Variante (alle Seiten ausser Startseite) */
+#sp-nlh.mini{padding:40px 16px 8px;background:#0D0F12}
+#sp-nlh.mini:before,#sp-nlh.mini:after{display:none}
+#sp-nlh.mini .w{max-width:980px;grid-template-columns:230px minmax(0,1fr);gap:36px;border:1px solid #23272C;border-radius:22px;padding:28px 32px;background:radial-gradient(420px 220px at 15% 50%,rgba(210,215,220,.09),transparent 70%),linear-gradient(135deg,#13161A,#1A1E22)}
+#sp-nlh.mini .tk{max-width:230px;border-radius:14px}
+#sp-nlh.mini .tk .m{padding:16px 14px 14px}
+#sp-nlh.mini .tk .lg{font-size:8px;gap:6px}
+#sp-nlh.mini .tk .lg span{width:13px;height:13px;border-radius:4px}
+#sp-nlh.mini .tk .lg span:after{inset:3.5px;border-width:1.2px}
+#sp-nlh.mini .tk .big{font-size:44px;margin:10px 0 4px}
+#sp-nlh.mini .tk .d{font-size:10px}
+#sp-nlh.mini .tk .st{flex-basis:46px}
+#sp-nlh.mini .tk .st:before,#sp-nlh.mini .tk .st:after{width:16px;height:16px;left:-9px;background:#15181C}
+#sp-nlh.mini .tk .st:before{top:-8px}#sp-nlh.mini .tk .st:after{bottom:-8px}
+#sp-nlh.mini .tk .code{font-size:9.5px}
+#sp-nlh.mini .tk .seal,#sp-nlh.mini .tkw:after,#sp-nlh.mini .steps{display:none}
+#sp-nlh.mini .ey{margin-bottom:8px}
+#sp-nlh.mini h2{font-size:24px;margin:0 0 6px}
+#sp-nlh.mini .lead{font-size:14px;margin:0 0 16px}
+#sp-nlh.mini .legal{margin-top:12px}
+@media(max-width:900px){
+ #sp-nlh.mini{padding:32px 16px 8px}
+ #sp-nlh.mini .w{grid-template-columns:1fr;gap:22px;padding:22px 18px}
+ #sp-nlh.mini .tk{max-width:220px;margin:0}
+ #sp-nlh.mini h2{font-size:22px}
+}
+#sp-nlh .msg{display:none;margin:14px 0 0;font-size:14px;line-height:1.5;color:#fff;max-width:520px}
+#sp-nlh .msg.err{color:#FF8A7A}
+#sp-nlh .msg.ok{padding:12px 14px;border-radius:12px;background:rgba(230,233,236,.08);border:1px solid rgba(230,233,236,.18)}
+#sp-nlh .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+#sp-nlh button[disabled]{opacity:.6}
     </style>
     <script>
     (function(){
+      var FULL=<?php echo $full ? 'true' : 'false'; ?>;
       function mount(){
-        if(document.getElementById('sp-nl'))return;
-        var anchor=document.querySelector('footer.elementor-location-footer .elementor-element-0421ed2')||document.querySelector('footer.elementor-location-footer');
+        if(document.getElementById('sp-nlh'))return;
+        var footer=document.querySelector('footer.elementor-location-footer');
+        var anchor=FULL?footer:(document.querySelector('footer.elementor-location-footer .elementor-element-0421ed2')||footer);
         if(!anchor)return;
-        var box=document.createElement('section');box.id='sp-nl';
-        box.innerHTML='<div class="in"><p class="ey">Newsletter</p><h3>10 % auf deine nächste Bestellung</h3>'
-          +'<p class="sub">Neuheiten, Aktionen und Forschungs-Updates direkt in dein Postfach. Kein Spam, jederzeit abbestellbar.</p>'
-          +'<form novalidate><input type="email" name="email" placeholder="Deine E-Mail-Adresse" autocomplete="email" required>'
+        var s=document.createElement('section');s.id='sp-nlh';if(!FULL)s.className='mini';
+        s.innerHTML='<div class="w">'
+          +'<div class="tkw"><div class="tk"><div class="sh"></div><div class="m"><div class="lg"><span></span>Peptrium Insider</div><div class="big">10<small>%</small></div><div class="d">auf deine nächste Bestellung</div></div>'
+          +'<div class="seal">Persönlich</div><div class="st"><div class="code">HALLO-<em>•••••</em></div></div></div></div>'
+          +'<div class="c"><div class="ey"><i></i>Newsletter</div>'
+          +'<h2>10 % für <span>Insider</span>.</h2>'
+          +(FULL?'<p class="lead">Trag dich ein und erfahre neue Peptide und Aktionen vor allen anderen – plus dein persönlicher Code für die nächste Bestellung.</p>'
+             +'<ul class="perks"><li>Neues zuerst</li><li>Nur wenn es sich lohnt</li><li>1 Klick abmelden</li></ul>'
+            :'<p class="lead">Neue Peptide und Aktionen zuerst – plus dein persönlicher Code für die nächste Bestellung. Kein Spam.</p>')
+          +'<form novalidate><input type="email" name="email" placeholder="Deine E-Mail-Adresse" aria-label="E-Mail-Adresse" autocomplete="email" required>'
           +'<span class="hp"><input type="text" name="website" tabindex="-1" autocomplete="off"></span>'
-          +'<button type="submit">Anmelden</button></form><p class="msg"></p>'
-          +'<p class="legal">Mit der Anmeldung willigst du ein, dass wir dir Neuheiten &amp; Angebote per E-Mail senden und auswerten, ob du unsere Mails öffnest und anklickst. Du bekommst zuerst eine Bestätigungsmail. Abmeldung jederzeit über den Link in jeder Mail. Mehr in der <a href="<?php echo esc_url($privacy); ?>">Datenschutzerklärung</a>.</p></div>';
-        if(anchor.classList.contains('elementor-element-0421ed2')){anchor.parentNode.insertBefore(box,anchor);}else{anchor.insertBefore(box,anchor.firstChild);}
-        var f=box.querySelector('form'),m=box.querySelector('.msg'),b=f.querySelector('button');
+          +'<button type="submit">Code sichern →</button></form><p class="msg"></p>'
+          +'<ol class="steps"><li data-n="1"><b>Anmelden</b>E-Mail eintragen</li><li data-n="2"><b>Bestätigen</b>Link in der Mail</li><li data-n="3"><b>Code nutzen</b>10 % an der Kasse</li></ol>'
+          +'<p class="legal">Mit der Anmeldung willigst du ein, dass wir dir Neuheiten &amp; Angebote per E-Mail senden und auswerten, ob du unsere Mails öffnest und anklickst. Du bekommst zuerst eine Bestätigungsmail. Abmeldung jederzeit über den Link in jeder Mail. Mehr in der <a href="<?php echo esc_url($privacy); ?>">Datenschutzerklärung</a>.</p>'
+          +'</div></div>';
+        anchor.parentNode.insertBefore(s,anchor);
+        var f=s.querySelector('form'),m=s.querySelector('.msg'),b=f.querySelector('button'),tk=s.querySelector('.tk'),code=s.querySelector('.code');
+        function show(t,cls){m.style.display='block';m.className='msg'+(cls?' '+cls:'');m.textContent=t;}
         f.addEventListener('submit',function(e){
           e.preventDefault();
           var em=f.email.value.trim();
-          if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){m.className='msg err';m.style.display='block';m.textContent='Bitte gib eine gültige E-Mail-Adresse ein.';return;}
+          if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){show('Bitte gib eine gültige E-Mail-Adresse ein.','err');return;}
           b.disabled=true;b.textContent='…';
-          var fd=new FormData();fd.append('action','sp_nl_subscribe');fd.append('email',em);fd.append('website',f.website.value);
+          var fd=new FormData();fd.append('action','sp_nl_subscribe');fd.append('email',em);fd.append('website',f.website.value);fd.append('src',FULL?'startseite':'footer');
           fetch('<?php echo esc_url(admin_url('admin-ajax.php')); ?>',{method:'POST',body:fd,credentials:'same-origin'})
             .then(function(r){return r.json();})
             .then(function(r){
-              m.style.display='block';m.textContent=(r&&r.data&&r.data.msg)||'Bitte versuch es noch einmal.';
-              m.className=r&&r.success?'msg':'msg err';
-              if(r&&r.success){f.style.display='none';}else{b.disabled=false;b.textContent='Anmelden';}
+              var t=(r&&r.data&&r.data.msg)||'Bitte versuch es noch einmal.';
+              if(r&&r.success){f.style.display='none';show(t,'ok');tk.classList.add('ok');code.textContent='POSTFACH ✓';}
+              else{show(t,'err');b.disabled=false;b.textContent='Code sichern →';}
             })
-            .catch(function(){m.style.display='block';m.className='msg err';m.textContent='Das hat leider nicht geklappt – bitte versuch es noch einmal.';b.disabled=false;b.textContent='Anmelden';});
+            .catch(function(){show('Das hat leider nicht geklappt – bitte versuch es noch einmal.','err');b.disabled=false;b.textContent='Code sichern →';});
         });
       }
       if(document.readyState!=='loading')mount();else document.addEventListener('DOMContentLoaded',mount);
