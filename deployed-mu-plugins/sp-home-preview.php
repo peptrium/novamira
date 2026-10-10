@@ -66,6 +66,50 @@ function sp_hpv_products() {
     return $out;
 }
 
+/** Forschungsbereiche mit einem typischen Produktbild. */
+function sp_hpv_cats() {
+    $pick = ['fettverlust' => 65, 'regeneration-heilung' => 428, 'fokus' => 434, 'energie' => 71, 'aesthetik' => 68, 'zubehoer' => 74];
+    $out = [];
+    foreach ($pick as $slug => $pid) {
+        $t = get_term_by('slug', $slug, 'product_cat');
+        $p = wc_get_product($pid);
+        if (!$t || !$t->count) {
+            continue;
+        }
+        $out[] = ['n' => html_entity_decode($t->name), 'u' => get_term_link($t), 'c' => (int) $t->count, 'i' => $p ? wp_get_attachment_image_url($p->get_image_id(), 'medium_large') : '', 'w' => false];
+    }
+    return $out;
+}
+
+/** Kombi-Sets (keine Set-Rabatte - nur bequem zusammen in den Warenkorb). */
+function sp_hpv_sets() {
+    $defs = [
+        ['n' => 'Retatrutide Starter', 'd' => 'Alles für den Start: Retatrutide 10 mg plus Bac Water zum Anmischen und Spritzen zum genauen Dosieren.', 'ids' => [555, 74, 80]],
+        ['n' => 'Regenerations-Duo', 'd' => 'Der Klassiker in der Regenerationsforschung: BPC-157 und TB-500 zusammen.', 'ids' => [428, 577, 74]],
+        ['n' => 'Fokus-Duo', 'd' => 'Semax und Selank – die beiden Peptide aus der Fokus- und Kognitionsforschung.', 'ids' => [434, 437, 74]],
+        ['n' => 'Pen-Set', 'd' => 'Der vorgefüllte Retatrutide-Pen (20 mg) mit passenden Pen Nadeln – ohne Anmischen.', 'ids' => [547, 908]],
+    ];
+    $out = [];
+    foreach ($defs as $d) {
+        $items = [];
+        $t = 0;
+        foreach ($d['ids'] as $id) {
+            $p = wc_get_product($id);
+            if (!$p || !$p->is_purchasable() || !$p->is_in_stock()) {
+                continue 2;
+            }
+            $parent = $p->is_type('variation') ? wc_get_product($p->get_parent_id()) : $p;
+            $img = $p->get_image_id() ? $p->get_image_id() : $parent->get_image_id();
+            $name = $parent->get_name() . ($p->is_type('variation') ? ' ' . implode(' ', array_values($p->get_attributes())) : '');
+            $price = (float) wc_get_price_to_display($p);
+            $t += $price;
+            $items[] = ['id' => $id, 'n' => $name, 'p' => $price, 'i' => wp_get_attachment_image_url($img, 'thumbnail'), 'w' => in_array($parent->get_id(), [80, 393, 395, 396, 908, 745], true)];
+        }
+        $out[] = ['n' => $d['n'], 'd' => $d['d'], 'items' => $items, 't' => round($t, 2)];
+    }
+    return $out;
+}
+
 add_action('wp_head', function () {
     if (!sp_hpv_active()) {
         return;
@@ -81,12 +125,14 @@ body.home .elementor-211>#sp-hp-prod{order:2}
 body.home .elementor-211>[data-id="mfst001"]{order:3}
 body.home .elementor-211>#sp-hp-proof{order:4}
 body.home .elementor-211>[data-id="penTeaser1"]{order:5}
-body.home .elementor-211>[data-id="e761cf4"]{order:6}
-body.home .elementor-211>[data-id="hiwk001"]{order:7}
-body.home .elementor-211>[data-id="77e913a"]{order:8}
-body.home .elementor-211>#sp-nlh{order:9}
-body.home .elementor-211>#sp-hp-info{order:10}
-body.home .elementor-211>[data-id="045a884"],body.home .elementor-211>[data-id="a4ab146"]{order:11}
+body.home .elementor-211>#sp-hp-sets{order:6}
+body.home .elementor-211>[data-id="e761cf4"]{order:7}
+body.home .elementor-211>[data-id="hiwk001"]{order:8}
+body.home .elementor-211>[data-id="77e913a"]{order:9}
+body.home .elementor-211>#sp-hp-faq{order:10}
+body.home .elementor-211>#sp-nlh{order:11}
+body.home .elementor-211>#sp-hp-info{order:12}
+body.home .elementor-211>[data-id="045a884"],body.home .elementor-211>[data-id="a4ab146"]{order:13}
 body.home .elementor-211>[data-id="a9d4d1b"],body.home .elementor-211>[data-id="d60a05b"],body.home .elementor-211>[data-id="spsocial1"],body.home .elementor-211>[data-id="midcta01"],body.home .elementor-211>[data-id="3ca703b"],body.home .elementor-211>[data-id="5c363d8"]{display:none!important}
 body.home .elementor-211>.sp-hp-closed{display:none!important}
 body.home .elementor-location-footer .elementor-element-97108f0{display:none!important}
@@ -95,8 +141,8 @@ body.home .elementor-location-footer .elementor-element-97108f0{display:none!imp
 body.home .sp-lbl,body.home .sp-mf-badge,body.home .sp-pt-eyebrow,body.home .sp-hiw-badge,body.home .sp-tools-badge,body.home .sp-abo-promo-eyebrow,body.home #sp-nlh .ey{display:inline-flex!important;align-items:center!important;gap:8px!important;padding:6px 14px!important;border-radius:999px!important;font:700 10.5px/1.2 Sora,sans-serif!important;letter-spacing:.16em!important;text-transform:uppercase!important;border:1px solid rgba(255,255,255,.18)!important;background:rgba(255,255,255,.05)!important;color:#E6E9EC!important;margin:0 0 16px!important;box-shadow:none!important}
 body.home .sp-lbl:before,body.home .sp-mf-badge:before,body.home .sp-pt-eyebrow:before,body.home .sp-hiw-badge:before,body.home .sp-tools-badge:before,body.home .sp-abo-promo-eyebrow:before{content:'';width:6px;height:6px;border-radius:50%;background:#C7CCD1;box-shadow:0 0 8px rgba(199,204,209,.7);flex:0 0 6px}
 body.home #sp-nlh .ey i{width:6px;height:6px}
-body.home .sp-lbl.lt,body.home .sp-tools-badge{border-color:rgba(13,15,18,.14)!important;background:#fff!important;color:#4A5058!important}
-body.home .sp-lbl.lt:before,body.home .sp-tools-badge:before{background:#0D0F12;box-shadow:none}
+body.home .sp-lbl.lt,body.home .sp-hiw-badge{border-color:rgba(13,15,18,.14)!important;background:#fff!important;color:#4A5058!important}
+body.home .sp-lbl.lt:before,body.home .sp-hiw-badge:before{background:#0D0F12;box-shadow:none}
 body.home .sp-abo-promo-eyebrow{color:#FF8A5C!important;border-color:rgba(255,138,92,.35)!important;background:rgba(255,138,92,.08)!important}
 body.home .sp-abo-promo-eyebrow:before{background:#FF8A5C;box-shadow:0 0 8px rgba(255,138,92,.8)}
 
@@ -187,19 +233,7 @@ body.home .sp-abo-promo-eyebrow:before{background:#FF8A5C;box-shadow:0 0 8px rgb
 @media(min-width:901px){.sp-stage{margin:0;padding:60px 0 40px}.sp-bottle{width:260px;margin:-200px 0 0 -130px}.sp-bshadow{width:200px;margin:160px 0 0 -100px}.sp-glow{width:420px;height:420px;margin:-210px 0 0 -210px}.sp-rv{flex-basis:300px}}
 @media (prefers-reduced-motion:reduce){.sp-mq .tr{animation:none}}
 
-/* ---- Abschnitte neu einfaerben ---- */
-body.home .elementor-211>[data-id="e761cf4"],body.home [data-id="e761cf4"] .sp-abo-promo,body.home [data-id="e761cf4"] .sp-promo-section{background:linear-gradient(180deg,#FFFFFF,#EEF0F2)!important}
-body.home [data-id="e761cf4"] .sp-abo-promo-card{box-shadow:0 24px 50px rgba(13,15,18,.25)!important}
-body.home #sp-how-it-works{background:linear-gradient(160deg,#0D0F12 0%,#1E2226 100%)!important}
-body.home #sp-how-it-works h2,body.home #sp-how-it-works h3{color:#fff!important}
-body.home #sp-how-it-works .sp-hiw-accent{background:linear-gradient(100deg,#9AA3AD,#F4F6F8 50%,#B8BFC6)!important;-webkit-background-clip:text!important;background-clip:text!important;color:transparent!important}
-body.home #sp-how-it-works p{color:rgba(255,255,255,.65)!important}
-body.home #sp-how-it-works .sp-hiw-cta{background:linear-gradient(120deg,#C7CCD1,#FFFFFF 45%,#C7CCD1)!important;color:#0D0F12!important}
-body.home #sp-how-it-works .sp-hiw-cta *{color:#0D0F12!important;stroke:#0D0F12}
-body.home .elementor-211>[data-id="77e913a"],body.home .sp-tools-section{background:linear-gradient(180deg,#FFFFFF,#EEF0F2)!important}
-body.home .sp-tools-title{color:#0D0F12!important}
-body.home .sp-tools-subtitle{color:rgba(13,15,18,.6)!important}
-body.home .sp-tool-card{background:linear-gradient(160deg,#15181C,#23272C)!important;box-shadow:0 14px 30px rgba(13,15,18,.18)!important}
+/* ---- Abschnitte: Originalfarben fuer Abo (dunkel), Schritte (hell), Tools (dunkel) ---- */
 body.home .elementor-211>[data-id="045a884"],body.home .elementor-211>[data-id="a4ab146"]{background:linear-gradient(180deg,#F6F7F8,#EEF0F2)!important}
 body.home [data-id="045a884"] .e-con,body.home [data-id="045a884"]>.e-con-inner{background:transparent!important}
 
@@ -225,6 +259,53 @@ body.home [data-id="045a884"] .e-con,body.home [data-id="045a884"]>.e-con-inner{
 #sp-hp-info .dis svg{flex:0 0 16px;margin-top:2px}
 #sp-hp-info button{display:inline-flex;align-items:center;gap:6px;margin:16px auto 0;border:1px solid rgba(13,15,18,.15);background:#fff;border-radius:999px;padding:8px 16px;font:600 12.5px Sora,sans-serif;color:#4A5058;cursor:pointer}
 #sp-hp-info button.open span{display:inline-block;transform:rotate(180deg)}
+
+/* ---- Forschungsbereiche ---- */
+.sp-cats-h{display:flex;align-items:baseline;justify-content:space-between;margin:34px 0 12px}
+.sp-cats-h b{font:700 17px Sora,sans-serif;color:#0D0F12}
+.sp-cats-h a{font-size:13px;font-weight:600;color:#5A6068!important;text-decoration:none!important}
+.sp-cats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.sp-cat{position:relative;display:flex;flex-direction:column;justify-content:flex-end;aspect-ratio:1/1.08;border-radius:18px;overflow:hidden;text-decoration:none!important;background:radial-gradient(circle at 50% 30%,#30363D,#0B0D10 70%)}
+.sp-cat img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.85;transition:transform .5s}
+.sp-cat.wide img{object-fit:contain;padding:12px 12px 40px}
+.sp-cat:hover img{transform:scale(1.05)}
+.sp-cat:after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,13,16,0) 40%,rgba(11,13,16,.85))}
+.sp-cat span{position:relative;z-index:1;padding:0 12px 12px;color:#fff;font:700 13.5px/1.25 Sora,sans-serif}
+.sp-cat small{display:block;font-weight:500;font-size:11px;color:#B9BEC5;margin-top:2px}
+@media(max-width:900px){.sp-cats{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 16px;margin:0 -16px;padding:2px 16px 10px;scrollbar-width:none}.sp-cats::-webkit-scrollbar{display:none}.sp-cat{flex:0 0 36%;scroll-snap-align:start}}
+.sp-trust li.pay:before{background-color:#2A2F35}
+/* ---- Kombi-Sets ---- */
+.sp-set{display:flex;flex-direction:column;gap:12px;background:#fff;border:1px solid #E3E6E9;border-radius:20px;padding:18px;box-shadow:0 10px 28px rgba(13,15,18,.06)}
+.sp-set .thumbs{display:flex;align-items:center}
+.sp-set .thumbs span{width:62px;height:62px;border-radius:50%;overflow:hidden;border:3px solid #fff;background:radial-gradient(circle at 50% 30%,#30363D,#0B0D10 70%);box-shadow:0 4px 12px rgba(13,15,18,.18);margin-left:-14px}
+.sp-set .thumbs span:first-child{margin-left:0}
+.sp-set .thumbs img{width:100%;height:100%;object-fit:cover}
+.sp-set .thumbs span.w img{object-fit:contain;padding:6px}
+.sp-set .thumbs i{font-style:normal;margin-left:10px;font-size:12px;font-weight:700;color:#5A6068}
+.sp-set h3{margin:0;font:700 17px Sora,sans-serif;color:#0D0F12}
+.sp-set .why{margin:0;font-size:13px;line-height:1.55;color:#5A6068}
+.sp-set ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.sp-set li{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:#2A2F35}
+.sp-set li span:last-child{color:#5A6068;white-space:nowrap}
+.sp-set .sum{display:flex;align-items:baseline;justify-content:space-between;border-top:1px dashed #D5D9DD;padding-top:10px;margin-top:auto}
+.sp-set .sum strong{font:800 20px Sora,sans-serif;color:#0D0F12;white-space:nowrap}
+.sp-set .sum{gap:10px}
+.sp-set .ship{font-size:11.5px;font-weight:600;color:#2E9B57}
+.sp-set .ship.no{color:#9AA0A8}
+.sp-set .add{height:46px;border:0;border-radius:13px;background:#0D0F12;color:#fff;font:700 13.5px Sora,sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
+.sp-set .add.ok{background:#2E9B57}
+#sp-hp-sets .sp-rail{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:900px){.sp-set{flex:0 0 80%}}
+/* ---- FAQ ---- */
+#sp-hp-faq .in{max-width:760px}
+.sp-faq{border-top:1px solid #DDE1E5}
+.sp-faq details{border-bottom:1px solid #DDE1E5}
+.sp-faq summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:14px;padding:18px 2px;font:700 15.5px/1.35 Sora,sans-serif;color:#0D0F12}
+.sp-faq summary::-webkit-details-marker{display:none}
+.sp-faq summary:after{content:'+';flex:0 0 28px;height:28px;border-radius:50%;border:1px solid #D5D9DD;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:18px;color:#3A4048;transition:transform .25s}
+.sp-faq details[open] summary:after{transform:rotate(45deg);background:#0D0F12;color:#fff;border-color:#0D0F12}
+.sp-faq p{margin:0;padding:0 40px 18px 2px;font-size:14px;line-height:1.65;color:#4A5058}
+.sp-faq a{color:#0D0F12;font-weight:600}
 #sp-hpv-flag{position:fixed;left:12px;top:12px;z-index:99999;background:#FF8A5C;color:#0D0F12;font:700 11px Sora,sans-serif;padding:6px 10px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.3);pointer-events:none}
 </style>
     <?php
@@ -238,6 +319,8 @@ add_action('wp_footer', function () {
 <div id="sp-hpv-flag">ENTWURF-VORSCHAU</div>
 <script id="sp-hpv-js">
 window.SP_HP_PRODS=<?php echo wp_json_encode(sp_hpv_products()); ?>;
+window.SP_HP_CATS=<?php echo wp_json_encode(sp_hpv_cats()); ?>;
+window.SP_HP_SETS=<?php echo wp_json_encode(sp_hpv_sets()); ?>;
 document.addEventListener('DOMContentLoaded',function(){
  var root=document.querySelector('body.home .elementor-211'); if(!root)return;
  function el(h){var d=document.createElement('div');d.innerHTML=h.trim();return d.firstChild;}
@@ -261,7 +344,8 @@ document.addEventListener('DOMContentLoaded',function(){
  }).join('');
  var prod=el('<section id="sp-hp-prod" class="sp-hp-sec sp-hp-light"><div class="in"><div class="hd"><span class="sp-lbl lt">Bestseller</span><h2>Peptide in Forschungsqualität</h2><p class="sub">Jede Charge HPLC-geprüft, mit Analysezertifikat – Versand aus Deutschland.</p></div>'
   +'<div class="sp-rail">'+cards+'<a class="sp-pc all" href="/alle-produkte/"><div class="ar">→</div><b>Alle Produkte</b><span>Das ganze Sortiment ansehen</span></a></div>'
-  +'<ul class="sp-trust"><li>HPLC ≥ 99 % Reinheit</li><li>Analysezertifikat zu jeder Charge</li><li>Gratisversand ab 100 €</li></ul>'
+  +'<div class="sp-cats-h"><b>Nach Forschungsbereich</b><a href="/alle-produkte/">Alle →</a></div><div class="sp-cats">'+(window.SP_HP_CATS||[]).map(function(c){return '<a class="sp-cat'+(c.w?' wide':'')+'" href="'+c.u+'">'+(c.i?'<img loading="lazy" src="'+c.i+'" alt="">':'')+'<span>'+c.n+'<small>'+c.c+(c.c===1?' Produkt':' Produkte')+'</small></span></a>';}).join('')+'</div>'
+  +'<ul class="sp-trust"><li>HPLC ≥ 99 % Reinheit</li><li>Analysezertifikat zu jeder Charge</li><li>Gratisversand ab 100 €</li><li>Neutrale, diskrete Verpackung</li><li class="pay">Vorkasse · Krypto · Guthaben</li></ul>'
   +'<div class="sp-hp-more-a"><a href="/alle-produkte/">Alle Produkte ansehen →</a></div></div></section>');
  root.appendChild(prod);
  prod.addEventListener('click',function(e){
@@ -302,6 +386,32 @@ document.addEventListener('DOMContentLoaded',function(){
  if('IntersectionObserver' in window){new IntersectionObserver(function(e){vis=e[0].isIntersecting;if(vis)kick();},{rootMargin:'200px 0px'}).observe(stage);}else{vis=true;}
  window.addEventListener('scroll',kick,{passive:true});cur=tgt=target();paint(cur);
  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){window.removeEventListener('scroll',kick);}
+ /* Kombi-Sets */
+ var S=window.SP_HP_SETS||[];
+ if(S.length){
+ var sets=el('<section id="sp-hp-sets" class="sp-hp-sec sp-hp-light"><div class="in"><div class="hd"><span class="sp-lbl lt">Beliebte Kombinationen</span><h2>Passt zusammen.</h2><p class="sub">Sinnvoll kombiniert – mit einem Klick komplett im Warenkorb.</p></div><div class="sp-rail">'
+  +S.map(function(s,i){var t=s.items.map(function(it){return '<span class="'+(it.w?'w':'')+'"><img loading="lazy" src="'+it.i+'" alt=""></span>';}).join('');
+    return '<div class="sp-set" data-set="'+i+'"><div class="thumbs">'+t+'<i>'+s.items.length+' Artikel</i></div><h3>'+s.n+'</h3><p class="why">'+s.d+'</p><ul>'+s.items.map(function(it){return '<li><span>'+it.n+'</span><span>'+eur(it.p)+'</span></li>';}).join('')+'</ul>'
+     +'<div class="sum"><span class="ship'+(s.t>=100?'':' no')+'">'+(s.t>=100?'✓ Gratisversand':'noch '+eur(100-s.t)+' bis Gratisversand')+'</span><strong>'+eur(s.t)+'</strong></div><button type="button" class="add">'+cart+'Set in den Warenkorb</button></div>';}).join('')
+  +'</div></div></section>');
+ root.appendChild(sets);
+ sets.addEventListener('click',function(e){var b=e.target.closest('.add');if(!b)return;var s=S[+b.closest('.sp-set').getAttribute('data-set')],old=b.innerHTML,i=0,last=null;b.disabled=true;b.textContent='…';
+   function next(){if(i>=s.items.length){b.classList.add('ok');b.innerHTML='✓ Set hinzugefügt';if(window.jQuery)jQuery(document.body).trigger('added_to_cart',[last&&last.fragments,last&&last.cart_hash,jQuery(b)]);setTimeout(function(){b.classList.remove('ok');b.innerHTML=old;b.disabled=false;},2400);return;}
+     var fd=new FormData();fd.append('product_id',s.items[i].id);fd.append('quantity','1');
+     fetch('/?wc-ajax=add_to_cart',{method:'POST',body:fd,credentials:'same-origin'}).then(function(r){return r.json();}).then(function(r){last=r;i++;next();}).catch(function(){b.innerHTML=old;b.disabled=false;});}
+   next();});
+ }
+ /* FAQ */
+ var F=[
+  ['Wie schnell kommt meine Bestellung?','Wir versenden mit DHL. Sobald dein Paket unterwegs ist, bekommst du die Sendungsnummer per E-Mail. Ab 100 € Bestellwert ist der Versand gratis. Mehr unter <a href="/versand-lieferzeit/">Versand &amp; Lieferzeit</a>.'],
+  ['Wie kann ich bezahlen?','Per Vorkasse (Überweisung), mit Kryptowährung oder mit deinem Peptrium-Guthaben. Bei Vorkasse verschicken wir, sobald deine Zahlung eingegangen ist.'],
+  ['Ist die Verpackung neutral?','Ja. Wir verschicken neutral und unauffällig – von außen ist nicht zu erkennen, was im Paket ist.'],
+  ['Gibt es Mengenrabatt oder Geschenke?','Bei ausgewählten Peptiden sparst du ab 3 Stück 10 %, ab 5 Stück 15 % und ab 10 Stück 20 %. Ab 200 € Bestellwert legen wir ein Injektionskit gratis dazu, ab 350 € GHK-Cu und ab 500 € Retatrutide.'],
+  ['Wie funktioniert das Abo?','Du stellst einmal ein, was du regelmäßig brauchst. Ab der 2. Lieferung zahlst du dauerhaft 15 % weniger und kannst jederzeit pausieren oder kündigen. Alles dazu auf der Seite <a href="/abo-modell/">Abo-Modell</a>.'],
+  ['Wofür sind die Produkte bestimmt?','Alle Produkte sind ausschließlich für die Laborforschung bestimmt – nicht zur Anwendung am Menschen oder Tier und nicht für diagnostische oder therapeutische Zwecke.']
+ ];
+ var faq=el('<section id="sp-hp-faq" class="sp-hp-sec sp-hp-light"><div class="in"><div class="hd"><span class="sp-lbl lt">Häufige Fragen</span><h2>Gut zu wissen.</h2></div><div class="sp-faq">'+F.map(function(f,i){return '<details'+(i===0?' open':'')+'><summary>'+f[0]+'</summary><p>'+f[1]+'</p></details>';}).join('')+'</div></div></section>');
+ root.appendChild(faq);
  /* Newsletter in die Seite holen */
  var nl=document.getElementById('sp-nlh'); if(nl) root.appendChild(nl);
  /* Hinweis + Mehr ueber Peptrium */
