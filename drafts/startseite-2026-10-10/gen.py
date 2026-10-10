@@ -181,6 +181,9 @@ add_action('wp_head', function () {
     if (function_exists('sp_redesign_is_draft') && sp_redesign_is_draft('katalog')) {
         echo '<meta name="robots" content="noindex,nofollow">' . "\n";
     }
+    if (function_exists('sp_redesign_live') && sp_redesign_live('katalog')) {
+        echo '<script type="application/ld+json">' . base64_decode('__FAQ_B64__') . '</script>' . "\n";
+    }
     ?>
 <style id="sp-hpv-css">
 """ + css + r"""
@@ -204,4 +207,6 @@ window.SP_HP_SETS=<?php echo wp_json_encode(sp_hpv_sets()); ?>;
     <?php
 }, 99);
 """
+import base64 as _b
+php=php.replace('__FAQ_B64__',_b.b64encode(open('hp/faq.json','rb').read()).decode())
 open('sp-home-preview.php','w').write(php)

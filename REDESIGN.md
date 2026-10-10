@@ -42,6 +42,7 @@ Vorschau-Plugins (mu-plugins): `sp-ds.php` (gemeinsame Ebene), `sp-home-preview.
 - [ ] Über uns, Kontakt, FAQ, Versand (Text live korrigiert), AGB, Datenschutz, Widerruf, Forschungsnutzung, Partner-Programm
 
 ## Phase 6 – Test & Livegang
+- [x] LIVE seit 2026-10-10 20:10 (Basis 20:05, Katalog+Kauf 20:10) – zentraler Schalter sp-00-redesign.php
 - [ ] Klick-Test aller Buttons/Links je Seite
 - [ ] Testbestellungen (Test-Konto, als Test markiert): normal, Abo, Guthaben, Gutschein, Geschenke
 - [ ] Livegang Welle 1 (Shop-Seiten), Welle 2 (Kauf), Welle 3 (Konto + Inhalte)
