@@ -286,3 +286,17 @@ add_filter('wp_robots', function ($robots) {
     }
     return $robots;
 });
+
+/** Sitemap: versteckte Produkte (noindex) und /shop/ (301 -> /alle-produkte/) nicht melden. */
+add_filter('wp_sitemaps_posts_query_args', function ($args, $post_type) {
+    if ($post_type === 'product') {
+        $hidden = get_terms(['taxonomy' => 'product_visibility', 'slug' => ['exclude-from-catalog', 'exclude-from-search'], 'fields' => 'ids', 'hide_empty' => false]);
+        if ($hidden && !is_wp_error($hidden)) {
+            $args['tax_query'] = [['taxonomy' => 'product_visibility', 'field' => 'term_id', 'terms' => $hidden, 'operator' => 'NOT IN']];
+        }
+    }
+    if ($post_type === 'page' && function_exists('wc_get_page_id')) {
+        $args['post__not_in'] = array_merge($args['post__not_in'] ?? [], [wc_get_page_id('shop')]);
+    }
+    return $args;
+}, 20, 2);
