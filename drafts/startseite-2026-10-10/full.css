@@ -237,7 +237,5 @@ html,body{overflow-x:hidden}
 @media(min-width:901px){.sp-mq .tr.js>.sp-rv{width:300px}}
 .sp-mq .tr.js>.sp-rv{box-sizing:border-box}
 
-/* 3 Schritte: Stichworte + groessere Bilder */
-#sp-how-it-works .sp-kw{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 0}
-#sp-how-it-works .sp-kw span{font:600 12px/1 Sora,sans-serif;padding:7px 10px;border-radius:999px;background:#F1F2F4;border:1px solid #E3E6E9;color:#2A2F35;white-space:nowrap}
-@media(max-width:767px){body.home .sp-hiw-step-img{height:190px!important;margin-top:12px!important;border-radius:16px!important}}
+/* 3 Schritte: kurzer Satz + groessere Bilder */
+@media(max-width:767px){body.home .sp-hiw-step-img{height:190px!important;margin-top:12px!important;border-radius:16px!important}body.home .sp-hiw-step-content p{margin:4px 0 0!important}}
