@@ -1,0 +1,71 @@
+/* ===== Produktseite (Entwurf) ===== */
+body.single-product .elementor-340{display:flex;flex-direction:column}
+body.single-product .elementor-340>*{order:50;width:100%}
+body.single-product .elementor-340>[data-id="5d034e1"]{order:1}
+body.single-product .elementor-340>#sp-pp-proof{order:2}
+body.single-product .elementor-340>#sp-pp-sets{order:3}
+body.single-product .elementor-340>[data-id="4573496"]{order:4}
+body.single-product .elementor-340>[data-id="9977f52"]{order:5}
+body.single-product .elementor-340>#sp-pp-more{order:6}
+body.single-product .elementor-340>#sp-pp-info{order:7}
+body.single-product .elementor-340>[data-id="b221b92"],body.single-product .elementor-340>[data-id="rtxrel01"],body.single-product .elementor-340>[data-id="4be25d4"]{display:none!important}
+body.single-product .elementor-location-footer .elementor-element-97108f0{display:none!important}
+/* Labels einheitlich */
+.sp-pp .sp-lbl,body.single-product .sp-sci-badge{display:inline-flex!important;align-items:center!important;gap:8px!important;padding:6px 14px!important;border-radius:999px!important;font:700 10.5px/1.2 Sora,sans-serif!important;letter-spacing:.16em!important;text-transform:uppercase!important;border:1px solid rgba(255,255,255,.18)!important;background:rgba(255,255,255,.05)!important;color:#E6E9EC!important;margin:0 0 16px!important}
+.sp-pp .sp-lbl:before,body.single-product .sp-sci-badge:before{content:'';width:6px;height:6px;border-radius:50%;background:#C7CCD1;box-shadow:0 0 8px rgba(199,204,209,.7);flex:0 0 6px}
+.sp-pp .sp-lbl.lt{border-color:rgba(13,15,18,.14)!important;background:#fff!important;color:#4A5058!important}
+.sp-pp .sp-lbl.lt:before{background:#0D0F12;box-shadow:none}
+/* Dunkle Abschnitte */
+.sp-hp-dark{background:linear-gradient(160deg,#0D0F12 0%,#1E2226 100%)}
+.sp-hp-dark h2{color:#fff!important}
+.sp-hp-dark .sub{color:rgba(255,255,255,.62)!important}
+/* Kundenstimmen dunkel */
+#sp-pp-proof h2 span{background:linear-gradient(100deg,#9AA3AD,#F4F6F8 50%,#B8BFC6);-webkit-background-clip:text;background-clip:text;color:transparent}
+#sp-pp-proof .sp-sum{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.12);box-shadow:none}
+#sp-pp-proof .sp-sum .big{color:#fff}
+#sp-pp-proof .sp-sum .t{color:#B9BEC5}#sp-pp-proof .sp-sum .t b{color:#fff}
+#sp-pp-proof .sp-rv{background:#1A1E22;border-color:#2C3137}
+#sp-pp-proof .sp-rv p{color:#D5D9DD}
+#sp-pp-proof .sp-rv .au{color:#9AA0A8}#sp-pp-proof .sp-rv .au b{color:#fff}
+#sp-pp-proof .sp-rv .au i{background:#E6E9EC;color:#0D0F12}
+#sp-pp-proof .sp-mq:before{background:linear-gradient(90deg,#15181C,rgba(21,24,28,0))}
+#sp-pp-proof .sp-mq:after{background:linear-gradient(270deg,#15181C,rgba(21,24,28,0))}
+#sp-pp-proof .sp-glow{background:radial-gradient(circle,rgba(210,215,220,.22),rgba(210,215,220,0) 65%)}
+#sp-pp-proof .sp-bshadow{background:radial-gradient(ellipse,rgba(0,0,0,.6),rgba(0,0,0,0) 70%)}
+/* Lexikon: Abschnitt dunkel, Karte bleibt */
+body.single-product [data-id="4573496"]{background:linear-gradient(160deg,#0D0F12 0%,#1E2226 100%)!important;padding-top:40px!important;padding-bottom:40px!important}
+body.single-product [data-id="4573496"] .sp-sci-card{background:linear-gradient(160deg,#1A1E22,#262A2F)!important;border:1px solid #2C3137!important}
+/* FAQ im Startseiten-Stil */
+body.single-product [data-id="9977f52"]{background:linear-gradient(180deg,#FFFFFF,#EEF0F2)!important;padding-top:44px!important;padding-bottom:44px!important}
+body.single-product .sp-reta-faq h3{font:700 clamp(24px,3vw,32px)/1.2 Sora,sans-serif!important;letter-spacing:-.02em;text-align:center;margin:0 0 22px!important;color:#0D0F12!important}
+body.single-product .sp-reta-faq details{border:0!important;border-bottom:1px solid #DDE1E5!important;border-radius:0!important;background:transparent!important;margin:0!important;padding:0!important;box-shadow:none!important}
+body.single-product .sp-reta-faq details:first-of-type{border-top:1px solid #DDE1E5!important}
+body.single-product .sp-reta-faq summary{list-style:none;display:flex!important;justify-content:space-between;align-items:center;gap:14px;padding:18px 2px!important;font:700 15px/1.4 Sora,sans-serif!important;color:#0D0F12!important;cursor:pointer}
+body.single-product .sp-reta-faq summary::-webkit-details-marker{display:none}
+body.single-product .sp-reta-faq .sp-faq-arrow{display:none!important}
+body.single-product .sp-reta-faq summary:after{content:'+';flex:0 0 28px;height:28px;border-radius:50%;border:1px solid #D5D9DD;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:18px;color:#3A4048;transition:transform .25s}
+body.single-product .sp-reta-faq details[open] summary:after{transform:rotate(45deg);background:#0D0F12;color:#fff;border-color:#0D0F12}
+body.single-product .sp-reta-faq details p{margin:0!important;padding:0 40px 18px 2px!important;font-size:14px!important;line-height:1.65!important;color:#4A5058!important}
+/* Weitere Produkte auf dunkel */
+#sp-pp-more .sp-pc{border-color:#2C3137;box-shadow:none}
+#sp-pp-more .sp-hp-more-a a{background:linear-gradient(120deg,#C7CCD1,#fff 50%,#C7CCD1);color:#0D0F12!important}
+/* Hinweis-Zeile */
+#sp-pp-info{background:linear-gradient(180deg,#FFFFFF,#EEF0F2);padding:24px 20px;text-align:center;font-family:Sora,sans-serif}
+#sp-pp-info .dis{display:inline-flex;align-items:flex-start;gap:8px;max-width:640px;margin:0 auto;font-size:12.5px;line-height:1.55;color:#4A5058;text-align:left}
+#sp-pp-info .dis b{color:#0D0F12}
+/* Sticky Kaufleiste (Handy) */
+#sp-pp-bar{position:fixed;left:10px;right:10px;bottom:10px;z-index:199995;display:flex;align-items:center;gap:10px;padding:8px 8px 8px 10px;border-radius:18px;background:rgba(13,15,18,.92);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1);box-shadow:0 14px 34px rgba(0,0,0,.35);font-family:Sora,sans-serif;transform:translate3d(0,140%,0);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+#sp-pp-bar.on{transform:translate3d(0,0,0)}
+#sp-pp-bar img{width:42px;height:42px;border-radius:10px;object-fit:cover;background:#0B0D10;flex:0 0 42px}
+#sp-pp-bar .t{flex:1;min-width:0;color:#fff;line-height:1.25}
+#sp-pp-bar .t b{display:block;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#sp-pp-bar .t span{font-size:13px;color:#C9CDD2}
+#sp-pp-bar button{flex:0 0 auto;height:44px;padding:0 16px;border:0;border-radius:13px;background:linear-gradient(120deg,#C7CCD1,#FFFFFF 45%,#C7CCD1);color:#0D0F12;font:700 13.5px Sora,sans-serif;display:flex;align-items:center;gap:7px;cursor:pointer}
+body.sp-bar-on #sp-cart-fab{bottom:86px!important;transition:bottom .35s}
+body.sp-bar-on #sp-social-fab{bottom:154px!important;transition:bottom .35s}
+@media(min-width:901px){#sp-pp-bar{display:none}}
+/* volle Breite fuer die neuen Abschnitte */
+body.single-product .elementor-340>#sp-pp-proof,body.single-product .elementor-340>#sp-pp-sets,body.single-product .elementor-340>#sp-pp-more,body.single-product .elementor-340>#sp-pp-info{width:100vw!important;max-width:100vw!important;margin-left:calc(50% - 50vw)!important;margin-right:calc(50% - 50vw)!important;box-sizing:border-box}
+body.single-product{overflow-x:hidden}
+body.single-product .sp-reta-faq h3{text-align:center!important}
+.sp-pc .add,.sp-set .add{white-space:nowrap;font-size:13px}
