@@ -128,7 +128,6 @@ body.home [data-id="045a884"] .e-con,body.home [data-id="045a884"]>.e-con-inner{
  body.home .sp-mf-grid{display:flex!important;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 20px;gap:12px!important;margin:0 -20px;padding:4px 20px 12px;scrollbar-width:none}
  body.home .sp-mf-grid::-webkit-scrollbar{display:none}
  body.home .sp-mf-card{flex:0 0 84%;scroll-snap-align:start}
- body.home .sp-hiw-track{display:none!important}
  body.home .sp-hiw-steps{gap:14px!important}
  body.home .sp-hiw-step{min-height:0!important;height:auto!important;padding:0!important}
 }

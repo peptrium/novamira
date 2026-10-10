@@ -119,6 +119,7 @@
  /* 3 Schritte: je ein kurzer Satz statt Fliesstext, Bild groesser */
  var ST=['Wähle aus unserem Sortiment an geprüften Forschungspeptiden.','Größe und Menge wählen – ab 3 Stück sparst du 10 %.','Per Vorkasse oder Krypto bezahlen – in 2 Werktagen bei dir.'];
  document.querySelectorAll('#sp-how-it-works .sp-hiw-step-content').forEach(function(c,i){var p=c.querySelector('p');if(p&&ST[i]){p.textContent=ST[i];p.style.display='';}});
+ setTimeout(function(){window.dispatchEvent(new Event('resize'));window.dispatchEvent(new Event('scroll'));},60);
  /* Hinweis + Mehr ueber Peptrium (eigener, strukturierter Text) */
  var info=el('<div id="sp-hp-info"><div class="dis"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A5058" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg><span><b>Nur für Laborforschung.</b> Nicht zur Anwendung am Menschen oder Tier und nicht für diagnostische oder therapeutische Zwecke bestimmt.</span></div><br><button type="button" aria-expanded="false">Mehr über Peptrium <span>▾</span></button>'
   +'<div class="sp-about" hidden><h2>Peptide kaufen in Deutschland – bei Peptrium</h2>'
