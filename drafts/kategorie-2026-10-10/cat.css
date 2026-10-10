@@ -67,3 +67,9 @@ body.sp-cat-on .elementor-location-footer .elementor-element-97108f0{display:non
 #sp-cat .empty{display:flex;flex-direction:column;align-items:center;gap:8px;padding:34px 20px;border-radius:20px;background:#F6F7F8;border:1px dashed #D5D9DD;color:#4A5058;font-size:14px;line-height:1.55}
 #sp-cat .empty b{font-size:17px;color:#0D0F12}
 #sp-cat .empty a{margin-top:6px;height:42px;display:inline-flex;align-items:center;padding:0 20px;border-radius:999px;background:#0D0F12;color:#fff!important;font-weight:700;text-decoration:none!important}
+
+/* v3 */
+#sp-cat .hero{border-radius:0!important;padding-bottom:20px}
+#sp-cat .meta{flex-wrap:wrap!important;overflow:visible!important;margin:0!important;padding:0!important}
+#sp-cat .chips{margin-bottom:14px}
+.sp-grid .sp-pc .coa{font-size:9px!important;padding:4px 7px!important}

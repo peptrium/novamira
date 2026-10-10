@@ -281,6 +281,11 @@ html,body{overflow-x:hidden}
 @media(max-width:767px){
  body.home .sp-hiw-step-img{display:block!important;width:100%!important;height:120px!important;object-fit:cover!important;border-radius:14px!important;margin:12px 0 0!important}
 }
+
+/* Karten-Badges ruhiger: ein Badge oben links, Vorbestellung dunkel mit Bernstein-Text */
+.sp-pc .bd.p{background:rgba(13,15,18,.82)!important;color:#F5C26B!important;border:1px solid rgba(245,194,107,.45);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.sp-pc .pre-n{color:#8A6A2A!important}
+.sp-pc .coa{font-size:10px!important;letter-spacing:.01em}
 /* ===== Produktseite (Entwurf) ===== */
 body.single-product .elementor-340{display:flex;flex-direction:column}
 body.single-product .elementor-340>*{order:50;width:100%}
@@ -584,7 +589,7 @@ document.addEventListener('DOMContentLoaded',function(){
  /* 3) Weitere Produkte (statt "Wird haeufig zusammen gekauft") */
  var P=D.more||[];
  if(P.length){var more=el('<section id="sp-pp-more" class="sp-pp sp-hp-sec sp-hp-dark"><div class="in"><div class="hd"><span class="sp-lbl">Auch beliebt</span><h2>Das könnte dich auch interessieren.</h2></div><div class="sp-rail">'
-  +P.map(function(p){var vo=p.vol?'<div class="vo"><span>'+p.vol+'</span></div>':'';return '<div class="sp-pc'+(p.pen?' pen':'')+'" data-id="'+p.aid+'"><a class="im" href="'+p.u+'"><img loading="lazy" src="'+p.i+'" alt="'+p.n+'">'+(p.r?'<span class="bd s">−'+Math.round((1-p.p/p.r)*100)+' %</span>':'')+'<span class="coa">✓ COA</span></a><div class="tx"><a href="'+p.u+'"><h3 class="nm">'+p.n+'</h3></a><div class="rt"><b>★★★★★</b>'+String(p.rt).replace('.',',')+' ('+p.rc+')</div>'+vo+'<div class="pr"><strong>'+(p.v?'ab ':'')+eur(p.p)+'</strong>'+(p.r?'<s>'+eur(p.r)+'</s>':'')+'</div>'+(p.v?'<a class="add" href="'+p.u+'">Größe wählen</a>':'<button type="button" class="add">'+cart+'In den Warenkorb</button>')+'</div></div>';}).join('')
+  +P.map(function(p){var vo=p.vol?'<div class="vo"><span>'+p.vol+'</span></div>':'';return '<div class="sp-pc'+(p.pen?' pen':'')+'" data-id="'+p.aid+'"><a class="im" href="'+p.u+'"><img loading="lazy" src="'+p.i+'" alt="'+p.n+'">'+(p.pre?'<span class="bd p">Vorbestellung'+(p.r?' · −'+Math.round((1-p.p/p.r)*100)+' %':'')+'</span>':(p.r?'<span class="bd s">−'+Math.round((1-p.p/p.r)*100)+' %</span>':''))+'<span class="coa">✓ HPLC-verifiziert</span></a><div class="tx"><a href="'+p.u+'"><h3 class="nm">'+p.n+'</h3></a><div class="rt"><b>★★★★★</b>'+String(p.rt).replace('.',',')+' ('+p.rc+')</div>'+vo+'<div class="pr"><strong>'+(p.v?'ab ':'')+eur(p.p)+'</strong>'+(p.r?'<s>'+eur(p.r)+'</s>':'')+'</div>'+(p.v?'<a class="add" href="'+p.u+'">Größe wählen</a>':'<button type="button" class="add">'+cart+(p.pre?'Vorbestellen':'In den Warenkorb')+'</button>')+'</div></div>';}).join('')
   +'</div><div class="sp-hp-more-a"><a href="/alle-produkte/">Alle Produkte ansehen →</a></div></div></section>');
   root.appendChild(more);
   more.addEventListener('click',function(e){var b=e.target.closest('button.add');if(!b)return;addIds([b.closest('.sp-pc').getAttribute('data-id')],b,'✓ Hinzugefügt');});}

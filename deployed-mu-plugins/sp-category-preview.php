@@ -30,8 +30,8 @@ function sp_cpv_collections() {
         'wachstumshormon-erholung' => ['Wachstumshormon & Erholung', 'Forschungspeptide zur Untersuchung der Wachstumshormon-Sekretion und regenerativer Signalwege.', [77, 431, 428]],
         'haut-kollagen' => ['Haut & Kollagen', 'Forschungspeptide zur Untersuchung von Kollagensynthese und Hautstruktur – GHK-Cu ist hier eines der meistuntersuchten.', [68, 395]],
         'pigmentierung-braeunung' => ['Pigmentierung & Bräunung', 'Forschungspeptide zur Untersuchung von Pigmentierungsprozessen. Dieser Bereich wird gerade aufgebaut – passende Peptide folgen in Kürze.', []],
-        'alle-peptrium-pens' => ['Alle Peptrium-Pens', 'Vorgefüllte Pens mit Dosierrad – kein Anmischen, keine Spritzen. Retatrutide, GHK-Cu und Mots-C in mehreren Stärken.', [393, 395, 396], 'Peptrium-Pen'],
-        'zubehoer' => ['Zubehör', 'Alles für die Arbeit im Labor: Bac Water zum Anmischen, Spritzen, Pen Nadeln und Injektionskit.', 'cat:zubehoer', 'Zubehör'],
+        'alle-peptrium-pens' => ['Alle Peptrium-Pens', 'Vorgefüllte Pens mit Dosierrad – kein Anmischen, keine Spritzen, in mehreren Stärken.', [393, 395, 396], 'Peptrium-Pen'],
+        'zubehoer' => ['Zubehör', 'Alles für die Arbeit im Labor – vom Anmischen bis zum genauen Dosieren.', 'cat:zubehoer', 'Zubehör'],
     ];
 }
 
@@ -62,12 +62,12 @@ function sp_cpv_active() {
 
 function sp_cpv_desc($slug) {
     $d = [
-        'fettverlust' => 'Peptide aus der Stoffwechsel-Forschung – darunter Retatrutide als Triple-Agonist, Tesamorelin und der vorgefüllte Peptrium-Pen.',
-        'regeneration-heilung' => 'Forschungspeptide für Studien zu Geweberegeneration und Wundheilung – BPC-157, TB-500, KPV und IGF-1 LR3.',
-        'fokus' => 'Peptide aus der neurologischen und kognitiven Forschung – Semax, Selank sowie CJC-1295 + Ipamorelin.',
-        'energie' => 'Mots-C, ein mitochondriales Peptid aus der Energie- und Stoffwechselforschung – als Vial oder vorgefüllter Pen.',
-        'aesthetik' => 'GHK-Cu, das Kupferpeptid aus der Haut- und Kollagenforschung – als Vial oder vorgefüllter Pen.',
-        'zubehoer' => 'Alles für die Arbeit im Labor: Bac Water zum Anmischen, Spritzen, Pen Nadeln und Injektionskit.',
+        'fettverlust' => 'Forschungspeptide für Studien zu Stoffwechsel, Appetitregulation und Fettstoffwechsel – als Vial oder vorgefüllter Pen.',
+        'regeneration-heilung' => 'Forschungspeptide für Studien zu Geweberegeneration, Wundheilung und Entzündungsprozessen.',
+        'fokus' => 'Forschungspeptide für Studien zu kognitiven Prozessen, Stressregulation und Wachstumshormon-Sekretion.',
+        'energie' => 'Forschungspeptide für Studien zu Mitochondrien, Zellenergie und Stoffwechsel.',
+        'aesthetik' => 'Forschungspeptide für Studien zu Haut, Kollagen und Zellschutz.',
+        'zubehoer' => 'Alles für die Arbeit im Labor – vom Anmischen bis zum genauen Dosieren.',
     ];
     return $d[$slug] ?? '';
 }
@@ -86,7 +86,7 @@ function sp_cpv_data() {
     if ($term) {
         $args['category'] = [$term->slug];
     }
-    $hide = [729, 817];
+    $hide = [729, 817, 745];
     $items = [];
     $rank = 0;
     if (is_search()) {
@@ -132,7 +132,8 @@ function sp_cpv_data() {
             'qd' => in_array($id, $qd, true) && !$p->is_on_sale(),
             'pre' => in_array($id, $pre, true),
             'pen' => stripos($p->get_name(), 'Pen') !== false && !in_array('zubehoer', $cats, true),
-            'acc' => in_array('zubehoer', $cats, true),
+            'acc' => in_array($id, [80, 908, 745], true),
+            'noq' => in_array('zubehoer', $cats, true),
             'best' => $rank++ === 0 && !in_array('zubehoer', $cats, true),
         ];
     }
@@ -241,9 +242,8 @@ add_action('wp_head', function () {
 .sp-cat span{position:relative;z-index:1;padding:0 12px 12px;color:#fff;font:700 13.5px/1.25 Sora,sans-serif}
 .sp-cat small{display:block;font-weight:500;font-size:11px;color:#B9BEC5;margin-top:2px}
 @media(max-width:900px){.sp-cats{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 16px;margin:0 -16px;padding:2px 16px 10px;scrollbar-width:none}.sp-cats::-webkit-scrollbar{display:none}.sp-cat{flex:0 0 36%;scroll-snap-align:start}}
-.sp-pc .bd.p{background:#F5A623;color:#0D0F12}
-.sp-pc .bd.p+.bd{top:42px}
-.sp-pc .pre-n{font-size:11px;color:#A86A00;text-align:center;margin-top:-2px}
+.sp-pc .bd.p{background:rgba(13,15,18,.82);color:#F5C26B;border:1px solid rgba(245,194,107,.45)}
+.sp-pc .pre-n{font-size:11px;color:#8A6A2A;text-align:center;margin-top:-2px}
 /* ===== Kategorie / Alle Produkte (Entwurf) ===== */
 body.sp-cat-on #content>.ast-container{display:none!important}
 body.sp-cat-on .elementor-location-footer .elementor-element-97108f0{display:none!important}
@@ -314,6 +314,12 @@ body.sp-cat-on .elementor-location-footer .elementor-element-97108f0{display:non
 #sp-cat .empty b{font-size:17px;color:#0D0F12}
 #sp-cat .empty a{margin-top:6px;height:42px;display:inline-flex;align-items:center;padding:0 20px;border-radius:999px;background:#0D0F12;color:#fff!important;font-weight:700;text-decoration:none!important}
 
+/* v3 */
+#sp-cat .hero{border-radius:0!important;padding-bottom:20px}
+#sp-cat .meta{flex-wrap:wrap!important;overflow:visible!important;margin:0!important;padding:0!important}
+#sp-cat .chips{margin-bottom:14px}
+.sp-grid .sp-pc .coa{font-size:9px!important;padding:4px 7px!important}
+
 #sp-hpv-flag{position:fixed;left:12px;top:12px;z-index:200000;background:#FF8A5C;color:#0D0F12;font:700 11px Sora,sans-serif;padding:6px 10px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.3);text-decoration:none!important}
 </style>
     <?php
@@ -337,12 +343,12 @@ document.addEventListener('DOMContentLoaded',function(){
  var list=D.products.filter(function(p){return !pre||p.pre;});
  function card(p){
    var first=(p.vars&&p.vars.length)?p.vars[0]:{id:p.id,p:p.p,r:p.r};
-   var bd=(p.pre?'<span class="bd p">Vorbestellung</span>':'')+(first.r?'<span class="bd s">−'+Math.round((1-first.p/first.r)*100)+' %</span>':(p.best?'<span class="bd">★ Bestseller</span>':(p.pen?'<span class="bd n">Neu</span>':'')));
+   var bd=p.pre?'<span class="bd p">Vorbestellung'+(first.r?' · −'+Math.round((1-first.p/first.r)*100)+' %':'')+'</span>':(first.r?'<span class="bd s">−'+Math.round((1-first.p/first.r)*100)+' %</span>':(p.best?'<span class="bd">★ Bestseller</span>':(p.pen?'<span class="bd n">Neu</span>':'')));
    var vo='';
    if(p.vars&&p.vars.length>1)vo='<div class="vo">'+p.vars.map(function(v,k){return '<button type="button" data-id="'+v.id+'" data-p="'+v.p+'" data-r="'+(v.r||'')+'"'+(k===0?' class="on"':'')+'>'+v.l+'</button>';}).join('')+'</div>';
    else if(p.vars&&p.vars.length===1)vo='<div class="vo"><span>'+p.vars[0].l+'</span></div>';
    else if(p.vol)vo='<div class="vo"><span>'+p.vol+'</span></div>';
-   return '<div class="sp-pc'+(p.pen?' pen':'')+(p.acc?' acc':'')+'" data-id="'+first.id+'"><a class="im" href="'+p.u+'"><img loading="lazy" src="'+p.i+'" alt="'+p.n+'">'+bd+(p.acc?'':'<span class="coa">✓ COA</span>')+'</a><div class="tx"><a href="'+p.u+'"><h3 class="nm">'+p.n+'</h3></a>'
+   return '<div class="sp-pc'+(p.pen?' pen':'')+(p.acc?' acc':'')+'" data-id="'+first.id+'"><a class="im" href="'+p.u+'"><img loading="lazy" src="'+p.i+'" alt="'+p.n+'">'+bd+(p.acc||p.noq?'':'<span class="coa">✓ HPLC-verifiziert</span>')+'</a><div class="tx"><a href="'+p.u+'"><h3 class="nm">'+p.n+'</h3></a>'
     +(p.rc?'<div class="rt"><b>★★★★★</b>'+String(p.rt).replace('.',',')+' ('+p.rc+')</div>':'')+vo
     +(p.qd?'<div class="qd">ab 3 Stück −10 %</div>':'')
     +'<div class="pr"><strong>'+eur(first.p)+'</strong>'+(first.r?'<s>'+eur(first.r)+'</s>':'')+'</div>'
@@ -353,7 +359,7 @@ document.addEventListener('DOMContentLoaded',function(){
  root.innerHTML='<section class="hero"><div class="in"><div class="bc"><a href="/">Start</a> › <a href="/alle-produkte/">Produkte</a>'+(D.isAll?'':' › '+D.title)+'</div>'
   +'<span class="pill">'+(D.label||'Sortiment')+'</span>'
   +'<h1>'+(pre?'Vorbestellung':D.title)+'</h1><p>'+(pre?'Diese Produkte sind gerade vorbestellbar – mit Preisvorteil. Wir liefern, sobald die neue Ware eintrifft.':D.desc)+'</p>'
-  +'<div class="meta"><span>'+list.length+(list.length===1?' Produkt':' Produkte')+'</span><span>🚚 Lieferung in 2 Werktagen</span><span>Gratisversand ab 100 €</span></div></div></section>'
+  +'<div class="meta"><span>🚚 Lieferung in 2 Werktagen</span><span>Gratisversand ab 100 €</span></div></div></section>'
   +'<div class="body"><div class="chips">'+chips+'</div>'
   +'<div class="bar"><b>'+list.length+' Ergebnisse</b><select aria-label="Sortieren"><option value="pop">Beliebteste</option><option value="pa">Preis aufsteigend</option><option value="pd">Preis absteigend</option><option value="az">Name A–Z</option></select></div>'
   +(list.some(function(p){return p.pre;})&&!pre?'<div class="note">⏳ <span>Mit <b>Vorbestellung</b> markierte Produkte werden geliefert, sobald neue Ware eintrifft.</span></div>':'')

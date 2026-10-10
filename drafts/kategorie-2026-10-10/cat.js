@@ -8,12 +8,12 @@ document.addEventListener('DOMContentLoaded',function(){
  var list=D.products.filter(function(p){return !pre||p.pre;});
  function card(p){
    var first=(p.vars&&p.vars.length)?p.vars[0]:{id:p.id,p:p.p,r:p.r};
-   var bd=(p.pre?'<span class="bd p">Vorbestellung</span>':'')+(first.r?'<span class="bd s">−'+Math.round((1-first.p/first.r)*100)+' %</span>':(p.best?'<span class="bd">★ Bestseller</span>':(p.pen?'<span class="bd n">Neu</span>':'')));
+   var bd=p.pre?'<span class="bd p">Vorbestellung'+(first.r?' · −'+Math.round((1-first.p/first.r)*100)+' %':'')+'</span>':(first.r?'<span class="bd s">−'+Math.round((1-first.p/first.r)*100)+' %</span>':(p.best?'<span class="bd">★ Bestseller</span>':(p.pen?'<span class="bd n">Neu</span>':'')));
    var vo='';
    if(p.vars&&p.vars.length>1)vo='<div class="vo">'+p.vars.map(function(v,k){return '<button type="button" data-id="'+v.id+'" data-p="'+v.p+'" data-r="'+(v.r||'')+'"'+(k===0?' class="on"':'')+'>'+v.l+'</button>';}).join('')+'</div>';
    else if(p.vars&&p.vars.length===1)vo='<div class="vo"><span>'+p.vars[0].l+'</span></div>';
    else if(p.vol)vo='<div class="vo"><span>'+p.vol+'</span></div>';
-   return '<div class="sp-pc'+(p.pen?' pen':'')+(p.acc?' acc':'')+'" data-id="'+first.id+'"><a class="im" href="'+p.u+'"><img loading="lazy" src="'+p.i+'" alt="'+p.n+'">'+bd+(p.acc?'':'<span class="coa">✓ COA</span>')+'</a><div class="tx"><a href="'+p.u+'"><h3 class="nm">'+p.n+'</h3></a>'
+   return '<div class="sp-pc'+(p.pen?' pen':'')+(p.acc?' acc':'')+'" data-id="'+first.id+'"><a class="im" href="'+p.u+'"><img loading="lazy" src="'+p.i+'" alt="'+p.n+'">'+bd+(p.acc||p.noq?'':'<span class="coa">✓ HPLC-verifiziert</span>')+'</a><div class="tx"><a href="'+p.u+'"><h3 class="nm">'+p.n+'</h3></a>'
     +(p.rc?'<div class="rt"><b>★★★★★</b>'+String(p.rt).replace('.',',')+' ('+p.rc+')</div>':'')+vo
     +(p.qd?'<div class="qd">ab 3 Stück −10 %</div>':'')
     +'<div class="pr"><strong>'+eur(first.p)+'</strong>'+(first.r?'<s>'+eur(first.r)+'</s>':'')+'</div>'
@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded',function(){
  root.innerHTML='<section class="hero"><div class="in"><div class="bc"><a href="/">Start</a> › <a href="/alle-produkte/">Produkte</a>'+(D.isAll?'':' › '+D.title)+'</div>'
   +'<span class="pill">'+(D.label||'Sortiment')+'</span>'
   +'<h1>'+(pre?'Vorbestellung':D.title)+'</h1><p>'+(pre?'Diese Produkte sind gerade vorbestellbar – mit Preisvorteil. Wir liefern, sobald die neue Ware eintrifft.':D.desc)+'</p>'
-  +'<div class="meta"><span>'+list.length+(list.length===1?' Produkt':' Produkte')+'</span><span>🚚 Lieferung in 2 Werktagen</span><span>Gratisversand ab 100 €</span></div></div></section>'
+  +'<div class="meta"><span>🚚 Lieferung in 2 Werktagen</span><span>Gratisversand ab 100 €</span></div></div></section>'
   +'<div class="body"><div class="chips">'+chips+'</div>'
   +'<div class="bar"><b>'+list.length+' Ergebnisse</b><select aria-label="Sortieren"><option value="pop">Beliebteste</option><option value="pa">Preis aufsteigend</option><option value="pd">Preis absteigend</option><option value="az">Name A–Z</option></select></div>'
   +(list.some(function(p){return p.pre;})&&!pre?'<div class="note">⏳ <span>Mit <b>Vorbestellung</b> markierte Produkte werden geliefert, sobald neue Ware eintrifft.</span></div>':'')
