@@ -64,6 +64,8 @@ add_action('wp_head', function () {
     }
     ?>
 <style id="sp-ds-css">
+/* Footer-Banner "Hochreine Peptide fuer deine Forschung" ueberall weg (Nutzerwunsch) */
+.elementor-location-footer .elementor-element-97108f0{display:none!important}
 /* Header: kein Astra-Blau bei Fokus/aktiv */
 .sp-hb-right button,.sp-hb-right button:hover,.sp-hb-right button:focus,.sp-hb-right button:active,.sp-hb-right button[aria-expanded="true"]{background:rgba(255,255,255,.08)!important;color:#fff!important;outline:none!important;box-shadow:none!important}
 .sp-hb-right button[aria-expanded="true"],.sp-hb-right button:active{background:rgba(255,255,255,.18)!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)!important}
