@@ -161,7 +161,7 @@ body.home .sp-abo-promo-eyebrow:before{background:#FF8A5C;box-shadow:0 0 8px rgb
 .sp-mq:before{left:0;background:linear-gradient(90deg,#F4F5F6,rgba(244,245,246,0))}
 .sp-mq:after{right:0;background:linear-gradient(270deg,#F4F5F6,rgba(244,245,246,0))}
 .sp-mq .tr{display:flex;gap:14px;width:max-content;animation:spMq 55s linear infinite;will-change:transform;backface-visibility:hidden;transform:translate3d(0,0,0)}
-.sp-mq.r2 .tr{animation-duration:65s;animation-direction:reverse}
+.sp-mq.r2 .tr{animation-direction:reverse}
 .sp-mq:hover .tr,.sp-mq:active .tr{animation-play-state:paused}
 @keyframes spMq{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}}
 .sp-rv{flex:0 0 270px;display:flex;flex-direction:column;gap:10px;background:#fff;border:1px solid #E3E6E9;border-radius:18px;padding:16px}
@@ -400,6 +400,40 @@ body.single-product .sp-reta-check-item span{min-width:0;overflow-wrap:anywhere}
  body.single-product [data-id="7269057"]>.elementor-widget-image a,body.single-product [data-id="7269057"]>.elementor-widget-image img{display:block;margin:0!important;box-shadow:none!important}
  body.single-product [data-id="279d771"]{padding-top:8px!important}
 }
+
+/* ===== v3: Hero-Bild randlos mit weichem Uebergang, saubere Abstaende ===== */
+@media(max-width:900px){
+ body.single-product [data-id="5d034e1"]{background:linear-gradient(180deg,#0B0D10 0,#0B0D10 260px,transparent 260px)!important}
+ body.single-product [data-id="825e5c4"]{padding-top:0!important}
+ body.single-product [data-id="7269057"]{padding:0!important;background:#0B0D10!important}
+ body.single-product [data-id="7269057"]>.elementor-widget-image{margin:0!important;border-radius:0!important;box-shadow:none!important;overflow:hidden;position:relative;background:#0B0D10}
+ body.single-product [data-id="7269057"]>.elementor-widget-image:after{content:'';position:absolute;left:0;right:0;bottom:0;height:42%;background:linear-gradient(180deg,rgba(11,13,16,0) 0%,rgba(11,13,16,.75) 60%,#0B0D10 100%);pointer-events:none}
+ body.single-product [data-id="7269057"] img{width:100%!important;height:auto!important;max-height:470px!important;object-fit:cover!important;object-position:50% 30%;border-radius:0!important;box-shadow:none!important}
+ .sp-img-bd{top:16px;left:16px}
+ body.single-product [data-id="279d771"]{margin-top:-1px!important;padding:0 20px 24px!important;background:linear-gradient(180deg,#0B0D10 0%,#15181C 100%)!important;border-radius:0 0 26px 26px;margin-bottom:16px!important;position:relative;z-index:1}
+ body.single-product .sp-reta-hero{margin-top:-46px;position:relative}
+ body.single-product .sp-reta-check-item{white-space:nowrap;font-size:12.5px!important;padding:11px 10px!important}
+ body.single-product .sp-reta-check-item span{overflow-wrap:normal}
+ /* Breiten vereinheitlichen: alles 16px vom Rand */
+ body.single-product .sp-pen-promo,body.single-product #rx-buybox{margin-left:0!important;margin-right:0!important;width:100%!important;max-width:100%!important;box-sizing:border-box}
+ body.single-product [data-id="spwpenpromo1"],body.single-product [data-id="de228b8"]{margin:0 0 14px!important;padding:0!important;width:100%!important}
+}
+/* Pen-Hinweis: eine schlanke Zeile statt Box in Box */
+body.single-product .sp-pen-promo{padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important}
+body.single-product .sp-pen-promo-eyebrow-row{display:none!important}
+body.single-product .sp-pen-promo-row{display:flex!important;align-items:center!important;gap:12px!important;padding:10px 12px!important;border-radius:16px!important;border:1px solid #E3E6E9!important;background:linear-gradient(135deg,#FFFFFF,#F4F5F6)!important;box-shadow:none!important;text-decoration:none!important}
+body.single-product .sp-pen-promo-icon{flex:0 0 46px!important;width:46px!important;height:46px!important;border-radius:12px!important;overflow:hidden;background:#0B0D10!important}
+body.single-product .sp-pen-promo-icon img{width:100%!important;height:100%!important;object-fit:cover!important}
+body.single-product .sp-pen-promo-text{flex:1!important;min-width:0!important}
+body.single-product .sp-pen-promo-name{display:block!important;font:700 14px/1.3 Sora,sans-serif!important;color:#0D0F12!important;white-space:normal!important}
+body.single-product .sp-pen-promo-blurb{display:block!important;font-size:12px!important;color:#5A6068!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important}
+body.single-product .sp-pen-promo-aside .sp-pen-promo-price{display:none!important}
+body.single-product .sp-pen-promo-name em{font-style:normal;font:700 9.5px Sora,sans-serif;letter-spacing:.08em;background:linear-gradient(120deg,#C7CCD1,#fff 50%,#C7CCD1);color:#0D0F12;padding:2px 6px;border-radius:999px;margin-left:6px;vertical-align:2px}
+/* Preiszeile: Lager + Versand kompakt */
+body.single-product #rx-buybox .rx-stock{font-size:12.5px!important}
+body.single-product #rx-buybox .rx-shipbadges{margin-top:8px!important}
+
+@media(max-width:900px){body.single-product [data-id="825e5c4"]{padding-left:0!important;padding-right:0!important}}
 #sp-hpv-flag{position:fixed;left:12px;top:12px;z-index:200000;background:#FF8A5C;color:#0D0F12;font:700 11px Sora,sans-serif;padding:6px 10px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.3);pointer-events:none}
 </style>
     <?php
@@ -426,7 +460,10 @@ document.addEventListener('DOMContentLoaded',function(){
  /* 0) Oberer Teil: Bild-Badges + Vertrauens-Zeile in der Kaufbox */
  var imc=document.querySelector('[data-id="7269057"]');
  if(imc&&!imc.querySelector('.sp-img-bd')){imc.appendChild(el('<div class="sp-img-bd"><span>★ Bestseller</span><span class="g">✓ HPLC ≥ 99 %</span></div>'));}
- var short={'99 % Reinheit (HPLC)':'HPLC-Reinheit ≥ 99 %','LC-MS Identitätsverifizierung':'LC-MS identitätsgeprüft','Chargenspezifisches Analysezertifikat (COA)':'Analysezertifikat (COA)','Diskrete Verpackung & schneller Versand':'Diskret & schnell versendet'};
+ var short={'99 % Reinheit (HPLC)':'99 % Reinheit','LC-MS Identitätsverifizierung':'LC-MS geprüft','Chargenspezifisches Analysezertifikat (COA)':'Mit Zertifikat','Diskrete Verpackung & schneller Versand':'Diskreter Versand'};
+ var pn=document.querySelector('.sp-pen-promo-name'),pb=document.querySelector('.sp-pen-promo-blurb'),pp=document.querySelector('.sp-pen-promo-price');
+ if(pn&&!pn.querySelector('em')){pn.innerHTML='Auch als Peptrium-Pen <em>NEU</em>';}
+ if(pb&&pp){pb.textContent='Fertig gemischt, kein Anmischen · '+pp.textContent.trim();}
  document.querySelectorAll('.sp-reta-check-item span').forEach(function(s){var t=s.textContent.trim();if(short[t])s.textContent=short[t];});
  var cta=document.querySelector('#rx-buybox .rx-buycta');
  if(cta&&!document.querySelector('.sp-bb-trust')){cta.parentNode.insertBefore(el('<div class="sp-bb-trust"><div><b>🚚</b>Gratisversand ab 100 €</div><div><b>📦</b>Neutral verpackt</div><div><b>🔒</b>Sicher bezahlen</div></div>'),cta.nextSibling);}
@@ -448,6 +485,10 @@ document.addEventListener('DOMContentLoaded',function(){
  function kick(){tgt=target();if(!run&&vis){run=true;requestAnimationFrame(loop);}}
  if('IntersectionObserver' in window){new IntersectionObserver(function(e){vis=e[0].isIntersecting;if(vis)kick();},{rootMargin:'200px 0px'}).observe(stage);}else{vis=true;}
  window.addEventListener('scroll',kick,{passive:true});cur=tgt=target();paint(cur);
+
+ /* Laufband: beide Reihen gleich schnell (Dauer aus der echten Breite, ~28 px/s) */
+ function mqSpeed(){document.querySelectorAll('.sp-mq .tr').forEach(function(tr){var w=tr.scrollWidth/2;if(w>0)tr.style.animationDuration=(w/28).toFixed(1)+'s';});}
+ mqSpeed();window.addEventListener('load',mqSpeed);window.addEventListener('resize',mqSpeed);
  /* 2) Passt dazu: Sets */
  var S=D.sets||[];
  if(S.length){var sets=el('<section id="sp-pp-sets" class="sp-pp sp-hp-sec sp-hp-light"><div class="in"><div class="hd"><span class="sp-lbl lt">Passt dazu</span><h2>Komplett in einem Klick.</h2><p class="sub">Alles, was du rund um '+D.name+' brauchst – zusammen in den Warenkorb.</p></div><div class="sp-rail">'

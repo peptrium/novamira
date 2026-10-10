@@ -11,7 +11,10 @@ document.addEventListener('DOMContentLoaded',function(){
  /* 0) Oberer Teil: Bild-Badges + Vertrauens-Zeile in der Kaufbox */
  var imc=document.querySelector('[data-id="7269057"]');
  if(imc&&!imc.querySelector('.sp-img-bd')){imc.appendChild(el('<div class="sp-img-bd"><span>★ Bestseller</span><span class="g">✓ HPLC ≥ 99 %</span></div>'));}
- var short={'99 % Reinheit (HPLC)':'HPLC-Reinheit ≥ 99 %','LC-MS Identitätsverifizierung':'LC-MS identitätsgeprüft','Chargenspezifisches Analysezertifikat (COA)':'Analysezertifikat (COA)','Diskrete Verpackung & schneller Versand':'Diskret & schnell versendet'};
+ var short={'99 % Reinheit (HPLC)':'99 % Reinheit','LC-MS Identitätsverifizierung':'LC-MS geprüft','Chargenspezifisches Analysezertifikat (COA)':'Mit Zertifikat','Diskrete Verpackung & schneller Versand':'Diskreter Versand'};
+ var pn=document.querySelector('.sp-pen-promo-name'),pb=document.querySelector('.sp-pen-promo-blurb'),pp=document.querySelector('.sp-pen-promo-price');
+ if(pn&&!pn.querySelector('em')){pn.innerHTML='Auch als Peptrium-Pen <em>NEU</em>';}
+ if(pb&&pp){pb.textContent='Fertig gemischt, kein Anmischen · '+pp.textContent.trim();}
  document.querySelectorAll('.sp-reta-check-item span').forEach(function(s){var t=s.textContent.trim();if(short[t])s.textContent=short[t];});
  var cta=document.querySelector('#rx-buybox .rx-buycta');
  if(cta&&!document.querySelector('.sp-bb-trust')){cta.parentNode.insertBefore(el('<div class="sp-bb-trust"><div><b>🚚</b>Gratisversand ab 100 €</div><div><b>📦</b>Neutral verpackt</div><div><b>🔒</b>Sicher bezahlen</div></div>'),cta.nextSibling);}
@@ -33,6 +36,10 @@ document.addEventListener('DOMContentLoaded',function(){
  function kick(){tgt=target();if(!run&&vis){run=true;requestAnimationFrame(loop);}}
  if('IntersectionObserver' in window){new IntersectionObserver(function(e){vis=e[0].isIntersecting;if(vis)kick();},{rootMargin:'200px 0px'}).observe(stage);}else{vis=true;}
  window.addEventListener('scroll',kick,{passive:true});cur=tgt=target();paint(cur);
+
+ /* Laufband: beide Reihen gleich schnell (Dauer aus der echten Breite, ~28 px/s) */
+ function mqSpeed(){document.querySelectorAll('.sp-mq .tr').forEach(function(tr){var w=tr.scrollWidth/2;if(w>0)tr.style.animationDuration=(w/28).toFixed(1)+'s';});}
+ mqSpeed();window.addEventListener('load',mqSpeed);window.addEventListener('resize',mqSpeed);
  /* 2) Passt dazu: Sets */
  var S=D.sets||[];
  if(S.length){var sets=el('<section id="sp-pp-sets" class="sp-pp sp-hp-sec sp-hp-light"><div class="in"><div class="hd"><span class="sp-lbl lt">Passt dazu</span><h2>Komplett in einem Klick.</h2><p class="sub">Alles, was du rund um '+D.name+' brauchst – zusammen in den Warenkorb.</p></div><div class="sp-rail">'
