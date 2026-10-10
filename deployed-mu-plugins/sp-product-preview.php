@@ -341,6 +341,16 @@ html,body{overflow-x:hidden}
 @media(max-width:767px){body.home .sp-hiw-step-img{width:72%!important;height:auto!important;aspect-ratio:282/190;object-fit:cover!important;margin-top:10px!important;border-radius:14px!important}body.home .sp-hiw-step-content p{margin:4px 0 0!important}}
 .sp-set .vg{flex-wrap:nowrap!important;gap:6px}
 .sp-set .vg button{flex:1 1 auto;padding:0 6px;font-size:11.5px;white-space:nowrap}
+/* Desktop: 3 Schritte nebeneinander statt schmaler Spalte, Tools-Raster auf Seitenbreite */
+@media(min-width:1024px){
+body.home .elementor-211>[data-id="hiwk001"] .sp-hiw-steps{flex-direction:row!important;align-items:stretch!important;gap:28px!important;max-width:1100px!important;width:100%!important;margin-left:auto!important;margin-right:auto!important}
+body.home .elementor-211>[data-id="hiwk001"] .sp-hiw-steps *{max-width:none}
+body.home .elementor-211>[data-id="hiwk001"] .sp-hiw-track{display:none!important}
+body.home .elementor-211>[data-id="hiwk001"] .sp-hiw-step{flex:1 1 0!important;flex-direction:column!important;align-items:flex-start!important;gap:14px!important;margin:0!important}
+body.home .elementor-211>[data-id="hiwk001"] .sp-hiw-step-content{width:100%!important}
+body.home .elementor-211>[data-id="hiwk001"] .sp-hiw-step-img{width:100%!important;height:auto!important;aspect-ratio:282/190;object-fit:cover}
+body.home .elementor-211>[data-id="77e913a"] .sp-tools-grid{max-width:1140px!important;margin-left:auto!important;margin-right:auto!important}
+}
 /* ===== Produktseite (Entwurf) ===== */
 body.single-product .pp-root{display:flex;flex-direction:column}
 body.single-product .pp-root>*{order:50;width:100%}
@@ -597,6 +607,14 @@ body.single-product .sp-reta-check-item.wrap span{overflow-wrap:anywhere!importa
 /* Pen Nadeln (Hook-Seite ohne Elementor) */
 body.single-product .pp-hook .sp-pen-wrap{background:transparent!important}
 @media(max-width:900px){body.single-product .pp-hook .sp-pen-wrap{padding:16px 0 28px!important;gap:20px!important}}
+/* Alte Template-Regeln "flex:0 0 100vw" (fuer Zeilen gedacht) wuerden in der Spalte die HOEHE auf Bildschirmbreite setzen -> leere Flaechen am PC */
+body.single-product .pp-root>.elementor-element,body.single-product .pp-root>section,body.single-product .pp-root>div{flex:0 0 auto!important}
+@media(min-width:1024px){
+body.single-product #sp-pp-proof,body.single-product #sp-pp-sets,body.single-product #sp-pp-more,body.single-product .pp-root>.pp-lex,body.single-product .pp-root>.pp-faq{border-radius:28px!important;overflow:hidden}
+body.single-product .pp-root>*+*{margin-top:18px}
+body.single-product .pp-root>.pp-lex,body.single-product .pp-root>.pp-faq,body.single-product #sp-pp-proof,body.single-product #sp-pp-sets,body.single-product #sp-pp-more{width:auto!important;max-width:1240px!important;margin-left:auto!important;margin-right:auto!important;align-self:stretch}
+body.single-product #sp-pp-sets .sp-rail{grid-template-columns:repeat(auto-fit,minmax(240px,280px))!important;justify-content:center}
+}
 #sp-hpv-flag{position:fixed;left:12px;top:12px;z-index:200000;background:#FF8A5C;color:#0D0F12;font:700 11px Sora,sans-serif;padding:6px 10px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.3);text-decoration:none!important}
 </style>
     <?php

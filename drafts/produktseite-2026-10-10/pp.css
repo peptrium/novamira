@@ -254,3 +254,11 @@ body.single-product .sp-reta-check-item.wrap span{overflow-wrap:anywhere!importa
 /* Pen Nadeln (Hook-Seite ohne Elementor) */
 body.single-product .pp-hook .sp-pen-wrap{background:transparent!important}
 @media(max-width:900px){body.single-product .pp-hook .sp-pen-wrap{padding:16px 0 28px!important;gap:20px!important}}
+/* Alte Template-Regeln "flex:0 0 100vw" (fuer Zeilen gedacht) wuerden in der Spalte die HOEHE auf Bildschirmbreite setzen -> leere Flaechen am PC */
+body.single-product .pp-root>.elementor-element,body.single-product .pp-root>section,body.single-product .pp-root>div{flex:0 0 auto!important}
+@media(min-width:1024px){
+body.single-product #sp-pp-proof,body.single-product #sp-pp-sets,body.single-product #sp-pp-more,body.single-product .pp-root>.pp-lex,body.single-product .pp-root>.pp-faq{border-radius:28px!important;overflow:hidden}
+body.single-product .pp-root>*+*{margin-top:18px}
+body.single-product .pp-root>.pp-lex,body.single-product .pp-root>.pp-faq,body.single-product #sp-pp-proof,body.single-product #sp-pp-sets,body.single-product #sp-pp-more{width:auto!important;max-width:1240px!important;margin-left:auto!important;margin-right:auto!important;align-self:stretch}
+body.single-product #sp-pp-sets .sp-rail{grid-template-columns:repeat(auto-fit,minmax(240px,280px))!important;justify-content:center}
+}

@@ -244,3 +244,17 @@ html,body{overflow-x:hidden}
 @media(max-width:767px){body.home .sp-hiw-step-img{width:72%!important;height:auto!important;aspect-ratio:282/190;object-fit:cover!important;margin-top:10px!important;border-radius:14px!important}body.home .sp-hiw-step-content p{margin:4px 0 0!important}}
 .sp-set .vg{flex-wrap:nowrap!important;gap:6px}
 .sp-set .vg button{flex:1 1 auto;padding:0 6px;font-size:11.5px;white-space:nowrap}
+/* Desktop: 3 Schritte nebeneinander statt schmaler Spalte, Tools-Raster auf Seitenbreite */
+@media(min-width:1024px){
+body.home .elementor-211>[data-id="hiwk001"] .sp-hiw-steps{flex-direction:row!important;align-items:stretch!important;gap:28px!important;max-width:1100px!important;width:100%!important;margin-left:auto!important;margin-right:auto!important}
+body.home .elementor-211>[data-id="hiwk001"] .sp-hiw-steps *{max-width:none}
+body.home .elementor-211>[data-id="hiwk001"] .sp-hiw-track{display:none!important}
+body.home .elementor-211>[data-id="hiwk001"] .sp-hiw-step{flex:1 1 0!important;flex-direction:column!important;align-items:flex-start!important;gap:14px!important;margin:0!important}
+body.home .elementor-211>[data-id="hiwk001"] .sp-hiw-step-content{width:100%!important}
+body.home .elementor-211>[data-id="hiwk001"] .sp-hiw-step-img{width:100%!important;height:auto!important;aspect-ratio:282/190;object-fit:cover}
+body.home .elementor-211>[data-id="77e913a"] .sp-tools-grid{max-width:1140px!important;margin-left:auto!important;margin-right:auto!important}
+body.home .elementor-211>[data-id="77e913a"] .sp-tool-card{display:flex!important;flex-direction:column!important}
+body.home .elementor-211>[data-id="77e913a"] .sp-tool-card p{flex:0 0 auto}
+body.home .elementor-211>[data-id="77e913a"] .sp-tool-cta{align-self:flex-start;margin-top:auto!important}
+body.home .elementor-211>[data-id="77e913a"] .sp-tools-grid{align-items:stretch!important}
+}
