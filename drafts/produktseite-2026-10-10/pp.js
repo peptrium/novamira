@@ -8,6 +8,13 @@ document.addEventListener('DOMContentLoaded',function(){
    (function next(){if(i>=ids.length){b.classList.add('ok');b.innerHTML=done;if(window.jQuery)jQuery(document.body).trigger('added_to_cart',[last&&last.fragments,last&&last.cart_hash,jQuery(b)]);setTimeout(function(){b.classList.remove('ok');b.innerHTML=old;b.disabled=false;},2400);return;}
      var fd=new FormData();fd.append('product_id',ids[i]);fd.append('quantity','1');
      fetch('/?wc-ajax=add_to_cart',{method:'POST',body:fd,credentials:'same-origin'}).then(function(r){return r.json();}).then(function(r){last=r;i++;next();}).catch(function(){b.innerHTML=old;b.disabled=false;});})();}
+ /* 0) Oberer Teil: Bild-Badges + Vertrauens-Zeile in der Kaufbox */
+ var imc=document.querySelector('[data-id="7269057"]');
+ if(imc&&!imc.querySelector('.sp-img-bd')){imc.appendChild(el('<div class="sp-img-bd"><span>★ Bestseller</span><span class="g">✓ HPLC ≥ 99 %</span></div>'));}
+ var short={'99 % Reinheit (HPLC)':'HPLC-Reinheit ≥ 99 %','LC-MS Identitätsverifizierung':'LC-MS identitätsgeprüft','Chargenspezifisches Analysezertifikat (COA)':'Analysezertifikat (COA)','Diskrete Verpackung & schneller Versand':'Diskret & schnell versendet'};
+ document.querySelectorAll('.sp-reta-check-item span').forEach(function(s){var t=s.textContent.trim();if(short[t])s.textContent=short[t];});
+ var cta=document.querySelector('#rx-buybox .rx-buycta');
+ if(cta&&!document.querySelector('.sp-bb-trust')){cta.parentNode.insertBefore(el('<div class="sp-bb-trust"><div><b>🚚</b>Gratisversand ab 100 €</div><div><b>📦</b>Neutral verpackt</div><div><b>🔒</b>Sicher bezahlen</div></div>'),cta.nextSibling);}
  /* 1) Kundenstimmen: dunkel, Laufband + Flasche */
  var rv=[];
  document.querySelectorAll('[data-id="b221b92"] .rv-card').forEach(function(c){var t=c.querySelector('.rv-text'),n=c.querySelector('.rv-name'),a=c.querySelector('.rv-avatar');if(t)rv.push({t:t.textContent.trim(),n:n?n.textContent.trim():'Verifizierter Kunde',a:a?a.textContent.trim():'✓',s:c.querySelectorAll('.rv-stars > svg').length||5});});
