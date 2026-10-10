@@ -157,7 +157,7 @@ body.home .sp-abo-promo-eyebrow:before{background:#FF8A5C;box-shadow:0 0 8px rgb
 @media(min-width:901px){.sp-pc.all{display:none}}
 
 /* ---- Kundenstimmen: Laufband + Flasche beim Scrollen ---- */
-#sp-hp-proof{overflow:hidden}
+#sp-hp-proof{overflow:hidden;background:#F4F5F6!important}
 #sp-hp-proof h2 span{background:linear-gradient(100deg,#0D0F12,#6A727C 50%,#0D0F12);-webkit-background-clip:text;background-clip:text;color:transparent}
 .sp-sum{display:flex;align-items:center;justify-content:center;gap:16px;margin:0 auto 10px;padding:14px 20px;max-width:440px;background:#fff;border:1px solid #E3E6E9;border-radius:18px;box-shadow:0 8px 24px rgba(13,15,18,.06)}
 .sp-sum .big{font:800 40px/1 Sora,sans-serif;color:#0D0F12}
@@ -165,22 +165,26 @@ body.home .sp-abo-promo-eyebrow:before{background:#FF8A5C;box-shadow:0 0 8px rgb
 .sp-sum .t{font-size:12.5px;color:#5A6068;line-height:1.45}
 .sp-sum .t b{color:#0D0F12}
 .sp-stage{position:relative;margin:0 -20px;padding:40px 0 30px}
-.sp-mq{overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);margin:0 0 14px}
-.sp-mq .tr{display:flex;gap:14px;width:max-content;animation:spMq 55s linear infinite}
+.sp-mq{position:relative;overflow:hidden;margin:0 0 14px;contain:paint}
+.sp-mq:before,.sp-mq:after{content:'';position:absolute;top:0;bottom:0;width:28px;z-index:1;pointer-events:none}
+.sp-mq:before{left:0;background:linear-gradient(90deg,#F4F5F6,rgba(244,245,246,0))}
+.sp-mq:after{right:0;background:linear-gradient(270deg,#F4F5F6,rgba(244,245,246,0))}
+.sp-mq .tr{display:flex;gap:14px;width:max-content;animation:spMq 55s linear infinite;will-change:transform;backface-visibility:hidden;transform:translate3d(0,0,0)}
 .sp-mq.r2 .tr{animation-duration:65s;animation-direction:reverse}
 .sp-mq:hover .tr,.sp-mq:active .tr{animation-play-state:paused}
-@keyframes spMq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-.sp-rv{flex:0 0 270px;display:flex;flex-direction:column;gap:10px;background:#fff;border:1px solid #E3E6E9;border-radius:18px;padding:16px;box-shadow:0 8px 24px rgba(13,15,18,.05)}
+@keyframes spMq{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}}
+.sp-rv{flex:0 0 270px;display:flex;flex-direction:column;gap:10px;background:#fff;border:1px solid #E3E6E9;border-radius:18px;padding:16px}
 .sp-rv .st{color:#F5A623;font-size:13px;letter-spacing:2px}
 .sp-rv p{margin:0;font-size:13.5px;line-height:1.55;color:#2A2F35;flex:1;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;min-height:4.65em}
 .sp-rv .au{display:flex;align-items:center;gap:10px;font-size:12px;color:#5A6068}
 .sp-rv .au i{font-style:normal;width:32px;height:32px;border-radius:50%;background:#0D0F12;color:#fff;font-weight:700;font-size:11.5px;display:flex;align-items:center;justify-content:center}
 .sp-rv .au b{display:block;color:#0D0F12;font-size:12.5px}
 .sp-rv .au em{font-style:normal;color:#2E9B57;font-size:11px;font-weight:600}
-.sp-bottle{position:absolute;z-index:2;left:50%;top:50%;width:190px;margin:-150px 0 0 -95px;pointer-events:none;will-change:transform;filter:drop-shadow(0 30px 40px rgba(13,15,18,.35))}
+.sp-bottle{position:absolute;z-index:2;left:50%;top:50%;width:190px;margin:-150px 0 0 -95px;pointer-events:none;will-change:transform;backface-visibility:hidden;transform:translate3d(0,0,0)}
 .sp-bottle img{width:100%;height:auto;display:block}
 .sp-glow{position:absolute;z-index:1;left:50%;top:50%;width:300px;height:300px;margin:-150px 0 0 -150px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.95),rgba(255,255,255,0) 65%);pointer-events:none}
-@media(min-width:901px){.sp-stage{margin:0;padding:60px 0 40px}.sp-bottle{width:260px;margin:-200px 0 0 -130px}.sp-glow{width:420px;height:420px;margin:-210px 0 0 -210px}.sp-rv{flex-basis:300px}}
+.sp-bshadow{position:absolute;z-index:1;left:50%;top:50%;width:150px;height:36px;margin:120px 0 0 -75px;border-radius:50%;background:radial-gradient(ellipse,rgba(13,15,18,.28),rgba(13,15,18,0) 70%);pointer-events:none;will-change:transform,opacity}
+@media(min-width:901px){.sp-stage{margin:0;padding:60px 0 40px}.sp-bottle{width:260px;margin:-200px 0 0 -130px}.sp-bshadow{width:200px;margin:160px 0 0 -100px}.sp-glow{width:420px;height:420px;margin:-210px 0 0 -210px}.sp-rv{flex-basis:300px}}
 @media (prefers-reduced-motion:reduce){.sp-mq .tr{animation:none}}
 
 /* ---- Abschnitte neu einfaerben ---- */
@@ -286,13 +290,18 @@ document.addEventListener('DOMContentLoaded',function(){
  function row(list,cls){var s=list.map(card).join('');return '<div class="sp-mq '+cls+'"><div class="tr">'+s+s+'</div></div>';}
  var proof=el('<section id="sp-hp-proof" class="sp-hp-sec sp-hp-light"><div class="in"><div class="hd"><span class="sp-lbl lt">Kundenstimmen</span><h2>Was andere nicht liefern, <span>liefert Peptrium.</span></h2></div>'
   +'<div class="sp-sum"><div class="big">4,8</div><div><div class="st">★★★★★</div><div class="t">aus <b>2.500+ Bestellungen</b><br>von verifizierten Käufern</div></div></div>'
-  +'<div class="sp-stage">'+row(h1,'r1')+row(h2,'r2')+'<div class="sp-glow"></div><div class="sp-bottle"><img src="'+bimg+'" alt="Peptrium Fläschchen"></div></div></div></section>');
+  +'<div class="sp-stage">'+row(h1,'r1')+row(h2,'r2')+'<div class="sp-glow"></div><div class="sp-bshadow"></div><div class="sp-bottle"><img src="'+bimg+'" alt="Peptrium Fläschchen"></div></div></div></section>');
  root.appendChild(proof);
- /* Flasche bewegt sich beim Scrollen (wie im alten Abschnitt) */
- var stage=proof.querySelector('.sp-stage'),bottle=proof.querySelector('.sp-bottle'),tick=false;
- function upd(){tick=false;var r=stage.getBoundingClientRect(),vh=window.innerHeight;var p=((r.top+r.height/2)-vh/2)/vh;p=Math.max(-1,Math.min(1,p));
-   bottle.style.transform='translateY('+(p*110)+'px) rotate('+(p*-22+6)+'deg) scale('+(1-Math.abs(p)*0.08)+')';}
- window.addEventListener('scroll',function(){if(!tick){tick=true;requestAnimationFrame(upd);}},{passive:true});upd();
+ /* Flasche: gleitet weich hinter dem Scrollen her (nur solange sichtbar) */
+ var stage=proof.querySelector('.sp-stage'),bottle=proof.querySelector('.sp-bottle'),bsh=proof.querySelector('.sp-bshadow');
+ var cur=0,tgt=0,run=false,vis=false;
+ function target(){var r=stage.getBoundingClientRect(),vh=window.innerHeight;var p=((r.top+r.height/2)-vh/2)/vh;return Math.max(-1,Math.min(1,p));}
+ function paint(p){bottle.style.transform='translate3d(0,'+(p*110).toFixed(1)+'px,0) rotate('+(p*-22+6).toFixed(2)+'deg)';bsh.style.transform='translate3d(0,'+(p*40).toFixed(1)+'px,0) scale('+(1-Math.abs(p)*0.25).toFixed(3)+')';bsh.style.opacity=(1-Math.abs(p)*0.5).toFixed(2);}
+ function loop(){cur+=(tgt-cur)*0.12;paint(cur);if(Math.abs(tgt-cur)>0.0005&&vis){requestAnimationFrame(loop);}else{run=false;}}
+ function kick(){tgt=target();if(!run&&vis){run=true;requestAnimationFrame(loop);}}
+ if('IntersectionObserver' in window){new IntersectionObserver(function(e){vis=e[0].isIntersecting;if(vis)kick();},{rootMargin:'200px 0px'}).observe(stage);}else{vis=true;}
+ window.addEventListener('scroll',kick,{passive:true});cur=tgt=target();paint(cur);
+ if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){window.removeEventListener('scroll',kick);}
  /* Newsletter in die Seite holen */
  var nl=document.getElementById('sp-nlh'); if(nl) root.appendChild(nl);
  /* Hinweis + Mehr ueber Peptrium */
