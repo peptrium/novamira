@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) {
 /** Top-Level-Abschnitte pro Elementor-Dokument, die das Redesign ohnehin ausblendet. */
 function sp_rd_drop_sections() {
     return [
-        211 => ['a9d4d1b', 'midcta01', '3ca703b', '5c363d8', '045a884', 'a4ab146'], // Startseite (d60a05b + spsocial1 bleiben: JS liest die Texte)
+        211 => ['a9d4d1b', 'midcta01', '3ca703b', '5c363d8', '045a884', 'a4ab146', 'af2deb0'], // Startseite (d60a05b + spsocial1 bleiben: JS liest die Texte; af2deb0 = "Analysezertifikate einsehen", es gibt noch keine COAs)
         325 => ['59e11b5'], // Alle Produkte: Inhalt wird komplett von sp-category-preview.php gebaut
     ];
 }
@@ -39,6 +39,17 @@ add_filter('elementor/frontend/builder_content_data', function ($data, $post_id)
         return !(is_array($el) && isset($el['id']) && in_array($el['id'], $drop, true));
     }));
 }, 10, 2);
+
+/*
+ * Achtung: Elementor 4 speichert das fertige HTML pro Dokument im Postmeta _elementor_element_cache.
+ * Solange dieser Cache existiert, wird der Filter oben NICHT ausgefuehrt. Nach jeder Aenderung an
+ * sp_rd_drop_sections() deshalb den Cache der betroffenen Seiten loeschen (sp_rd_flush_elementor_cache()).
+ */
+function sp_rd_flush_elementor_cache() {
+    foreach (array_keys(sp_rd_drop_sections()) as $id) {
+        delete_post_meta($id, '_elementor_element_cache');
+    }
+}
 
 function sp_rd_webp_dir() {
     $u = wp_get_upload_dir();
