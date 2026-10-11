@@ -621,6 +621,9 @@ body.single-product .pp-root>*+*{margin-top:18px}
 body.single-product .pp-root>.pp-lex,body.single-product .pp-root>.pp-faq,body.single-product #sp-pp-proof,body.single-product #sp-pp-sets,body.single-product #sp-pp-more{width:auto!important;max-width:1240px!important;margin-left:auto!important;margin-right:auto!important;align-self:stretch}
 body.single-product #sp-pp-sets .sp-rail{grid-template-columns:repeat(auto-fit,minmax(240px,280px))!important;justify-content:center}
 }
+
+/* 2026-10-11: Desktop – Produktbild fuellt die Spalte, damit die Abzeichen (.sp-img-bd) innerhalb des Bildes sitzen (Pen-Bilder waren schmaler als die Spalte) */
+@media(min-width:901px){body.single-product .pp-img .elementor-widget-image img{width:100%!important;max-width:100%!important;height:auto!important}}
 #sp-hpv-flag{position:fixed;left:12px;top:12px;z-index:200000;background:#FF8A5C;color:#0D0F12;font:700 11px Sora,sans-serif;padding:6px 10px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.3);text-decoration:none!important}
 </style>
     <?php

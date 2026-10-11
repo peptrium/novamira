@@ -7,7 +7,7 @@
  *  A) elementor/frontend/builder_content_data: alte, vom Redesign per CSS versteckte Abschnitte werden beim
  *     Rendern gar nicht erst ausgegeben (ihre Bilder wurden sonst trotzdem geladen, Startseite ~20 MB).
  *  B) Ausgabepuffer: jede Upload-URL (.png/.jpg) > 100 KB im HTML (auch JSON-escaped in Inline-Skripten) wird
- *     durch eine einmalig erzeugte WebP-Kopie ersetzt (uploads/sp-redesign/webp/, max. 1200 px breit).
+ *     durch eine einmalig erzeugte WebP-Kopie ersetzt (uploads/sp-redesign/webp/, gleiche Breite wie das Original, nur > 2560 px wird verkleinert).
  *     Zuordnung in Option sp_rd_webp_map (rel. Pfad => webp-Dateiname oder '' = nicht umwandeln).
  * Zuruecksetzen: Datei loeschen (WebP-Ordner + Option koennen bleiben).
  */
@@ -83,8 +83,11 @@ function sp_rd_webp_for($rel, &$map, $allow_gen) {
             return '';
         }
         $sz = $ed->get_size();
-        if (!empty($sz['width']) && $sz['width'] > 1200) {
-            $ed->resize(1200, null, false);
+        // Nur sehr grosse Bilder verkleinern: srcset nennt die ORIGINAL-Breite ("1450w"). Ist die WebP-Datei
+        // schmaler als angegeben, rechnet der Browser die Bildgroesse falsch (2026-10-11: Pen-Bild ragte auf
+        // iPhones mit 3x-Display 25 px ueber seinen Rahmen in die Bewertungszeile).
+        if (!empty($sz['width']) && $sz['width'] > 2560) {
+            $ed->resize(2560, null, false);
         }
         $ed->set_quality(80);
         $res = $ed->save($dst, 'image/webp');
