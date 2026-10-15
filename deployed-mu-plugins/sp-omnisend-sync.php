@@ -139,6 +139,62 @@ add_action('init', function () {
     }
 });
 
+/**
+ * Aktueller E-Mail-Status eines Kontakts in Omnisend ('subscribed', 'nonSubscribed', 'unsubscribed'),
+ * '' wenn es den Kontakt nicht gibt, null bei Fehler.
+ */
+function sp_os_contact_status($email) {
+    $key = sp_os_key();
+    if ($key === '') {
+        return null;
+    }
+    $res = wp_remote_get('https://api.omnisend.com/api/contacts?email=' . rawurlencode(strtolower($email)), [
+        'timeout' => 8,
+        'headers' => ['Authorization' => 'Omnisend-API-Key ' . $key, 'Omnisend-Version' => '2026-03-15', 'Accept' => 'application/json'],
+    ]);
+    if (is_wp_error($res) || (int) wp_remote_retrieve_response_code($res) !== 200) {
+        return null;
+    }
+    $b = json_decode(wp_remote_retrieve_body($res), true);
+    foreach ($b['contacts'][0]['identifiers'] ?? [] as $i) {
+        if (($i['type'] ?? '') === 'email') {
+            return (string) ($i['channels']['email']['status'] ?? 'nonSubscribed');
+        }
+    }
+    return '';
+}
+
+/**
+ * Custom Properties setzen und danach ein Event ausloesen. Der Anmeldestatus wird NIE geaendert:
+ * bestehende Kontakte behalten ihren Status (sonst wuerde z.B. die Willkommensmail starten),
+ * neue werden mit $new_status angelegt. Abgemeldete bekommen nichts (Rueckgabe 'unsubscribed').
+ * Rueckgabe true oder Fehlertext.
+ */
+function sp_os_event($email, $event, array $props, $new_status = 'nonSubscribed') {
+    $email = strtolower(trim($email));
+    $st = sp_os_contact_status($email);
+    if ($st === null) {
+        return 'Status nicht abrufbar';
+    }
+    if ($st === 'unsubscribed') {
+        return 'unsubscribed';
+    }
+    $r = sp_os_send(['identifiers' => [['type' => 'email', 'id' => $email, 'channels' => ['email' => ['status' => $st !== '' ? $st : $new_status]]]], 'customProperties' => $props]);
+    if ($r !== true) {
+        return $r;
+    }
+    $res = wp_remote_post('https://api.omnisend.com/api/events', [
+        'timeout' => 8,
+        'headers' => ['Authorization' => 'Omnisend-API-Key ' . sp_os_key(), 'Omnisend-Version' => '2026-03-15', 'Content-Type' => 'application/json'],
+        'body' => wp_json_encode(['eventName' => $event, 'origin' => 'api', 'eventID' => wp_generate_uuid4(), 'eventTime' => gmdate('Y-m-d\TH:i:s\Z'), 'contact' => ['email' => $email], 'properties' => (object) []]),
+    ]);
+    if (is_wp_error($res)) {
+        return $res->get_error_message();
+    }
+    $code = (int) wp_remote_retrieve_response_code($res);
+    return ($code >= 200 && $code < 300) ? true : 'Event HTTP ' . $code . ': ' . substr((string) wp_remote_retrieve_body($res), 0, 200);
+}
+
 /* Admin: Peptrium Dashboard → Omnisend */
 add_action('admin_menu', function () {
     add_submenu_page('peptrium-dashboard', 'Omnisend', 'Omnisend', 'manage_woocommerce', 'sp-omnisend', 'sp_os_render_admin');

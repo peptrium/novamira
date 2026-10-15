@@ -275,30 +275,13 @@ function sp_nlm_omni_event($subscriber, $event, array $props) {
         return false; // Rest kommt am naechsten Tag dran
     }
     $email = strtolower($subscriber->email);
-    $r = sp_os_send(['identifiers' => [['type' => 'email', 'id' => $email, 'channels' => ['email' => ['status' => 'subscribed']]]], 'customProperties' => $props]); // Omnisend verlangt den E-Mail-Kanal
-    if ($r !== true) {
-        update_option('sp_os_last_error', current_time('mysql') . ' – ' . $email . ' (' . $event . ', Kontakt): ' . $r, false);
-        return false;
+    /* Fehlt der Kontakt in Omnisend (z. B. Sync fehlgeschlagen), erst vollstaendig mit Code anlegen. */
+    if (function_exists('sp_os_contact_status') && sp_os_contact_status($email) === '' && function_exists('sp_os_payload')) {
+        sp_os_send(sp_os_payload($subscriber, 'subscribed'));
     }
-    $res = wp_remote_post('https://api.omnisend.com/api/events', [
-        'timeout' => 8,
-        'headers' => [
-            'Authorization' => 'Omnisend-API-Key ' . sp_os_key(),
-            'Omnisend-Version' => '2026-03-15',
-            'Content-Type' => 'application/json',
-        ],
-        'body' => wp_json_encode([
-            'eventName' => $event,
-            'origin' => 'api',
-            'eventID' => wp_generate_uuid4(),
-            'eventTime' => gmdate('Y-m-d\TH:i:s\Z'),
-            'contact' => ['email' => $email],
-            'properties' => $props,
-        ]),
-    ]);
-    $code = is_wp_error($res) ? 0 : (int) wp_remote_retrieve_response_code($res);
-    if ($code < 200 || $code >= 300) {
-        update_option('sp_os_last_error', current_time('mysql') . ' – ' . $email . ' (' . $event . '): ' . (is_wp_error($res) ? $res->get_error_message() : 'HTTP ' . $code . ' ' . substr((string) wp_remote_retrieve_body($res), 0, 200)), false);
+    $r = function_exists('sp_os_event') ? sp_os_event($email, $event, $props, 'subscribed') : 'sp_os_event fehlt';
+    if ($r !== true) {
+        update_option('sp_os_last_error', current_time('mysql') . ' – ' . $email . ' (' . $event . '): ' . $r, false);
         return false;
     }
     set_transient($day, $count + 1, 2 * DAY_IN_SECONDS);
@@ -415,7 +398,7 @@ add_action('sp_nlm_daily', function () {
         foreach ([['sp_nl_coupon', 5, 'sp_nlm_exp1_sent'], ['sp_nlm_winback', 3, 'sp_nlm_exp2_sent']] as $cfg) {
             $open = sp_nlm_open_coupon($sub, $cfg[0]);
             if ($open && $open[1] <= $cfg[1] && $sub->getMeta($cfg[2], 'peptrium') !== $open[0]) {
-                if (sp_nlm_dispatch($sub, 'sp_code_erinnerung', ['erinnerung_code' => $open[0], 'erinnerung_tage' => $open[1] . ' ' . ($open[1] === 1 ? 'Tag' : 'Tage'), 'erinnerung_prozent' => $open[2] . ' %'], 'Dein Code läuft bald ab', function () use ($sub, $open) { return sp_nlm_expiry_html($sub, $open[0], $open[1], $open[2]); })) {
+                if (sp_nlm_dispatch($sub, 'sp_code_erinnerung', ['erinnerung_code' => $open[0], 'erinnerung_tage' => $open[1] . ' ' . ($open[1] === 1 ? 'Tag' : 'Tage'), 'erinnerung_prozent' => $open[2] . ' %', 'erinnerung_zahl' => (string) $open[1], 'erinnerung_label' => $open[1] === 1 ? 'TAG ÜBRIG' : 'TAGE ÜBRIG', 'erinnerung_bis' => sp_nlm_coupon_until($open[0])], 'Dein Code läuft bald ab', function () use ($sub, $open) { return sp_nlm_expiry_html($sub, $open[0], $open[1], $open[2]); })) {
                     $sub->updateMeta($cfg[2], $open[0], 'peptrium');
                 }
             }
@@ -456,3 +439,79 @@ add_action('sp_nlm_daily', function () {
         }
     }
 });
+
+/* Ablaufdatum eines Gutscheins als d.m.Y. */
+function sp_nlm_coupon_until($code) {
+    $id = wc_get_coupon_id_by_code($code);
+    $exp = $id ? (new WC_Coupon($id))->get_date_expires() : null;
+    return $exp ? $exp->date_i18n('d.m.Y') : '';
+}
+
+/* ---------------------------------------------------------------------
+ * (2026-10-16) Mail "Ist alles gut angekommen?" 5 Tage nach "Versendet"
+ * an ALLE Kaeufer (Nutzer-Entscheidung), ueber Omnisend-Event sp_nach_lieferung.
+ * Aus solange Option sp_nlm_delivered leer ist; nur Bestellungen, die nach dem
+ * Einschalten (Option sp_nlm_delivered_since) versendet wurden.
+ * ------------------------------------------------------------------- */
+function sp_nlm_delivered_props($order) {
+    $img = function ($p) {
+        $iid = $p ? ($p->get_image_id() ?: (($pp = wc_get_product($p->get_parent_id())) ? $pp->get_image_id() : 0)) : 0;
+        return $iid ? (string) wp_get_attachment_image_url($iid, 'woocommerce_thumbnail') : wc_placeholder_img_src();
+    };
+    $topup = function_exists('sp_wallet_get_topup_product_id') ? (int) sp_wallet_get_topup_product_id() : 0;
+    $slots = [];
+    foreach ($order->get_items() as $item) {
+        if (count($slots) >= 2 || $item->get_meta('Geschenk') || (int) $item->get_product_id() === $topup || (float) $item->get_total() <= 0) {
+            continue;
+        }
+        $slots[] = [$img($item->get_product()), $item->get_name(), 'Menge: ' . (int) $item->get_quantity()];
+    }
+    $p = [
+        'nl_nr' => (string) $order->get_order_number(),
+        'nl_link' => sp_nlm_url('/', 'nach-lieferung', ['sp_nachkauf' => sp_nlm_reorder_token($order)]),
+        'nl_show_2' => count($slots) > 1 ? 'table-cell' : 'none',
+    ];
+    for ($i = 0; $i < 2; $i++) {
+        $p['nl_bild_' . ($i + 1)] = $slots[$i][0] ?? $slots[0][0] ?? '';
+        $p['nl_name_' . ($i + 1)] = $slots[$i][1] ?? '';
+        $p['nl_info_' . ($i + 1)] = $slots[$i][2] ?? '';
+    }
+    return $p;
+}
+
+add_action('sp_nlm_daily', function () {
+    if (!get_option('sp_nlm_delivered') || !function_exists('sp_os_event')) {
+        return;
+    }
+    $since = max(strtotime((string) get_option('sp_nlm_delivered_since', 'now')), time() - 10 * DAY_IN_SECONDS);
+    $orders = wc_get_orders(['status' => 'completed', 'limit' => 200, 'date_completed' => $since . '...' . (time() - 5 * DAY_IN_SECONDS), 'type' => 'shop_order']);
+    $n = 0;
+    foreach ($orders as $o) {
+        if ($n >= 60 || $o->get_meta('_sp_nlm_delivered_sent') || $o->get_meta('_sp_is_test')) {
+            continue;
+        }
+        if (function_exists('sp_em_order_kind') && sp_em_order_kind($o) === 'topup') {
+            continue;
+        }
+        $email = strtolower((string) $o->get_billing_email());
+        if (!is_email($email)) {
+            continue;
+        }
+        if (class_exists('\FluentCrm\App\Models\Subscriber')) {
+            $fs = \FluentCrm\App\Models\Subscriber::where('email', $email)->first();
+            if ($fs && in_array($fs->status, ['unsubscribed', 'bounced', 'complained'], true)) {
+                $o->update_meta_data('_sp_nlm_delivered_sent', 'skip-abgemeldet');
+                $o->save();
+                continue;
+            }
+        }
+        $r = sp_os_event($email, 'sp_nach_lieferung', sp_nlm_delivered_props($o), 'nonSubscribed');
+        if ($r === true || $r === 'unsubscribed') {
+            $o->update_meta_data('_sp_nlm_delivered_sent', $r === true ? current_time('mysql') : 'skip-abgemeldet');
+            $o->save();
+            $n++;
+        } else {
+            update_option('sp_os_last_error', current_time('mysql') . ' – ' . $email . ' (sp_nach_lieferung): ' . $r, false);
+        }
+    }
+}, 20);

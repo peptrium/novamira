@@ -19,6 +19,11 @@
  *  4. Bestellt er danach -> als "zurueckgeholt" gezaehlt.
  * Abmelde-Link in jeder Mail. Admin-Uebersicht: Peptrium Dashboard ->
  * Warenkorb-Erinnerungen.
+ *
+ * (2026-10-16) OMNISEND-MODUS (Option sp_cr_omnisend = 1 + API-Schluessel): statt wp_mail/SMTP2GO
+ * gehen Events an Omnisend (sp_warenkorb_1 nach 2 Std., sp_warenkorb_2 ca. 24 Std. nach dem Abbruch,
+ * Status 'sent2'); Inhalt kommt als Kontakt-Eigenschaften wk_* (bis 3 Artikel, wk_show_N blendet leere
+ * Zeilen aus). Der Newsletter-Status des Kontakts wird nicht geaendert (sp_os_event).
  */
 if (!defined('ABSPATH')) {
     exit;
@@ -170,7 +175,7 @@ function sp_cr_mark_ordered($order) {
     }
     $table = sp_cr_table();
     $wpdb->query($wpdb->prepare("UPDATE {$table} SET status = 'ordered', order_id = %d WHERE email = %s AND status = 'open'", $order->get_id(), $email));
-    $wpdb->query($wpdb->prepare("UPDATE {$table} SET status = 'recovered', order_id = %d WHERE email = %s AND status = 'sent'", $order->get_id(), $email));
+    $wpdb->query($wpdb->prepare("UPDATE {$table} SET status = 'recovered', order_id = %d WHERE email = %s AND status IN ('sent','sent2')", $order->get_id(), $email));
 }
 add_action('woocommerce_store_api_checkout_order_processed', 'sp_cr_mark_ordered');
 add_action('woocommerce_checkout_order_processed', function ($order_id) {
@@ -219,7 +224,82 @@ function sp_cr_send_due() {
         // Erst als gesendet markieren (verhindert doppelte Mail bei ueberlappenden Laeufen), dann senden.
         $claimed = $wpdb->query($wpdb->prepare("UPDATE {$table} SET status = 'sent', sent_at = %s WHERE id = %d AND status = 'open'", current_time('mysql'), $row->id));
         if ($claimed === 1) {
-            sp_cr_send_mail($row);
+            if (sp_cr_omni()) {
+                sp_cr_omni_send($row, 'sp_warenkorb_1');
+            } else {
+                sp_cr_send_mail($row);
+            }
+        }
+    }
+    if (sp_cr_omni()) {
+        sp_cr_send_second();
+    }
+}
+
+function sp_cr_omni() {
+    return get_option('sp_cr_omnisend') && function_exists('sp_os_event') && function_exists('sp_os_key') && sp_os_key() !== '';
+}
+
+/* Kontakt-Eigenschaften fuer die Omnisend-Warenkorb-Mails. */
+function sp_cr_omni_props($row) {
+    $items = json_decode($row->cart, true) ?: array();
+    $fmt = function ($v) { return html_entity_decode(wp_strip_all_tags(wc_price($v)), ENT_QUOTES, 'UTF-8'); };
+    $p = array(
+        'wk_link' => add_query_arg('sp_warenkorb', $row->token, home_url('/')),
+        'wk_abmelden' => add_query_arg('sp_warenkorb_abmelden', $row->token, home_url('/')),
+        'wk_summe' => $fmt($row->cart_total),
+        'wk_mehr' => count($items) > 3 ? '+ ' . (count($items) - 3) . ' weitere' . (count($items) - 3 === 1 ? 'r Artikel' : ' Artikel') : '',
+    );
+    for ($i = 0; $i < 3; $i++) {
+        $it = $items[$i] ?? null;
+        $img = '';
+        if ($it) {
+            $prod = wc_get_product(!empty($it['variation_id']) ? $it['variation_id'] : $it['product_id']);
+            $iid = $prod ? $prod->get_image_id() : 0;
+            if (!$iid && !empty($it['product_id']) && ($par = wc_get_product($it['product_id']))) {
+                $iid = $par->get_image_id();
+            }
+            $img = $iid ? (string) wp_get_attachment_image_url($iid, 'woocommerce_thumbnail') : wc_placeholder_img_src('woocommerce_thumbnail');
+        }
+        $n = $i + 1;
+        $p['wk_show_' . $n] = $it ? 'table-row' : 'none';
+        $p['wk_bild_' . $n] = $img ?: ($p['wk_bild_1'] ?? '');
+        $p['wk_name_' . $n] = $it ? $it['name'] . (!empty($it['abo']) ? ' (Abo)' : '') : '';
+        $p['wk_info_' . $n] = $it ? 'Menge: ' . (int) $it['quantity'] : '';
+        $p['wk_preis_' . $n] = ($it && isset($it['price'])) ? $fmt($it['price']) : '';
+    }
+    return $p;
+}
+
+function sp_cr_omni_send($row, $event) {
+    $r = sp_os_event($row->email, $event, sp_cr_omni_props($row), 'nonSubscribed');
+    if ($r !== true) {
+        update_option('sp_os_last_error', current_time('mysql') . ' – ' . $row->email . ' (' . $event . '): ' . $r, false);
+    }
+    return $r;
+}
+
+/* Zweite Erinnerung ca. 24 Std. nach dem Abbruch (22 Std. nach der ersten), nur wenn weiter nicht bestellt. */
+function sp_cr_send_second() {
+    global $wpdb;
+    $table = sp_cr_table();
+    $now = current_time('timestamp');
+    $rows = $wpdb->get_results($wpdb->prepare(
+        "SELECT * FROM {$table} WHERE status = 'sent' AND sent_at <= %s AND sent_at >= %s ORDER BY id ASC LIMIT 50",
+        date('Y-m-d H:i:s', $now - 22 * HOUR_IN_SECONDS),
+        date('Y-m-d H:i:s', $now - 3 * DAY_IN_SECONDS)
+    ));
+    foreach ($rows as $row) {
+        if ($wpdb->get_var($wpdb->prepare("SELECT 1 FROM {$table} WHERE email = %s AND status = 'optout' LIMIT 1", $row->email))) {
+            continue;
+        }
+        $recent = wc_get_orders(array('billing_email' => $row->email, 'date_created' => '>' . strtotime(get_gmt_from_date($row->consent_at)), 'limit' => 1, 'return' => 'ids', 'status' => array('pending', 'on-hold', 'processing', 'completed')));
+        if ($recent) {
+            $wpdb->update($table, array('status' => 'recovered', 'order_id' => (int) $recent[0]), array('id' => $row->id));
+            continue;
+        }
+        if ($wpdb->query($wpdb->prepare("UPDATE {$table} SET status = 'sent2' WHERE id = %d AND status = 'sent'", $row->id)) === 1) {
+            sp_cr_omni_send($row, 'sp_warenkorb_2');
         }
     }
 }
@@ -281,7 +361,7 @@ add_action('template_redirect', function () {
         $token = preg_replace('/[^A-Za-z0-9]/', '', (string) $_GET['sp_warenkorb_abmelden']);
         $email = strlen($token) === 32 ? $wpdb->get_var($wpdb->prepare("SELECT email FROM {$table} WHERE token = %s", $token)) : null;
         if ($email) {
-            $wpdb->query($wpdb->prepare("UPDATE {$table} SET status = 'optout' WHERE email = %s AND status IN ('open','sent')", $email));
+            $wpdb->query($wpdb->prepare("UPDATE {$table} SET status = 'optout' WHERE email = %s AND status IN ('open','sent','sent2')", $email));
             if (!$wpdb->get_var($wpdb->prepare("SELECT 1 FROM {$table} WHERE email = %s AND status = 'optout' LIMIT 1", $email))) {
                 $now = current_time('mysql');
                 $wpdb->insert($table, array('email' => $email, 'cart' => '[]', 'token' => wp_generate_password(32, false, false), 'status' => 'optout', 'consent_at' => $now, 'updated_at' => $now));
@@ -338,11 +418,11 @@ function sp_cr_render_admin() {
         }
     }
     $rows = $wpdb->get_results("SELECT * FROM {$table} ORDER BY id DESC LIMIT 50");
-    $labels = array('open' => array('Wartet', '#50575e'), 'ordered' => array('Selbst bestellt', '#1F7A4D'), 'sent' => array('Erinnert', '#996800'), 'recovered' => array('Nach Erinnerung bestellt', '#1F7A4D'), 'optout' => array('Abgemeldet', '#B32D2E'));
+    $labels = array('open' => array('Wartet', '#50575e'), 'ordered' => array('Selbst bestellt', '#1F7A4D'), 'sent' => array('Erinnert', '#996800'), 'sent2' => array('2× erinnert', '#996800'), 'recovered' => array('Nach Erinnerung bestellt', '#1F7A4D'), 'optout' => array('Abgemeldet', '#B32D2E'));
     ?>
     <div class="wrap">
       <h1>Warenkorb-Erinnerungen</h1>
-      <p style="max-width:820px;color:#50575e;">Wer an der Kasse seine E-Mail-Adresse eingibt und nicht bestellt, bekommt <?php echo (int) SP_CR_DELAY_HOURS; ?> Stunden später <strong>eine</strong> Erinnerung mit ihrem Warenkorb und einem Link, der ihn wiederherstellt. Wer vorher bestellt, bekommt nichts.</p>
+      <p style="max-width:820px;color:#50575e;">Wer an der Kasse seine E-Mail-Adresse eingibt und nicht bestellt, bekommt <?php echo (int) SP_CR_DELAY_HOURS; ?> Stunden später eine Erinnerung<?php echo sp_cr_omni() ? ' und nach etwa 24 Stunden eine zweite (über Omnisend)' : ''; ?> mit ihrem Warenkorb und einem Link, der ihn wiederherstellt. Wer vorher bestellt, bekommt nichts.</p>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin:14px 0;">
         <?php foreach (array('Erfasst (30 Tage)' => $consents, 'Selbst bestellt' => $ordered, 'Erinnerung gesendet' => $sent, 'Danach bestellt' => $recovered) as $l => $v) : ?>
           <div style="background:#fff;border:1px solid #dcdcde;border-radius:8px;padding:10px 16px;"><div style="font-size:12px;color:#50575e;"><?php echo esc_html($l); ?></div><div style="font-size:22px;font-weight:700;"><?php echo (int) $v; ?></div></div>
@@ -385,8 +465,9 @@ function sp_cr_privacy_filter($html) {
     }
     $html = str_replace(' und Omnisend (Marketing)', '', $html);
     $section = '<h2 class="sp-cr-privacy">Warenkorb-Erinnerung per E-Mail</h2>'
-        . '<p>Wenn du an der Kasse deine E-Mail-Adresse eingibst, deine Bestellung aber nicht abschließt, speichern wir deine E-Mail-Adresse zusammen mit dem Inhalt deines Warenkorbs. Hast du nach etwa zwei Stunden nicht bestellt, senden wir dir einmalig eine E-Mail, die dich an deinen Warenkorb erinnert und ihn mit einem Klick wiederherstellt. Rechtsgrundlage ist unser berechtigtes Interesse, Interessenten, die einen Kauf bereits begonnen haben, auf ihren unvollständigen Einkauf hinzuweisen (Art. 6 Abs. 1 lit. f DSGVO).</p>'
-        . '<p>Du kannst dem jederzeit widersprechen &ndash; über den Abmelde-Link in der E-Mail oder per Nachricht an info@peptrium.com. Danach erhältst du keine Erinnerungen mehr; wir speichern dann nur noch deine E-Mail-Adresse, damit wir dir auch künftig keine Erinnerung senden. Warenkorb-Daten werden spätestens nach 30 Tagen gelöscht. Der Versand erfolgt über unseren E-Mail-Versanddienstleister SMTP2GO.</p>';
+        . '<p>Wenn du an der Kasse deine E-Mail-Adresse eingibst, deine Bestellung aber nicht abschließt, speichern wir deine E-Mail-Adresse zusammen mit dem Inhalt deines Warenkorbs. Hast du nach etwa zwei Stunden nicht bestellt, senden wir dir ' . (sp_cr_omni() ? 'eine E-Mail und, falls du weiterhin nicht bestellst, nach etwa einem Tag eine zweite' : 'einmalig eine E-Mail') . ', die dich an deinen Warenkorb erinnert und ihn mit einem Klick wiederherstellt. Rechtsgrundlage ist unser berechtigtes Interesse, Interessenten, die einen Kauf bereits begonnen haben, auf ihren unvollständigen Einkauf hinzuweisen (Art. 6 Abs. 1 lit. f DSGVO).</p>'
+        . '<p>Du kannst dem jederzeit widersprechen &ndash; über den Abmelde-Link in der E-Mail oder per Nachricht an info@peptrium.com. Danach erhältst du keine Erinnerungen mehr; wir speichern dann nur noch deine E-Mail-Adresse, damit wir dir auch künftig keine Erinnerung senden. Warenkorb-Daten werden spätestens nach 30 Tagen gelöscht. Der Versand erfolgt über unseren E-Mail-Versanddienstleister ' . (sp_cr_omni() ? 'Omnisend (UAB Omnisend, Litauen)' : 'SMTP2GO') . '.</p>'
+        . (get_option('sp_nlm_delivered') ? '<h3>Service-E-Mail nach der Lieferung</h3><p>Etwa fünf Tage nach dem Versand deiner Bestellung senden wir dir einmalig eine E-Mail mit Hinweisen zur Lieferung, Lagerung und Rekonstitution sowie einem Link, um die Bestellung erneut aufzugeben. Rechtsgrundlage ist unser berechtigtes Interesse an der Betreuung unserer Kunden (Art. 6 Abs. 1 lit. f DSGVO). Du kannst dem jederzeit über den Abmelde-Link in der E-Mail widersprechen. Versand über Omnisend (UAB Omnisend, Litauen).</p>' : '');
     return str_replace('<h2>Daten von Kindern</h2>', $section . '<h2>Daten von Kindern</h2>', $html);
 }
 add_filter('elementor/frontend/the_content', 'sp_cr_privacy_filter', 99);
