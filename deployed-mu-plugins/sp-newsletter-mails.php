@@ -24,6 +24,13 @@
  * hoechstens SP_NLM_DAILY_CAP automatische Mails pro Tag (neue Domain langsam
  * aufwaermen, Mailgun-Free erlaubt 100/Tag).
  * Links tragen utm_source=newsletter (Analyse-Tab zeigt "newsletter" als Quelle).
+ *
+ * OMNISEND (2026-10-15): Mailgun ist gesperrt. Ist Option sp_nlm_omnisend = 1 (und ein Omnisend-API-Schluessel in
+ * sp-omnisend-sync.php hinterlegt), entscheidet dieser Cron weiter WER WANN welche Mail bekommt, verschickt aber
+ * nichts selbst: er setzt die noetigen Werte als Omnisend-Kontakt-Eigenschaften (Code, Ablauf, Artikel, Link) und
+ * loest ein eigenes Omnisend-Ereignis aus (sp_code_erinnerung, sp_nachkauf, sp_nachkauf_2, sp_rueckgewinnung).
+ * Die passende Omnisend-Automation verschickt dann die Mail im Peptrium-Design. Die Willkommensmail kommt
+ * direkt aus Omnisend (Automation "Welcome Email"), hier bleibt sie aus.
  */
 if (!defined('ABSPATH')) {
     exit;
@@ -252,6 +259,74 @@ function sp_nlm_open_coupon($subscriber, $meta_key) {
     return $left > 0 ? [$code, $left, (int) $c->get_amount()] : null;
 }
 
+/* ---------------- Omnisend-Versand ---------------- */
+function sp_nlm_omni() {
+    return get_option('sp_nlm_omnisend', 0) && function_exists('sp_os_key') && sp_os_key() !== '' && function_exists('sp_os_send');
+}
+
+/* Kontakt-Eigenschaften setzen, dann eigenes Ereignis senden. true bei Erfolg. */
+function sp_nlm_omni_event($subscriber, $event, array $props) {
+    if (!$subscriber || $subscriber->status !== 'subscribed') {
+        return false;
+    }
+    $day = 'sp_nlm_sent_' . current_time('Ymd');
+    $count = (int) get_transient($day);
+    if ($count >= SP_NLM_DAILY_CAP) {
+        return false; // Rest kommt am naechsten Tag dran
+    }
+    $email = strtolower($subscriber->email);
+    $r = sp_os_send(['identifiers' => [['type' => 'email', 'id' => $email]], 'customProperties' => $props]);
+    if ($r !== true) {
+        update_option('sp_os_last_error', current_time('mysql') . ' – ' . $email . ' (' . $event . ', Kontakt): ' . $r, false);
+        return false;
+    }
+    $res = wp_remote_post('https://api.omnisend.com/api/events', [
+        'timeout' => 8,
+        'headers' => [
+            'Authorization' => 'Omnisend-API-Key ' . sp_os_key(),
+            'Omnisend-Version' => '2026-03-15',
+            'Content-Type' => 'application/json',
+        ],
+        'body' => wp_json_encode([
+            'eventName' => $event,
+            'origin' => 'api',
+            'eventID' => wp_generate_uuid4(),
+            'eventTime' => gmdate('Y-m-d\TH:i:s\Z'),
+            'contact' => ['email' => $email],
+            'properties' => $props,
+        ]),
+    ]);
+    $code = is_wp_error($res) ? 0 : (int) wp_remote_retrieve_response_code($res);
+    if ($code < 200 || $code >= 300) {
+        update_option('sp_os_last_error', current_time('mysql') . ' – ' . $email . ' (' . $event . '): ' . (is_wp_error($res) ? $res->get_error_message() : 'HTTP ' . $code . ' ' . substr((string) wp_remote_retrieve_body($res), 0, 200)), false);
+        return false;
+    }
+    set_transient($day, $count + 1, 2 * DAY_IN_SECONDS);
+    update_option('sp_os_last_ok', current_time('mysql') . ' – ' . $email . ' (' . $event . ')', false);
+    return true;
+}
+
+/* Bestellte Artikel als kurzer Text, z. B. "GHK-Cu (2×), Bac Water (1×)". */
+function sp_nlm_items_text($order) {
+    $out = [];
+    $topup = function_exists('sp_wallet_get_topup_product_id') ? (int) sp_wallet_get_topup_product_id() : 0;
+    foreach ($order->get_items() as $item) {
+        if ($item->get_meta('Geschenk') || (int) $item->get_product_id() === $topup || (float) $item->get_total() <= 0) {
+            continue;
+        }
+        $out[] = $item->get_name() . ' (' . (int) $item->get_quantity() . '×)';
+    }
+    return mb_substr(implode(', ', $out), 0, 1500);
+}
+
+/* Omnisend (wenn aktiv) oder alter wp_mail-Weg. $html_fn wird nur im alten Weg gerendert. */
+function sp_nlm_dispatch($subscriber, $event, array $props, $subject, $html_fn) {
+    if (sp_nlm_omni()) {
+        return sp_nlm_omni_event($subscriber, $event, $props);
+    }
+    return sp_nlm_send($subscriber, $subject, $html_fn());
+}
+
 /* ---------------- Versand ---------------- */
 function sp_nlm_send($subscriber, $subject, $html) {
     if (!sp_nlm_enabled() || !$subscriber || $subscriber->status !== 'subscribed') {
@@ -294,7 +369,7 @@ add_action('init', function () {
 });
 
 add_action('sp_nlm_daily', function () {
-    if (!sp_nlm_enabled() || !class_exists('\FluentCrm\App\Models\Subscriber')) {
+    if ((!sp_nlm_enabled() && !sp_nlm_omni()) || !class_exists('\FluentCrm\App\Models\Subscriber')) {
         return;
     }
     $subs = \FluentCrm\App\Models\Subscriber::where('status', 'subscribed')->whereHas('lists', function ($q) {
@@ -306,7 +381,7 @@ add_action('sp_nlm_daily', function () {
         foreach ([['sp_nl_coupon', 5, 'sp_nlm_exp1_sent'], ['sp_nlm_winback', 3, 'sp_nlm_exp2_sent']] as $cfg) {
             $open = sp_nlm_open_coupon($sub, $cfg[0]);
             if ($open && $open[1] <= $cfg[1] && $sub->getMeta($cfg[2], 'peptrium') !== $open[0]) {
-                if (sp_nlm_send($sub, 'Dein Code läuft bald ab', sp_nlm_expiry_html($sub, $open[0], $open[1], $open[2]))) {
+                if (sp_nlm_dispatch($sub, 'sp_code_erinnerung', ['erinnerung_code' => $open[0], 'erinnerung_tage' => $open[1] . ' ' . ($open[1] === 1 ? 'Tag' : 'Tagen'), 'erinnerung_prozent' => $open[2] . ' %'], 'Dein Code läuft bald ab', function () use ($sub, $open) { return sp_nlm_expiry_html($sub, $open[0], $open[1], $open[2]); })) {
                     $sub->updateMeta($cfg[2], $open[0], 'peptrium');
                 }
             }
@@ -326,19 +401,21 @@ add_action('sp_nlm_daily', function () {
         $first_sent = $last->get_meta('_sp_nlm_reorder_sent');
         if ($first_sent && !$last->get_meta('_sp_nlm_reorder2_sent') && $days < SP_NLM_WINBACK_DAYS
             && (time() - strtotime($first_sent)) >= SP_NLM_REORDER2_AFTER * DAY_IN_SECONDS) {
-            if (sp_nlm_send($sub, 'Noch alles da?', sp_nlm_reorder2_html($sub, $last))) {
+            if (sp_nlm_dispatch($sub, 'sp_nachkauf_2', ['nachkauf_link' => sp_nlm_url('/', 'nachkauf-2', ['sp_nachkauf' => sp_nlm_reorder_token($last)]), 'nachkauf_artikel' => sp_nlm_items_text($last)], 'Noch alles da?', function () use ($sub, $last) { return sp_nlm_reorder2_html($sub, $last); })) {
                 $last->update_meta_data('_sp_nlm_reorder2_sent', current_time('mysql'));
                 $last->save();
             }
             continue;
         }
         if ($days >= SP_NLM_REORDER_DAYS && $days < SP_NLM_WINBACK_DAYS && !$first_sent) {
-            if (sp_nlm_send($sub, 'Zeit für Nachschub?', sp_nlm_reorder_html($sub, $last))) {
+            if (sp_nlm_dispatch($sub, 'sp_nachkauf', ['nachkauf_link' => sp_nlm_url('/', 'nachkauf', ['sp_nachkauf' => sp_nlm_reorder_token($last)]), 'nachkauf_artikel' => sp_nlm_items_text($last)], 'Zeit für Nachschub?', function () use ($sub, $last) { return sp_nlm_reorder_html($sub, $last); })) {
                 $last->update_meta_data('_sp_nlm_reorder_sent', current_time('mysql'));
                 $last->save();
             }
         } elseif ($days >= SP_NLM_WINBACK_DAYS && !$last->get_meta('_sp_nlm_winback_sent')) {
-            if (sp_nlm_send($sub, 'Wir vermissen dich', sp_nlm_winback_html($sub, sp_nlm_winback_coupon($sub)))) {
+            $wb = sp_nlm_winback_coupon($sub);
+            $wbc = new WC_Coupon($wb);
+            if (sp_nlm_dispatch($sub, 'sp_rueckgewinnung', ['comeback_code' => $wb, 'comeback_bis' => $wbc->get_date_expires() ? $wbc->get_date_expires()->date_i18n('d.m.Y') : '', 'comeback_prozent' => SP_NLM_WINBACK_PERCENT . ' %'], 'Wir vermissen dich', function () use ($sub, $wb) { return sp_nlm_winback_html($sub, $wb); })) {
                 $last->update_meta_data('_sp_nlm_winback_sent', current_time('mysql'));
                 $last->save();
             }
