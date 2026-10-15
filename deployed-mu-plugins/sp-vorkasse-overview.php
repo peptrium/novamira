@@ -310,7 +310,7 @@ function sp_vorkasse_import_apply_confirmed() {
     return $result;
 }
 
-define('SP_VORKASSE_REMIND_AFTER_DAYS', 3);
+define('SP_VORKASSE_REMIND_AFTER_DAYS', 1); // 2026-10-16: vorher 3 (Nutzer: viel zu lang)
 define('SP_VORKASSE_CANCEL_AFTER_DAYS', 14);
 
 function sp_vorkasse_days_open($order) {
@@ -322,16 +322,58 @@ function sp_vorkasse_stage($days) {
     if ($days >= SP_VORKASSE_CANCEL_AFTER_DAYS) {
         return array('bg' => '#FCE8E8', 'color' => '#B32D2E', 'hint' => 'Stornieren, falls kein Geld da');
     }
-    if ($days >= 7) {
+    if ($days >= 3) {
         return array('bg' => '#FDEEE4', 'color' => '#B5450C', 'hint' => '2. Erinnerung sinnvoll');
     }
     if ($days >= SP_VORKASSE_REMIND_AFTER_DAYS) {
         return array('bg' => '#FFF6DC', 'color' => '#996800', 'hint' => 'Erinnerung sinnvoll');
     }
-    return array('bg' => '#F0F0F1', 'color' => '#50575e', 'hint' => 'Überweisung dauert 1–2 Werktage');
+    return array('bg' => '#F0F0F1', 'color' => '#50575e', 'hint' => 'Heute bestellt');
 }
 
-/** Zahlungserinnerung mit Bankdaten an den Kunden (gleiches Mail-Design wie die Abo-Mails). */
+/**
+ * (2026-10-16) Eigenes helles Layout im Stil der neuen Mails: dunkle Kopfzeile, Status Bestellt -> Bezahlt -> Versendet,
+ * Ueberweisungs-Karte (sp_em_pay_box), bestellte Artikel, Telegram/Mail. Transaktionsmail -> wp_mail (kein Abmelde-Link).
+ */
+function sp_vorkasse_reminder_html($order) {
+    $F = "-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Helvetica,Arial,sans-serif";
+    $ink = '#0D0F12'; $mut = '#5B6169'; $line = '#E4E6E9';
+    $logo = home_url('/wp-content/uploads/2026/08/IMG_2644-cropped-300x300.png');
+    $nr = esc_html($order->get_order_number());
+    $step = function ($label, $state) use ($ink) {
+        $dot = $state === 'done' ? '<div style="width:30px;height:30px;line-height:30px;border-radius:50%;background:' . $ink . ';color:#FFF;font-size:14px;font-weight:800;text-align:center;margin:0 auto;">✓</div>'
+            : ($state === 'now' ? '<div style="width:30px;height:30px;line-height:26px;border-radius:50%;border:2px solid #E08A00;background:#FFF4E5;color:#9A5B00;font-size:14px;font-weight:800;text-align:center;margin:0 auto;box-sizing:border-box;">!</div>'
+            : '<div style="width:30px;height:30px;line-height:26px;border-radius:50%;border:2px solid #D3D6DA;background:#FFF;margin:0 auto;box-sizing:border-box;"></div>');
+        $col = $state === 'now' ? '#9A5B00' : ($state === 'done' ? $ink : '#9AA0A8');
+        return '<td width="33%" align="center" valign="top" style="width:33%;">' . $dot . '<div style="font-size:12px;font-weight:700;color:' . $col . ';margin-top:6px;">' . $label . '</div></td>';
+    };
+    $items = '';
+    foreach ($order->get_items() as $item) {
+        if ($item->get_meta('Geschenk')) {
+            continue;
+        }
+        $p = $item->get_product();
+        $iid = $p ? ($p->get_image_id() ?: (($pp = wc_get_product($p->get_parent_id())) ? $pp->get_image_id() : 0)) : 0;
+        $img = $iid ? wp_get_attachment_image_url($iid, 'woocommerce_thumbnail') : wc_placeholder_img_src();
+        $items .= '<tr><td width="58" style="width:58px;padding:8px 0;border-top:1px solid ' . $line . ';"><img src="' . esc_url($img) . '" width="46" height="46" alt="" style="display:block;width:46px;height:46px;border-radius:10px;border:0;background:#0D0F12;"></td>'
+            . '<td style="padding:8px 6px;border-top:1px solid ' . $line . ';font-size:14px;font-weight:700;color:' . $ink . ';">' . esc_html($item->get_name()) . '<div style="font-size:12px;font-weight:500;color:' . $mut . ';">Menge: ' . (int) $item->get_quantity() . '</div></td></tr>';
+    }
+    $pay = function_exists('sp_em_pay_box') ? sp_em_pay_box($order) : '';
+    $days = (int) SP_VORKASSE_CANCEL_AFTER_DAYS;
+    return '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;background:#E9EBED;">'
+        . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#E9EBED;"><tr><td align="center" style="padding:0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#FFFFFF;font-family:' . $F . ';">'
+        . '<tr><td style="padding:16px 20px;background:#0B0D10;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="text-align:left;"><img src="' . esc_url($logo) . '" width="30" height="30" alt="" style="display:inline-block;vertical-align:middle;border:0;"><span style="display:inline-block;vertical-align:middle;margin-left:8px;font-size:12px;font-weight:800;letter-spacing:.3em;color:#E6E8EB;">PEPTRIUM</span></td><td style="text-align:right;font-size:11px;color:#7D848D;">Bestellung #' . $nr . '</td></tr></table></td></tr>'
+        . '<tr><td style="padding:30px 20px 8px;text-align:left;"><div style="font-size:12px;font-weight:700;letter-spacing:.16em;color:#9A5B00;">⏳ ZAHLUNG OFFEN</div><div style="font-size:32px;line-height:1.1;font-weight:800;color:' . $ink . ';margin:8px 0 10px;letter-spacing:-.02em;">Deine Zahlung<br>fehlt noch.</div><div style="font-size:15px;line-height:1.55;color:' . $mut . ';">Deine Bestellung vom ' . esc_html($order->get_date_created()->date_i18n('d.m.Y')) . ' ist für dich reserviert. Sobald deine Überweisung da ist, versenden wir sie – diskret per DHL.</div></td></tr>'
+        . '<tr><td style="padding:20px 20px 6px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>' . $step('Bestellt', 'done') . $step('Bezahlt', 'now') . $step('Versendet', 'next') . '</tr></table></td></tr>'
+        . '<tr><td style="padding:20px 20px 4px;">' . $pay . '</td></tr>'
+        . '<tr><td style="padding:0 20px 20px;"><div style="background:#F5F6F7;border-radius:14px;padding:14px 16px;font-size:13px;line-height:1.6;color:' . $mut . ';"><strong style="color:' . $ink . ';">Schon überwiesen?</strong> Dann ist alles gut – die Zahlung ist vermutlich noch unterwegs, du kannst diese Mail ignorieren.<br>Geht innerhalb von ' . $days . ' Tagen nach der Bestellung keine Zahlung ein, kann die Bestellung storniert werden.</div></td></tr>'
+        . ($items ? '<tr><td style="padding:0 20px 24px;"><div style="font-size:12px;font-weight:700;letter-spacing:.16em;color:' . $mut . ';margin-bottom:6px;">DEINE BESTELLUNG</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0">' . $items . '</table></td></tr>' : '')
+        . '<tr><td style="padding:24px 20px;background:#12151A;text-align:center;"><div style="font-size:15px;font-weight:700;color:#FFF;margin-bottom:12px;">Fragen zur Zahlung?</div><table role="presentation" align="center" cellpadding="0" cellspacing="0"><tr><td style="padding:0 5px;"><a href="https://t.me/peptrium" style="display:inline-block;background:#229ED9;color:#FFF;text-decoration:none;font-weight:700;font-size:14px;padding:12px 18px;border-radius:12px;">Telegram</a></td><td style="padding:0 5px;"><a href="mailto:info@peptrium.com" style="display:inline-block;background:#FFF;color:' . $ink . ';text-decoration:none;font-weight:700;font-size:14px;padding:12px 18px;border-radius:12px;">✉️ E-Mail</a></td></tr></table>'
+        . '<div style="height:24px;"></div><img src="' . esc_url($logo) . '" width="46" height="46" alt="Peptrium" style="display:block;margin:0 auto;border:0;"><div style="font-size:12px;font-weight:800;letter-spacing:.34em;color:#E6E8EB;margin-top:6px;">PEPTRIUM</div><div style="font-size:11px;line-height:1.6;color:#7D848D;margin-top:12px;">Alle Produkte ausschließlich für Laborforschungszwecke.<br>Nicht für den menschlichen oder veterinärmedizinischen Gebrauch.</div></td></tr>'
+        . '</table></td></tr></table></body></html>';
+}
+
+/** Zahlungserinnerung mit Bankdaten an den Kunden. */
 function sp_vorkasse_send_payment_reminder($order) {
     $to = $order->get_billing_email();
     if (!$to || !function_exists('sp_abo_send_branded_email')) {
@@ -347,30 +389,11 @@ function sp_vorkasse_send_payment_reminder($order) {
     if (!empty($acc['iban'])) { $rows['IBAN'] = esc_html($acc['iban']); }
     if (!empty($acc['bic'])) { $rows['BIC'] = esc_html($acc['bic']); }
     if (!empty($acc['bank_name'])) { $rows['BANK'] = esc_html($acc['bank_name']); }
-    $box = function_exists('sp_email_box_style') ? sp_email_box_style() : 'background:#F9FAFA;border:1px solid #DCDEE0;border-radius:12px;padding:20px 22px;margin:0 0 22px;';
-    if (function_exists('sp_em_hero')) {
-        sp_em_hero(['eyebrow' => 'Bestellung #' . $order->get_order_number(), 'sub' => 'Für deine Bestellung ist noch keine Zahlung bei uns eingegangen.']);
+    $html = sp_vorkasse_reminder_html($order);
+    $sent_ok = wp_mail($to, 'Zahlungserinnerung zu deiner Bestellung #' . $order->get_order_number(), $html, array('Content-Type: text/html; charset=UTF-8'));
+    if (!$sent_ok) {
+        return false;
     }
-    ob_start();
-    ?>
-    <p style="margin:0 0 20px;font-size:15px;line-height:1.6;color:#0D0F12;">Deine Bestellung <strong>#<?php echo esc_html($order->get_order_number()); ?></strong> vom <?php echo esc_html($order->get_date_created()->date_i18n('d.m.Y')); ?> ist für dich reserviert. Sobald deine Überweisung da ist, versenden wir sie &ndash; diskret per DHL. Hier nochmal alle Daten:</p>
-    <?php if (function_exists('sp_em_pay_box')) : ?>
-      <?php echo sp_em_pay_box($order); // Neues Mail-Design (2026-10-10): gleiche Ueberweisungs-Karte wie in der Bestellbestaetigung ?>
-    <?php else : ?>
-    <div style="<?php echo esc_attr($box); ?>">
-      <?php $n = 0; foreach ($rows as $label => $value) : $n++; ?>
-        <div style="<?php echo $n < count($rows) ? 'border-bottom:1px solid #F2F3F4;padding-bottom:9px;margin-bottom:9px;' : ''; ?>">
-          <p style="margin:0 0 2px;font-size:11px;font-weight:700;letter-spacing:.04em;color:#4B5157;"><?php echo esc_html($label); ?></p>
-          <p style="margin:0;font-size:15px;font-weight:700;color:#0D0F12;"><?php echo wp_kses_post($value); ?></p>
-        </div>
-      <?php endforeach; ?>
-    </div>
-    <?php endif; ?>
-    <p style="margin:0 0 12px;font-size:13px;line-height:1.6;color:#4B5157;">Du hast schon überwiesen? Dann ist alles gut &ndash; die Zahlung ist vermutlich noch unterwegs, du kannst diese Mail ignorieren.</p>
-    <p style="margin:0 0 12px;font-size:13px;line-height:1.6;color:#4B5157;">Geht innerhalb von <?php echo (int) SP_VORKASSE_CANCEL_AFTER_DAYS; ?> Tagen nach der Bestellung keine Zahlung ein, kann die Bestellung storniert werden.</p>
-    <?php if (function_exists('sp_abo_email_support_line')) { echo sp_abo_email_support_line(); } ?>
-    <?php
-    sp_abo_send_branded_email($to, 'Zahlungserinnerung zu deiner Bestellung #' . $order->get_order_number(), 'Deine Zahlung fehlt noch', ob_get_clean(), null, 'dark');
     $sent = (array) $order->get_meta('_sp_vorkasse_reminders');
     $sent[] = time();
     $order->update_meta_data('_sp_vorkasse_reminders', $sent);
@@ -451,9 +474,9 @@ function sp_vorkasse_render_page() {
         <?php
         $sp_vk_tiles = array(
             'Offen gesamt' => array(0, null, '#1d2327'),
-            '0–2 Tage (normal)' => array(0, array(0, 2), '#50575e'),
-            '3–6 Tage (erinnern)' => array(0, array(3, 6), '#996800'),
-            '7–13 Tage (2. Erinnerung)' => array(0, array(7, 13), '#B5450C'),
+            'Heute (normal)' => array(0, array(0, 0), '#50575e'),
+            '1–2 Tage (erinnern)' => array(0, array(1, 2), '#996800'),
+            '3–13 Tage (2. Erinnerung)' => array(0, array(3, 13), '#B5450C'),
             '14+ Tage (stornieren?)' => array(0, array(14, PHP_INT_MAX), '#B32D2E'),
         );
         $sp_vk_sums = array_fill_keys(array_keys($sp_vk_tiles), 0.0);
@@ -476,7 +499,7 @@ function sp_vorkasse_render_page() {
             </div>
           <?php endforeach; ?>
         </div>
-        <p style="max-width:1000px;color:#50575e;">Ab 3 Tagen erscheint „Zahlungserinnerung senden“, ab 14 Tagen zusätzlich „Stornieren“. Es passiert nichts automatisch &ndash; du entscheidest bei jeder Bestellung selbst.</p>
+        <p style="max-width:1000px;color:#50575e;">Ab 1 Tag erscheint „Zahlungserinnerung senden“, ab 14 Tagen zusätzlich „Stornieren“. Es passiert nichts automatisch &ndash; du entscheidest bei jeder Bestellung selbst.</p>
         <table class="wp-list-table widefat fixed striped" style="max-width:1000px;">
           <thead>
             <tr>
