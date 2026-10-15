@@ -275,7 +275,7 @@ function sp_nlm_omni_event($subscriber, $event, array $props) {
         return false; // Rest kommt am naechsten Tag dran
     }
     $email = strtolower($subscriber->email);
-    $r = sp_os_send(['identifiers' => [['type' => 'email', 'id' => $email]], 'customProperties' => $props]);
+    $r = sp_os_send(['identifiers' => [['type' => 'email', 'id' => $email, 'channels' => ['email' => ['status' => 'subscribed']]]], 'customProperties' => $props]); // Omnisend verlangt den E-Mail-Kanal
     if ($r !== true) {
         update_option('sp_os_last_error', current_time('mysql') . ' – ' . $email . ' (' . $event . ', Kontakt): ' . $r, false);
         return false;

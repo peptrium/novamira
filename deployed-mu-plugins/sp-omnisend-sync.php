@@ -43,6 +43,8 @@ function sp_os_payload($sub, $status) {
                 $src = 'kasse';
             } elseif (stripos($t->title, 'Startseite') !== false) {
                 $src = 'startseite';
+            } elseif (stripos($t->title, 'Bestellmail') !== false) {
+                $src = 'bestellmail';
             }
         }
         $data['tags'] = ['newsletter', 'quelle-' . $src];
