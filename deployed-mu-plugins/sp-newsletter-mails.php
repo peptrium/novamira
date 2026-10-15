@@ -319,6 +319,40 @@ function sp_nlm_items_text($order) {
     return mb_substr(implode(', ', $out), 0, 1500);
 }
 
+/* Zwei Bild-Plaetze fuer die Nachkauf-Mail: die ersten bestellten Artikel, freie Plaetze mit passendem Zubehoer. */
+function sp_nlm_slots($order) {
+    $img = function ($p) {
+        $iid = $p ? ($p->get_image_id() ?: (($pp = wc_get_product($p->get_parent_id())) ? $pp->get_image_id() : 0)) : 0;
+        return $iid ? (string) wp_get_attachment_image_url($iid, 'woocommerce_thumbnail') : wc_placeholder_img_src();
+    };
+    $slots = [];
+    $have = [];
+    $topup = function_exists('sp_wallet_get_topup_product_id') ? (int) sp_wallet_get_topup_product_id() : 0;
+    foreach ($order->get_items() as $item) {
+        if (count($slots) >= 2 || $item->get_meta('Geschenk') || (int) $item->get_product_id() === $topup || (float) $item->get_total() <= 0) {
+            continue;
+        }
+        $have[] = (int) $item->get_product_id();
+        $slots[] = [$img($item->get_product()), $item->get_name(), 'Menge: ' . (int) $item->get_quantity()];
+    }
+    foreach ([74, 80, 68] as $sid) {
+        if (count($slots) >= 2) {
+            break;
+        }
+        $p = wc_get_product($sid);
+        if ($p && !in_array($sid, $have, true) && $p->is_purchasable()) {
+            $slots[] = [$img($p), $p->get_name(), 'Passt dazu · ' . html_entity_decode(wp_strip_all_tags(wc_price($p->get_price())), ENT_QUOTES, 'UTF-8')];
+        }
+    }
+    $out = [];
+    foreach ($slots as $i => $sl) {
+        $out['nachkauf_bild_' . ($i + 1)] = $sl[0];
+        $out['nachkauf_name_' . ($i + 1)] = $sl[1];
+        $out['nachkauf_info_' . ($i + 1)] = $sl[2];
+    }
+    return $out;
+}
+
 /* Omnisend (wenn aktiv) oder alter wp_mail-Weg. $html_fn wird nur im alten Weg gerendert. */
 function sp_nlm_dispatch($subscriber, $event, array $props, $subject, $html_fn) {
     if (sp_nlm_omni()) {
@@ -381,7 +415,7 @@ add_action('sp_nlm_daily', function () {
         foreach ([['sp_nl_coupon', 5, 'sp_nlm_exp1_sent'], ['sp_nlm_winback', 3, 'sp_nlm_exp2_sent']] as $cfg) {
             $open = sp_nlm_open_coupon($sub, $cfg[0]);
             if ($open && $open[1] <= $cfg[1] && $sub->getMeta($cfg[2], 'peptrium') !== $open[0]) {
-                if (sp_nlm_dispatch($sub, 'sp_code_erinnerung', ['erinnerung_code' => $open[0], 'erinnerung_tage' => $open[1] . ' ' . ($open[1] === 1 ? 'Tag' : 'Tagen'), 'erinnerung_prozent' => $open[2] . ' %'], 'Dein Code läuft bald ab', function () use ($sub, $open) { return sp_nlm_expiry_html($sub, $open[0], $open[1], $open[2]); })) {
+                if (sp_nlm_dispatch($sub, 'sp_code_erinnerung', ['erinnerung_code' => $open[0], 'erinnerung_tage' => $open[1] . ' ' . ($open[1] === 1 ? 'Tag' : 'Tage'), 'erinnerung_prozent' => $open[2] . ' %'], 'Dein Code läuft bald ab', function () use ($sub, $open) { return sp_nlm_expiry_html($sub, $open[0], $open[1], $open[2]); })) {
                     $sub->updateMeta($cfg[2], $open[0], 'peptrium');
                 }
             }
@@ -401,14 +435,14 @@ add_action('sp_nlm_daily', function () {
         $first_sent = $last->get_meta('_sp_nlm_reorder_sent');
         if ($first_sent && !$last->get_meta('_sp_nlm_reorder2_sent') && $days < SP_NLM_WINBACK_DAYS
             && (time() - strtotime($first_sent)) >= SP_NLM_REORDER2_AFTER * DAY_IN_SECONDS) {
-            if (sp_nlm_dispatch($sub, 'sp_nachkauf_2', ['nachkauf_link' => sp_nlm_url('/', 'nachkauf-2', ['sp_nachkauf' => sp_nlm_reorder_token($last)]), 'nachkauf_artikel' => sp_nlm_items_text($last)], 'Noch alles da?', function () use ($sub, $last) { return sp_nlm_reorder2_html($sub, $last); })) {
+            if (sp_nlm_dispatch($sub, 'sp_nachkauf_2', ['nachkauf_link' => sp_nlm_url('/', 'nachkauf-2', ['sp_nachkauf' => sp_nlm_reorder_token($last)]), 'nachkauf_artikel' => sp_nlm_items_text($last)] + sp_nlm_slots($last), 'Noch alles da?', function () use ($sub, $last) { return sp_nlm_reorder2_html($sub, $last); })) {
                 $last->update_meta_data('_sp_nlm_reorder2_sent', current_time('mysql'));
                 $last->save();
             }
             continue;
         }
         if ($days >= SP_NLM_REORDER_DAYS && $days < SP_NLM_WINBACK_DAYS && !$first_sent) {
-            if (sp_nlm_dispatch($sub, 'sp_nachkauf', ['nachkauf_link' => sp_nlm_url('/', 'nachkauf', ['sp_nachkauf' => sp_nlm_reorder_token($last)]), 'nachkauf_artikel' => sp_nlm_items_text($last)], 'Zeit für Nachschub?', function () use ($sub, $last) { return sp_nlm_reorder_html($sub, $last); })) {
+            if (sp_nlm_dispatch($sub, 'sp_nachkauf', ['nachkauf_link' => sp_nlm_url('/', 'nachkauf', ['sp_nachkauf' => sp_nlm_reorder_token($last)]), 'nachkauf_artikel' => sp_nlm_items_text($last)] + sp_nlm_slots($last), 'Zeit für Nachschub?', function () use ($sub, $last) { return sp_nlm_reorder_html($sub, $last); })) {
                 $last->update_meta_data('_sp_nlm_reorder_sent', current_time('mysql'));
                 $last->save();
             }

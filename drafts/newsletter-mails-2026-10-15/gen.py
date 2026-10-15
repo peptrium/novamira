@@ -54,26 +54,30 @@ def wrap(rows):
 S=json.loads(sys.argv[1]) if len(sys.argv)>1 else {}
 v=lambda k,d: S.get(k,d)
 mails={}
-mails['willkommen']=wrap(head('nl-hero-vials.jpg','Peptrium Insider','10 % für dich.','Schön, dass du dabei bist.')
- +sec(ticket('10 %','Willkommen',v('hallo_code','HALLO-N2E5N'),'gültig bis '+v('hallo_bis','09.11.2026'),'Jetzt einlösen →',utm('/alle-produkte/','willkommen')))
+mails['willkommen']=wrap(head('nl-hero-vials.jpg','Dein Willkommensgeschenk','10 % für dich.','Schön, dass du dabei bist.')
+ +sec(ticket('10 %','Willkommen','[[contact.custom_properties.hallo_code]]','gültig bis [[contact.custom_properties.hallo_gueltig_bis]]','Jetzt einlösen →',utm('/alle-produkte/','willkommen')))
  +sec(cards(['reta','ghk','pen','mots'],'willkommen','Beliebt bei Insidern'),SOFT)
  +sec(icons(),'#FFFFFF','24px 12px 18px')+foot())
-mails['erinnerung']=wrap(head('nl-hero-vials.jpg','Kurze Erinnerung','Nur noch '+v('tage','5 Tage')+'.','Dein Code ist noch nicht eingelöst.')
- +sec(ticket(v('pct','10 %'),'läuft ab',v('code','HALLO-N2E5N'),'nur noch '+v('tage','5 Tage')+' gültig','Code jetzt nutzen →',utm('/alle-produkte/','code-erinnerung')))
+mails['erinnerung']=wrap(head('nl-hero-vials.jpg','Kurze Erinnerung','Nur noch [[contact.custom_properties.erinnerung_tage]].','Dein Code ist noch nicht eingelöst.')
+ +sec(ticket('[[contact.custom_properties.erinnerung_prozent]]','läuft ab','[[contact.custom_properties.erinnerung_code]]','nur noch [[contact.custom_properties.erinnerung_tage]] gültig','Code jetzt nutzen →',utm('/alle-produkte/','code-erinnerung')))
  +sec(cards(['reta','ghk'],'code-erinnerung','Am meisten gekauft'),SOFT)+foot())
 def lastorder():
-    items=[('reta','2×'),('bac','1×')]
-    r=''.join(f'<tr><td width="76" style="width:76px;padding:10px 0;border-bottom:1px solid {LINE};"><img src="{P[k][2]}" width="64" height="64" alt="" style="display:block;width:64px;height:64px;object-fit:cover;border-radius:12px;background:#0D0F12;"></td><td style="padding:10px 6px;border-bottom:1px solid {LINE};font-family:{F};"><div style="font-size:15px;font-weight:800;color:{INK};">{P[k][0]}</div><div style="font-size:13px;color:{MUT};">Menge: {q}</div></td></tr>' for k,q in items)
-    return h2('Deine letzte Bestellung')+f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:16px;">{r}</table>'+btn('Gleiche Bestellung nochmal →','https://peptrium.com/?sp_nachkauf=…')
+    r=''
+    for i in (1,2):
+        cp='[[contact.custom_properties.nachkauf_%s_'+str(i)+']]'
+        b='border-bottom:1px solid '+LINE+';'
+        r+=(f'<tr><td width="76" style="width:76px;padding:10px 0;{b}"><img src="{cp%"bild"}" width="64" height="64" alt="" style="display:block;width:64px;height:64px;border-radius:12px;background:#0D0F12;border:0;"></td>'
+            f'<td style="padding:10px 6px;{b}font-family:{F};"><div style="font-size:15px;font-weight:800;color:{INK};">{cp%"name"}</div><div style="font-size:13px;color:{MUT};">{cp%"info"}</div></td></tr>')
+    return h2('Deine letzte Bestellung')+f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:16px;">{r}</table>'+btn('Gleiche Bestellung nochmal →','[[contact.custom_properties.nachkauf_link]]')
 abo=(f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-radius:16px;overflow:hidden;"><tr><td style="background-color:#FF6B35;background-image:linear-gradient(135deg,#FF6B35 0%,#E5342B 100%);padding:18px 16px;font-family:{F};color:#FFFFFF;">'
      f'<div style="font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;opacity:.85;">Peptrium Abo</div><div style="font-size:20px;font-weight:800;margin:4px 0 4px;">Nie wieder nachbestellen</div>'
      f'<div style="font-size:14px;line-height:1.5;margin-bottom:14px;">Ab der 2. Lieferung −15 % · jederzeit pausierbar</div><a href="{utm("/abo-modell/","nachkauf")}" style="display:inline-block;background:#FFFFFF;color:#E5342B;text-decoration:none;font-weight:800;font-size:14px;padding:11px 18px;border-radius:12px;">Abo ansehen →</a></td></tr></table>')
-mails['nachkauf']=wrap(head('nl-hero-pen.jpg','Peptrium','Zeit für Nachschub?','Deine letzte Bestellung ist rund 4 Wochen her.')
+mails['nachkauf']=wrap(head('nl-hero-pen.jpg','Nachbestellen','Zeit für Nachschub?','Deine letzte Bestellung ist rund 4 Wochen her.')
  +sec(lastorder())+sec(abo,SOFT)+sec(icons(),'#FFFFFF','24px 12px 18px')+foot())
-mails['nachkauf2']=wrap(head('nl-hero-pen.jpg','Peptrium','Noch alles da?','Mit einem Klick wieder im Warenkorb.')
+mails['nachkauf2']=wrap(head('nl-hero-pen.jpg','Kurzer Hinweis','Noch alles da?','Mit einem Klick wieder im Warenkorb.')
  +sec(lastorder())+sec(cards(['ghk','mots'],'nachkauf-2','Passt dazu'),SOFT)+foot())
 mails['rueckgewinnung']=wrap(head('nl-hero-vials.jpg','Wir vermissen dich','Komm zurück – mit 10 %.','Nur für kurze Zeit.')
- +sec(ticket('10 %','Comeback','COMEBACK-7KQ2P','gültig bis 29.11.2026','Jetzt einlösen →',utm('/alle-produkte/','rueckgewinnung')))
+ +sec(ticket('[[contact.custom_properties.comeback_prozent]]','Comeback','[[contact.custom_properties.comeback_code]]','gültig bis [[contact.custom_properties.comeback_bis]]','Jetzt einlösen →',utm('/alle-produkte/','rueckgewinnung')))
  +sec(cards(['reta','pen','ghk','mots'],'rueckgewinnung','Neu & beliebt'),SOFT)+sec(icons(),'#FFFFFF','24px 12px 18px')+foot())
 for k,h in mails.items(): open(k+'.html','w',encoding='utf-8').write(h)
 print('ok')
