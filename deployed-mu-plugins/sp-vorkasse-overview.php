@@ -373,6 +373,34 @@ function sp_vorkasse_reminder_html($order) {
         . '</table></td></tr></table></body></html>';
 }
 
+/*
+ * (2026-10-16) Automatische Zahlungserinnerung: 48 Std. nach der Bestellung, EINMAL pro Bestellung,
+ * nur offene Vorkasse-Bestellungen (on-hold, bacs) bis 7 Tage alt, ohne Testbestellungen und nur
+ * wenn noch keine Erinnerung (auch keine manuelle) rausging. Stuendlicher Cron. Aus: Option sp_vk_auto = 0.
+ */
+add_action('init', function () {
+    if (!wp_next_scheduled('sp_vk_auto_remind')) {
+        wp_schedule_event(time() + 300, 'hourly', 'sp_vk_auto_remind');
+    }
+});
+add_action('sp_vk_auto_remind', function () {
+    if (!get_option('sp_vk_auto', 1)) {
+        return;
+    }
+    $orders = wc_get_orders(['status' => 'on-hold', 'payment_method' => 'bacs', 'limit' => 50,
+        'date_created' => (time() - 7 * DAY_IN_SECONDS) . '...' . (time() - 48 * HOUR_IN_SECONDS)]);
+    foreach ($orders as $o) {
+        if ($o->get_meta('_sp_is_test') || $o->get_meta('_sp_vk_auto_sent') || array_filter((array) $o->get_meta('_sp_vorkasse_reminders'))) {
+            continue;
+        }
+        $o->update_meta_data('_sp_vk_auto_sent', current_time('mysql')); // erst markieren (keine Doppelmail bei ueberlappenden Laeufen)
+        $o->save();
+        if (sp_vorkasse_send_payment_reminder($o)) {
+            $o->add_order_note('Automatische Zahlungserinnerung (48 Std. ohne Zahlungseingang).');
+        }
+    }
+});
+
 /** Zahlungserinnerung mit Bankdaten an den Kunden. */
 function sp_vorkasse_send_payment_reminder($order) {
     $to = $order->get_billing_email();
@@ -499,7 +527,7 @@ function sp_vorkasse_render_page() {
             </div>
           <?php endforeach; ?>
         </div>
-        <p style="max-width:1000px;color:#50575e;">Ab 1 Tag erscheint „Zahlungserinnerung senden“, ab 14 Tagen zusätzlich „Stornieren“. Es passiert nichts automatisch &ndash; du entscheidest bei jeder Bestellung selbst.</p>
+        <p style="max-width:1000px;color:#50575e;">Ab 1 Tag erscheint „Zahlungserinnerung senden“, ab 14 Tagen zusätzlich „Stornieren“. Nach 48 Stunden ohne Zahlung geht <strong>einmal automatisch</strong> eine Zahlungserinnerung raus (danach nur noch per Klick). Storniert wird nie automatisch &ndash; das entscheidest du.</p>
         <table class="wp-list-table widefat fixed striped" style="max-width:1000px;">
           <thead>
             <tr>
