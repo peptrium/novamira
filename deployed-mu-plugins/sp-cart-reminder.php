@@ -287,7 +287,7 @@ function sp_cr_send_second() {
     $rows = $wpdb->get_results($wpdb->prepare(
         "SELECT * FROM {$table} WHERE status = 'sent' AND sent_at <= %s AND sent_at >= %s ORDER BY id ASC LIMIT 50",
         date('Y-m-d H:i:s', $now - 22 * HOUR_IN_SECONDS),
-        date('Y-m-d H:i:s', $now - 3 * DAY_IN_SECONDS)
+        max(date('Y-m-d H:i:s', $now - 3 * DAY_IN_SECONDS), (string) get_option('sp_cr_omnisend_since', '2099-01-01 00:00:00')) // nur Erinnerungen ab Omnisend-Start (alte Mails sagten "einmalig")
     ));
     foreach ($rows as $row) {
         if ($wpdb->get_var($wpdb->prepare("SELECT 1 FROM {$table} WHERE email = %s AND status = 'optout' LIMIT 1", $row->email))) {
