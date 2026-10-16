@@ -66,6 +66,7 @@ def build():
                                           f'<img src="{src}" width="110" alt="" style="display:block;margin:0 auto;width:110px;height:110px;border-radius:12px;border:0;"><div style="font-size:15px;font-weight:800;color:{INK};margin-top:8px;">{name}</div><div style="font-size:12px;color:{LMUT};">{info}</div></a></td>')
     M['willkommen3'] = wrap(bar('Für den Start')
         + lrow(eyebrow('DIE BELIEBTESTE KOMBI', HE) + h1('Womit die meisten', 'starten.', HT, HS), '34px 20px 26px', HB)
+        + f'<tr><td style="padding:0;line-height:0;background:{HB};"><img src="{U}sp-email/nl-w3-start.jpg" width="600" alt="" style="display:block;width:100%;max-width:600px;height:auto;border:0;"></td></tr>'
         + lrow(f'<div style="background:{AL};border:1px solid {"#EFE2CC" if THEME == "bunt" else LBD};border-radius:22px;padding:22px 14px 18px;text-align:center;">{setrow}'
                f'<div style="font-size:21px;font-weight:800;color:{INK};margin-top:16px;">Retatrutide Starter-Set</div><div style="font-size:13px;line-height:1.5;color:{LMUT};margin:4px 0 12px;">Peptid, Bac Water zum Anmischen und Spritzen – alles für den Anfang.</div>'
                f'<div style="font-size:26px;font-weight:800;color:{INK};margin-bottom:14px;">94,70 €</div>' + lbtn('Set ansehen', utm('/produkt/retatrutide/', c)) + '</div>', '22px 20px 22px')
@@ -95,7 +96,7 @@ def build():
         + lrow(f'<div style="background:{AL};border-radius:22px;line-height:0;text-align:center;"><img src="{S("wd_bild")}" width="280" alt="" style="display:block;margin:0 auto;width:280px;max-width:100%;height:auto;border:0;"></div>'
                f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0 14px;"><tr><td style="text-align:left;font-family:{F};"><div style="font-size:13px;font-weight:800;color:{A};">✓ Sofort lieferbar</div><div style="font-size:12px;color:{LMUT};margin-top:2px;">Versand in 2 Werktagen</div></td>'
                f'<td align="right" style="font-size:26px;font-weight:800;color:{INK};white-space:nowrap;font-family:{F};">{S("wd_preis")}</td></tr></table>' + lbtn('Jetzt bestellen', S('wd_link'), A), '0 20px 32px')
-        + lfoot('Du bekommst diese Mail einmalig, weil du auf der Produktseite um eine Benachrichtigung gebeten hast.'))
+        + lfoot('Du bekommst diese Mail einmalig, weil du auf der Produktseite um eine Benachrichtigung gebeten hast.<br><a href="[[unsubscribe_link]]" style="color:#7D848D;">Keine E-Mails mehr erhalten</a>'))
 
     # ---------- Passt dazu · VIOLETT (Empfehlung) ----------
     c = 'passt-dazu'; A, AL, HB, HT, HS, HP, HE = pal('#6D4AFF', '#F2EFFF')
