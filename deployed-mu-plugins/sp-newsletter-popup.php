@@ -5,7 +5,7 @@
  *
  * (2026-10-16) Anmeldung laeuft ueber die bestehende Double-Opt-in-Anmeldung (admin-ajax sp_nl_subscribe, Quelle "Popup").
  * Der Code wird NICHT im Pop-up gezeigt - erst nach Bestaetigung (Danke-Seite + Willkommensmail).
- * Erscheint: Erstbesucher, nach 10 s (Produktseite 6 s) oder am Computer beim Verlassen (Maus nach oben),
+ * Erscheint: Erstbesucher, nach 12 s oder am Computer beim Verlassen (Maus nach oben),
  * erst nach Altersabfrage und Cookie-Banner, nie in Warenkorb/Kasse/Konto. "Nein danke"/X -> 7 Tage Ruhe,
  * nach Anmeldung nie wieder (Cookie sp_nlp_done). Eingeloggte Kunden mit Bestellung sehen es nicht.
  * LIVE nur mit Option sp_nlp_live = 1. Vorschau: ?sp_popup=vorschau (Cookie 24 h, erscheint nach 3 s, ignoriert die 7-Tage-Ruhe).
@@ -66,7 +66,7 @@ add_action('wp_footer', function () {
     $cfg = [
         'ajax' => admin_url('admin-ajax.php'),
         'preview' => sp_nlp_preview(),
-        'delay' => sp_nlp_preview() ? 3000 : ((function_exists('is_product') && is_product()) ? 6000 : 10000),
+        'delay' => sp_nlp_preview() ? 3000 : 12000, // Nutzer: 12 Sekunden
     ];
     ?>
 <style id="sp-nlp-css">
