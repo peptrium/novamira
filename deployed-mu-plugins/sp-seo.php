@@ -19,7 +19,7 @@ const SP_SEO_SITE = 'Peptrium';
 function sp_seo_pages() {
     return [
         'alle-produkte' => ['Peptide kaufen – alle Forschungspeptide', 'Alle Forschungspeptide von Peptrium: Retatrutide, GHK-Cu, Mots-C, BPC-157 und mehr – HPLC-geprüft, ab 3 Stück −10 %, Versand aus Deutschland in 2 Werktagen.'],
-        'shop' => ['Shop – Forschungspeptide kaufen', 'Forschungspeptide in Laborqualität: HPLC-geprüft, diskret verpackt, Versand aus Deutschland in 2 Werktagen, gratis ab 100 €.'],
+        'shop' => ['Shop – Forschungspeptide kaufen', 'Forschungspeptide in Laborqualität: HPLC-geprüft, diskret verpackt, Versand aus Deutschland in 2 Werktagen, gratis ab 150 €.'],
         'alle-peptrium-pens' => ['Peptrium-Pens – vorgefüllte Peptid-Pens', 'Peptrium-Pens mit Retatrutide, GHK-Cu oder Mots-C: fertig gemischt, exakte Dosierung per Klick, kein Anmischen. Versand aus Deutschland.'],
         'zubehoer' => ['Zubehör – Bac Water, Spritzen & Pen-Nadeln', 'Laborzubehör für Peptide: bakteriostatisches Wasser, Insulinspritzen und Pen-Nadeln – steril, günstig, Versand aus Deutschland in 2 Werktagen.'],
         'peptid-rechner' => ['Peptid-Rechner – Rekonstitution & Dosierung berechnen', 'Kostenloser Peptid-Rechner: Menge Bac Water, Konzentration und Einheiten auf der Spritze in Sekunden berechnen.'],
@@ -28,7 +28,7 @@ function sp_seo_pages() {
         'peptid-lexikon' => ['Peptid-Lexikon – Forschungspeptide erklärt', 'Das Peptid-Lexikon von Peptrium: Herkunft, Wirkmechanismus und Forschungsstand der wichtigsten Peptide verständlich erklärt.'],
         'ueber-uns' => ['Über uns', 'Peptrium liefert Forschungspeptide in geprüfter Qualität – mit transparenter Analytik, diskretem Versand und persönlichem Support.'],
         'kontakt' => ['Kontakt', 'Fragen zu Bestellung, Versand oder Produkten? Schreib uns per E-Mail oder Telegram – wir antworten schnell.'],
-        'versand-lieferzeit' => ['Versand & Lieferzeit', 'Versand mit DHL aus Deutschland in 2 Werktagen, neutral verpackt, mit Sendungsnummer. Gratisversand ab 100 €.'],
+        'versand-lieferzeit' => ['Versand & Lieferzeit', 'Versand mit DHL aus Deutschland in 2 Werktagen, neutral verpackt, mit Sendungsnummer. Gratisversand ab 150 €.'],
         'abo-modell' => ['Abo-Modell – 15 % sparen', 'Mit dem Peptrium-Abo sparst du ab der 2. Lieferung dauerhaft 15 %. Intervall frei wählbar, jederzeit pausieren oder kündigen.'],
         'abo-stack' => ['Abo-Stack zusammenstellen', 'Stell dir dein eigenes Peptid-Abo zusammen: Produkte wählen, Intervall festlegen und ab der 2. Lieferung 15 % sparen.'],
         'bestellstatus' => ['Bestellstatus prüfen', 'Bestellnummer und E-Mail eingeben und sofort sehen, wo deine Peptrium-Bestellung gerade ist.'],
@@ -42,7 +42,7 @@ function sp_seo_pages() {
 }
 
 function sp_seo_front() {
-    return ['Peptide kaufen in Forschungsqualität', 'Peptrium – Forschungspeptide wie Retatrutide, GHK-Cu und Mots-C: HPLC-geprüft, diskret verpackt, Versand aus Deutschland in 2 Werktagen, gratis ab 100 €.'];
+    return ['Peptide kaufen in Forschungsqualität', 'Peptrium – Forschungspeptide wie Retatrutide, GHK-Cu und Mots-C: HPLC-geprüft, diskret verpackt, Versand aus Deutschland in 2 Werktagen, gratis ab 150 €.'];
 }
 
 function sp_seo_price_from($p) {
@@ -71,12 +71,12 @@ function sp_seo_current() {
             $pr = sp_seo_price_from($p);
             $ab = $p->is_type('variable') ? 'ab ' : '';
             if (sp_seo_is_accessory($p)) {
-                $cur = [$n . ' kaufen', $n . ' für die Laborpraxis – steril und sofort lieferbar. ' . ($pr ? $ab . $pr . ' €, ' : '') . 'Versand aus Deutschland in 2 Werktagen, gratis ab 100 €.'];
+                $cur = [$n . ' kaufen', $n . ' für die Laborpraxis – steril und sofort lieferbar. ' . ($pr ? $ab . $pr . ' €, ' : '') . 'Versand aus Deutschland in 2 Werktagen, gratis ab 150 €.'];
             } elseif (stripos($n, 'Pen') === 0 || strpos($p->get_slug(), 'peptrium-pen') === 0) {
                 $cur = [$n . ' kaufen – vorgefüllter Peptid-Pen', $n . ': fertig gemischt, exakte Dosierung per Klick, kein Anmischen. ' . ($pr ? ucfirst($ab) . $pr . ' €. ' : '') . 'Versand aus Deutschland in 2 Werktagen. Nur für Laborforschung.'];
             } else {
                 $pre = function_exists('sp_preorder_product_ids') && in_array($p->get_id(), sp_preorder_product_ids(), true);
-                $cur = [$n . ' kaufen – Forschungspeptid', $n . ' in Forschungsqualität kaufen: HPLC-geprüft, ≥ 99 % Reinheit' . ($pr ? ', ' . $ab . $pr . ' €' : '') . '. ' . ($pre ? 'Jetzt vorbestellen – nur für Laborforschung.' : 'Versand aus Deutschland in 2 Werktagen, gratis ab 100 €.')];
+                $cur = [$n . ' kaufen – Forschungspeptid', $n . ' in Forschungsqualität kaufen: HPLC-geprüft, ≥ 99 % Reinheit' . ($pr ? ', ' . $ab . $pr . ' €' : '') . '. ' . ($pre ? 'Jetzt vorbestellen – nur für Laborforschung.' : 'Versand aus Deutschland in 2 Werktagen, gratis ab 150 €.')];
             }
         }
     } elseif (function_exists('is_product_category') && is_product_category()) {

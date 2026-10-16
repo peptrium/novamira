@@ -101,7 +101,7 @@ function sp_nlm_coupon_card($code, $line, $btn_url) {
 
 function sp_nlm_usps() {
     $rows = '';
-    foreach ([['🧪', 'LC-MS geprüft', 'jede Charge mit Analysezertifikat'], ['📦', 'Diskreter Versand', 'neutral verpackt per DHL'], ['🎁', 'Gratis-Geschenke', 'ab 200 € Bestellwert'], ['🚚', 'Gratisversand', 'ab 100 € innerhalb Deutschlands']] as $u) {
+    foreach ([['🧪', 'LC-MS geprüft', 'jede Charge mit Analysezertifikat'], ['📦', 'Diskreter Versand', 'neutral verpackt per DHL'], ['🎁', 'Gratis-Geschenke', 'ab 200 € Bestellwert'], ['🚚', 'Gratisversand', 'ab 150 € innerhalb Deutschlands']] as $u) {
         $rows .= '<table role="presentation" width="100%" style="margin-bottom:10px;"><tr><td width="30" valign="top" style="font-size:17px;">' . $u[0] . '</td><td style="font-size:14px;line-height:1.5;color:' . SP_EM_INK . ';"><strong>' . $u[1] . '</strong> <span style="color:' . SP_EM_MUTED . ';">– ' . $u[2] . '</span></td></tr></table>';
     }
     return sp_em_card(sp_em_label('Warum Peptrium') . $rows);

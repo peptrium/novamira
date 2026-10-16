@@ -571,7 +571,7 @@ function sp_an_paid_order_details($start, $end) {
 }
 
 function sp_an_gift_thresholds() {
-    $t = array(100 => 'Gratisversand');
+    $t = array(150 => 'Gratisversand');
     if (function_exists('sp_gift_tiers')) {
         foreach (sp_gift_tiers() as $tier) {
             $th = (int) $tier['threshold'];
@@ -882,7 +882,7 @@ add_action('sp_an_render_insights', function ($start, $end, $since) {
     <div class="sp-dash-card">
       <h2>Gratisversand-Hinweis in der Kasse – bringt er etwas?</h2>
       <?php if (!$x['viewers']): ?>
-        <p class="sp-dash-empty">Im Zeitraum hat noch niemand Vorschläge gesehen (Messung läuft seit 09.10.2026; Vorschläge erscheinen nur unter 100 € bei Lieferung nach Deutschland).</p>
+        <p class="sp-dash-empty">Im Zeitraum hat noch niemand Vorschläge gesehen (Messung läuft seit 09.10.2026; Vorschläge erscheinen nur unter 150 € bei Lieferung nach Deutschland).</p>
       <?php else: ?>
         <div class="sp-dash-status-grid">
           <div class="sp-dash-status-tile"><div class="l">Vorschläge gesehen</div><div class="n"><?php echo esc_html($x['viewers']); ?></div><div class="v">Besucher · davon bestellt: <?php echo esc_html($x['viewers_ordered']); ?></div></div>

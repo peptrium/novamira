@@ -98,7 +98,7 @@ body.sp-cd-on #sp-hpv-flag{display:none!important}
 #sp-cart-drawer .sp-cd-empty{padding:56px 10px}
 #sp-cart-drawer .sp-cd-empty:before{content:'🛒';display:block;font-size:40px;margin:0 0 12px;opacity:.8}
 #sp-cart-drawer .sp-cd-empty p{font-size:16px;font-weight:700;margin:0 0 6px}
-#sp-cart-drawer .sp-cd-empty p:after{content:'Entdecke unsere Forschungspeptide – ab 100 € versandkostenfrei.';display:block;font-size:13px;font-weight:400;color:#80868E;margin-top:6px;line-height:1.5}
+#sp-cart-drawer .sp-cd-empty p:after{content:'Entdecke unsere Forschungspeptide – ab 150 € versandkostenfrei.';display:block;font-size:13px;font-weight:400;color:#80868E;margin-top:6px;line-height:1.5}
 #sp-cart-drawer .sp-cd-empty .sp-cd-btn{margin-top:14px;max-width:240px;border-radius:14px}
 #sp-cart-drawer #sp-cd-checkout-btn.is-hidden,#sp-cart-drawer.sp-cx-empty #sp-gx,#sp-cart-drawer.sp-cx-empty .sp-cd-footer{display:none!important}
 @media(max-width:480px){#sp-cart-drawer{width:100vw}}
@@ -182,7 +182,7 @@ body.woocommerce-cart .wp-block-woocommerce-cart,body.woocommerce-cart .entry-he
 <script>
 (function(){var host=document.querySelector('body.woocommerce-cart .entry-content')||document.querySelector('body.woocommerce-cart main');if(!host||document.getElementById('sp-cx-empty'))return;
  var d=document.createElement('div');d.id='sp-cx-empty';
- d.innerHTML='<div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 002 1.6h9.7a2 2 0 002-1.6L23 6H6"/></svg></div><h1>Dein Warenkorb ist leer</h1><p>Entdecke unsere Forschungspeptide – ab 100 € ist der Versand gratis, Lieferung in 2 Werktagen.</p><a class="btn" href="<?php echo esc_url(home_url('/alle-produkte/')); ?>">Zu allen Produkten</a><div class="cats"><?php foreach ($cats as $c) { echo '<a href="' . esc_url($c['u']) . '">' . esc_html($c['n']) . '</a>'; } ?></div>';
+ d.innerHTML='<div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 002 1.6h9.7a2 2 0 002-1.6L23 6H6"/></svg></div><h1>Dein Warenkorb ist leer</h1><p>Entdecke unsere Forschungspeptide – ab 150 € ist der Versand gratis, Lieferung in 2 Werktagen.</p><a class="btn" href="<?php echo esc_url(home_url('/alle-produkte/')); ?>">Zu allen Produkten</a><div class="cats"><?php foreach ($cats as $c) { echo '<a href="' . esc_url($c['u']) . '">' . esc_html($c['n']) . '</a>'; } ?></div>';
  host.insertBefore(d,host.firstChild);})();
 </script>
     <?php

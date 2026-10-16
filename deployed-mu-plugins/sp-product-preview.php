@@ -644,7 +644,7 @@ window.SPSETS=(function(){
  function groups(s){var g=[];s.opts.forEach(function(o){var k=o.g||'';if(g.indexOf(k)<0)g.push(k);});return g;}
  function body(o){var t=o.items.map(function(it){return '<span class="'+(it.w?'w':'')+'"><img loading="lazy" src="'+it.i+'" alt=""></span>';}).join('');
   return '<div class="thumbs">'+t+'<i>'+o.items.length+' Artikel</i></div><ul>'+o.items.map(function(it){return '<li><span>'+it.n+'</span><span>'+eur(it.p)+'</span></li>';}).join('')+'</ul>'
-   +'<div class="sum"><span class="ship'+(o.t>=100?'':' no')+'">'+(o.t>=100?'✓ Gratisversand':'noch '+eur(100-o.t)+' bis Gratisversand')+'</span><strong>'+eur(o.t)+'</strong></div>';}
+   +'<div class="sum"><span class="ship'+(o.t>=150?'':' no')+'">'+(o.t>=150?'✓ Gratisversand':'noch '+eur(150-o.t)+' bis Gratisversand')+'</span><strong>'+eur(o.t)+'</strong></div>';}
  function chips(s,k){var o=s.opts[k],G=groups(s),h='',V=[];
   if(G.length>1)h+='<div class="vo vg">'+G.map(function(g){return '<button type="button" data-g="'+q(g)+'"'+((o.g||'')===g?' class="on"':'')+'>'+g+'</button>';}).join('')+'</div>';
   s.opts.forEach(function(x,j){if((x.g||'')===(o.g||'')&&x.l)V.push(j);});
@@ -701,7 +701,7 @@ document.addEventListener('DOMContentLoaded',function(){
  document.querySelectorAll('.sp-reta-check-item span').forEach(function(s){var t=s.textContent.trim();if(short[t])s.textContent=short[t];});
  document.querySelectorAll('.sp-reta-check-item').forEach(function(i){if(i.scrollWidth>i.clientWidth+1)i.classList.add('wrap');});
  var cta=document.querySelector('#rx-buybox .rx-buycta');
- if(cta&&!document.querySelector('.sp-bb-trust')){cta.parentNode.insertBefore(el('<div class="sp-bb-trust"><div><b>🚚</b>Gratisversand ab 100 €</div><div><b>📦</b>Neutral verpackt</div><div><b>🔒</b>Sicher bezahlen</div></div>'),cta.nextSibling);}
+ if(cta&&!document.querySelector('.sp-bb-trust')){cta.parentNode.insertBefore(el('<div class="sp-bb-trust"><div><b>🚚</b>Gratisversand ab 150 €</div><div><b>📦</b>Neutral verpackt</div><div><b>🔒</b>Sicher bezahlen</div></div>'),cta.nextSibling);}
  /* Vorbestellung: Hinweis + Button-Text */
  if(D.pre){var cta2=document.querySelector('#rx-buybox .rx-buycta');if(cta2&&!document.querySelector('.sp-pre-note')&&!/vorbestellbar/i.test(document.getElementById('rx-buybox').textContent))cta2.parentNode.insertBefore(el('<div class="sp-pre-note"><i>Vorbestellung</i><span><b>Jetzt mit Preisvorteil sichern.</b> Wir liefern, sobald die neue Ware eintrifft.</span></div>'),cta2);
    var rb=document.querySelector('form.cart .single_add_to_cart_button');if(rb)rb.textContent='Vorbestellen';}

@@ -193,7 +193,7 @@ add_action('wp_footer', function () {
       window.__spCartGifts = true;
 
       var TIERS = [
-        { amount: 100, icon: '🚚', label: 'Gratisversand', giftImg: '' },
+        { amount: 150, icon: '🚚', label: 'Gratisversand', giftImg: '' },
         { amount: 200, icon: '💧', label: '<?php echo (defined('SP_GIFT_BAC_WATER_ENABLED') && SP_GIFT_BAC_WATER_ENABLED) ? 'Injektionskit + Bac Water gratis' : 'Injektionskit gratis'; ?>', giftImg: '<?php echo esc_js($gift_img_200 ?: ''); ?>' },
         { amount: 350, icon: '🎁', label: 'GHK-Cu gratis', giftImg: '<?php echo esc_js($gift_img_350 ?: ''); ?>' },
         { amount: 500, icon: '⭐', label: 'Retatrutide gratis', giftImg: '<?php echo esc_js($gift_img_500 ?: ''); ?>' }
@@ -437,7 +437,7 @@ add_action('wp_footer', function () {
       ?>
       var RECON_NEEDED_IDS = <?php echo wp_json_encode($sp_recon_ids_expanded); ?>;
       var ADDON_SUGGESTIONS = [
-        { id: 74, name: 'Bac Water 3 ml', price: '6,90 €', hint: 'Zum Anmischen deines Pulvers' },
+        { id: 74, name: 'Bac Water 3 ml', price: '9,90 €', hint: 'Zum Anmischen deines Pulvers' },
         { id: 80, name: 'Insulinspritze 10er Pack', price: '9,90 €', hint: 'Zum genauen Dosieren' }
       ];
 

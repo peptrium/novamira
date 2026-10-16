@@ -173,9 +173,9 @@ function sp_an_weekly_build() {
     $near_above = 0;
     if (function_exists('sp_an_paid_order_details')) {
         foreach (sp_an_paid_order_details($start, $end) as $d) {
-            if ($d['basis'] >= 70 && $d['basis'] < 100) {
+            if ($d['basis'] >= 120 && $d['basis'] < 150) {
                 $near_below++;
-            } elseif ($d['basis'] >= 100 && $d['basis'] < 130) {
+            } elseif ($d['basis'] >= 150 && $d['basis'] < 180) {
                 $near_above++;
             }
         }
@@ -253,8 +253,8 @@ function sp_an_weekly_build() {
         </div>
       <?php endif; ?>
 
-      <h2 style="<?php echo $h2; ?>">Gratisversand-Grenze (100 €)</h2>
-      <div style="font-size:14px">Knapp darunter (70–99 €): <b><?php echo esc_html($near_below); ?></b> · knapp darüber (100–129 €): <b><?php echo esc_html($near_above); ?></b></div>
+      <h2 style="<?php echo $h2; ?>">Gratisversand-Grenze (150 €)</h2>
+      <div style="font-size:14px">Knapp darunter (120–149 €): <b><?php echo esc_html($near_below); ?></b> · knapp darüber (150–179 €): <b><?php echo esc_html($near_above); ?></b></div>
       <?php if (function_exists('sp_an_fsh_stats')): $fx = sp_an_fsh_stats($start, $end); if ($fx['viewers']): ?>
         <div style="font-size:14px;margin-top:6px">Hinweis in der Kasse: <b><?php echo esc_html($fx['viewers']); ?></b> sahen Vorschläge, <b><?php echo esc_html($fx['clickers']); ?></b> tippten auf „+“ (<?php echo esc_html(sp_an_weekly_money($fx['value'])); ?> hinzugefügt), davon <b><?php echo esc_html($fx['clickers_ordered']); ?></b> bestellt.</div>
       <?php endif; endif; ?>
