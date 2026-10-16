@@ -9,7 +9,7 @@
  * erst nach Altersabfrage und Cookie-Banner, nie in Warenkorb/Kasse/Konto. "Nein danke"/X -> 7 Tage Ruhe,
  * nach Anmeldung nie wieder (Cookie sp_nlp_done). Eingeloggte Kunden mit Bestellung sehen es nicht.
  * LIVE nur mit Option sp_nlp_live = 1. Vorschau: ?sp_popup=vorschau (Cookie 24 h, erscheint nach 3 s, ignoriert die 7-Tage-Ruhe).
- * Postfach-Button je nach Anbieter der Adresse (Gmail-App per Deep-Link mit Web-Fallback, iCloud -> Apple Mail auf iOS, sonst Webmail).
+ * Kein Postfach-Button (Nutzer-Entscheidung 2026-10-16: lieber keiner als einer, der auf manchen Handys nicht geht).
  */
 if (!defined('ABSPATH')) {
     exit;
@@ -94,7 +94,7 @@ add_action('wp_footer', function () {
 #sp-nlp .lg{font-size:11px;line-height:1.5;color:#7D848D;margin-top:12px;text-align:center}
 #sp-nlp .lg a{color:#7D848D}
 #sp-nlp .er{color:#FF8A80;font-size:13px;margin:8px 0 0;display:none}
-#sp-nlp .cd{display:flex;align-items:center;justify-content:space-between;border:1.5px dashed #3A4048;border-radius:14px;padding:12px 14px;margin:0 0 4px}
+#sp-nlp .cd{display:flex;align-items:center;justify-content:space-between;border:1.5px dashed #3A4048;border-radius:14px;padding:12px 14px;margin:0 0 14px}
 #sp-nlp .cd small{font-size:10px;font-weight:700;letter-spacing:.16em;color:#7D848D}
 #sp-nlp .cd b{font-family:'SFMono-Regular',Consolas,Menlo,monospace;font-size:17px;font-weight:800;color:#D9DDE2;letter-spacing:.06em;filter:blur(4px);user-select:none}
 #sp-nlp .ic{font-size:42px;margin:12px 0 2px}
@@ -128,7 +128,6 @@ add_action('wp_footer', function () {
       <h2 style="margin-top:4px">Fast geschafft!</h2>
       <p>Wir haben dir eine Mail an <b data-mail></b> geschickt. Tippe dort auf <b>„Anmeldung bestätigen“</b> – dann ist dein Code freigeschaltet.</p>
       <div class="cd"><small>DEIN CODE</small><b aria-hidden="true">HALLO-XXXXX</b></div>
-      <a class="b" data-box href="#" target="_blank" rel="noopener" style="display:none"></a>
       <div class="rs" data-rs>Keine Mail bekommen? Schau im Spam-Ordner nach oder <button type="button" data-resend>erneut senden</button>.</div>
     </div>
     <div class="st" data-s="4">
@@ -159,19 +158,6 @@ add_action('wp_footer', function () {
   M.querySelectorAll('[data-close]').forEach(function(b){b.addEventListener('click',close);});
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&M.classList.contains('on')) close();});
   M.querySelector('[data-yes]').addEventListener('click',function(){step(2);setTimeout(function(){var i=M.querySelector('input[type=email]');i&&i.focus();},50);});
-  /* Postfach-Button je nach Anbieter */
-  var iOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1), AND=/Android/i.test(navigator.userAgent);
-  var WEB={'gmail.com':['Gmail','https://mail.google.com/'],'googlemail.com':['Gmail','https://mail.google.com/'],'gmx.de':['GMX','https://www.gmx.net/'],'gmx.net':['GMX','https://www.gmx.net/'],'gmx.at':['GMX','https://www.gmx.at/'],'gmx.ch':['GMX','https://www.gmx.ch/'],'web.de':['WEB.DE','https://web.de/'],'icloud.com':['iCloud','https://www.icloud.com/mail'],'me.com':['iCloud','https://www.icloud.com/mail'],'mac.com':['iCloud','https://www.icloud.com/mail'],'outlook.com':['Outlook','https://outlook.live.com/mail/'],'outlook.de':['Outlook','https://outlook.live.com/mail/'],'hotmail.com':['Outlook','https://outlook.live.com/mail/'],'hotmail.de':['Outlook','https://outlook.live.com/mail/'],'live.com':['Outlook','https://outlook.live.com/mail/'],'live.de':['Outlook','https://outlook.live.com/mail/'],'t-online.de':['T-Online','https://email.t-online.de/'],'magenta.de':['T-Online','https://email.t-online.de/'],'yahoo.com':['Yahoo','https://mail.yahoo.com/'],'yahoo.de':['Yahoo','https://mail.yahoo.com/'],'aol.com':['AOL','https://mail.aol.com/'],'aol.de':['AOL','https://mail.aol.com/'],'freenet.de':['freenet','https://webmail.freenet.de/'],'protonmail.com':['Proton','https://mail.proton.me/'],'proton.me':['Proton','https://mail.proton.me/'],'pm.me':['Proton','https://mail.proton.me/']};
-  function boxBtn(){
-    var a=M.querySelector('[data-box]'), d=(email.split('@')[1]||'').toLowerCase(), w=WEB[d];
-    if(!w){a.style.display='none';return;}
-    a.textContent=w[0]+'-Postfach öffnen'; a.href=w[1]; a.style.display='flex';
-    a.onclick=function(e){
-      if(w[0]==='Gmail'&&iOS){e.preventDefault();var t=Date.now();location.href='googlegmail://';setTimeout(function(){if(!document.hidden&&Date.now()-t<2500) window.open(w[1],'_blank');},1200);}
-      else if(w[0]==='Gmail'&&AND){e.preventDefault();location.href='intent://#Intent;scheme=googlegmail;package=com.google.android.gm;S.browser_fallback_url='+encodeURIComponent(w[1])+';end';}
-      else if(w[0]==='iCloud'&&iOS){e.preventDefault();var t2=Date.now();location.href='message://';setTimeout(function(){if(!document.hidden&&Date.now()-t2<2500) window.open(w[1],'_blank');},1200);}
-    };
-  }
   function send(btn,cb){
     var f=M.querySelector('form'), fd=new FormData(); fd.append('action','sp_nl_subscribe'); fd.append('email',email); fd.append('website',f.website.value); fd.append('src','popup');
     btn&&(btn.disabled=true);
@@ -184,7 +170,7 @@ add_action('wp_footer', function () {
       if(!j||!j.success){err.textContent=(j&&j.data&&j.data.msg)||'Das hat nicht geklappt.';err.style.display='block';return;}
       cookie('sp_nlp_done',1,365);
       if(j.data&&j.data.state==='already'){step(4);return;}
-      M.querySelector('[data-mail]').textContent=email; boxBtn(); step(3);
+      M.querySelector('[data-mail]').textContent=email; step(3);
     });
   });
   M.querySelector('[data-resend]').addEventListener('click',function(){
