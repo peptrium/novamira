@@ -133,7 +133,7 @@ if __name__ == '__main__':
         open('vorschau-v2' + ('' if THEME == 'bunt' else '-' + THEME) + '.html', 'w').write('<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mail-Entwürfe hell</title>'
             '<style>body{margin:0;background:#D9DCE0;font-family:-apple-system,Segoe UI,Arial,sans-serif}h1{font-size:20px;margin:0;padding:18px 16px 4px}.i{padding:0 16px 14px;color:#444;font-size:14px}'
             '.w{display:flex;gap:18px;overflow-x:auto;padding:0 16px 30px;scroll-snap-type:x mandatory}.c{flex:0 0 min(400px,88vw);scroll-snap-align:start}.n{font-weight:800;font-size:14px;margin:0 0 8px}.m{border-radius:14px;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,.15)}</style></head>'
-            f'<body><h1>Neue Mails – Variante ' + {'bunt': 'A · bunt', 'hybrid': 'B · dunkler Kopf', 'neutral': 'C · hell neutral'}[THEME] + '</h1><div class="i">Zum Vergleich seitlich wischen. Beispieldaten.</div><div class="w">{cols}</div></body></html>')
+            f'<body><h1>Neue Mails – Variante ' + {'bunt': 'A · bunt', 'hybrid': 'B · dunkler Kopf', 'neutral': 'C · hell neutral'}[THEME] + f'</h1><div class="i">Zum Vergleich seitlich wischen. Beispieldaten.</div><div class="w">{cols}</div></body></html>')
         print('vorschau', list(M))
     else:
         for k, v in build().items():
