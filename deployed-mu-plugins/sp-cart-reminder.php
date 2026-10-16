@@ -241,6 +241,18 @@ function sp_cr_omni() {
 }
 
 /* Kontakt-Eigenschaften fuer die Omnisend-Warenkorb-Mails. */
+/* Zeile fuer Warenkorb-Mail 1: "Noch X bis zum Gratisversand" bzw. "Versandkostenfrei" (Schwelle live aus WooCommerce). */
+function sp_cr_versand_line($total) {
+    $th = function_exists('sp_fsh_threshold') ? (float) sp_fsh_threshold() : 150.0;
+    if ($th <= 0) {
+        return '';
+    }
+    if ($total >= $th) {
+        return '✓ Versandkostenfrei in Deutschland';
+    }
+    return '🚚 Noch ' . html_entity_decode(wp_strip_all_tags(wc_price($th - $total)), ENT_QUOTES, 'UTF-8') . ' bis zum Gratisversand';
+}
+
 function sp_cr_omni_props($row) {
     $items = json_decode($row->cart, true) ?: array();
     $fmt = function ($v) { return html_entity_decode(wp_strip_all_tags(wc_price($v)), ENT_QUOTES, 'UTF-8'); };
@@ -248,6 +260,7 @@ function sp_cr_omni_props($row) {
         'wk_link' => add_query_arg('sp_warenkorb', $row->token, home_url('/')),
         'wk_abmelden' => add_query_arg('sp_warenkorb_abmelden', $row->token, home_url('/')),
         'wk_summe' => $fmt($row->cart_total),
+        'wk_versand' => sp_cr_versand_line((float) $row->cart_total),
         'wk_mehr' => count($items) > 3 ? '+ ' . (count($items) - 3) . ' weitere' . (count($items) - 3 === 1 ? 'r Artikel' : ' Artikel') : '',
     );
     for ($i = 0; $i < 3; $i++) {

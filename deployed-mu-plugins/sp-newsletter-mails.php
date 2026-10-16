@@ -416,7 +416,9 @@ add_action('sp_nlm_daily', function () {
             continue;
         }
         $first_sent = $last->get_meta('_sp_nlm_reorder_sent');
-        if ($first_sent && !$last->get_meta('_sp_nlm_reorder2_sent') && $days < SP_NLM_WINBACK_DAYS
+        $reorder_days = sp_nlm_reorder_days($last);
+        $winback_days = sp_nlm_winback_days($last);
+        if ($first_sent && !$last->get_meta('_sp_nlm_reorder2_sent') && $days < $winback_days
             && (time() - strtotime($first_sent)) >= SP_NLM_REORDER2_AFTER * DAY_IN_SECONDS) {
             if (sp_nlm_dispatch($sub, 'sp_nachkauf_2', ['nachkauf_link' => sp_nlm_url('/', 'nachkauf-2', ['sp_nachkauf' => sp_nlm_reorder_token($last)]), 'nachkauf_artikel' => sp_nlm_items_text($last)] + sp_nlm_slots($last), 'Noch alles da?', function () use ($sub, $last) { return sp_nlm_reorder2_html($sub, $last); })) {
                 $last->update_meta_data('_sp_nlm_reorder2_sent', current_time('mysql'));
@@ -424,12 +426,12 @@ add_action('sp_nlm_daily', function () {
             }
             continue;
         }
-        if ($days >= SP_NLM_REORDER_DAYS && $days < SP_NLM_WINBACK_DAYS && !$first_sent) {
+        if ($reorder_days > 0 && $days >= $reorder_days && $days < $winback_days && !$first_sent) {
             if (sp_nlm_dispatch($sub, 'sp_nachkauf', ['nachkauf_link' => sp_nlm_url('/', 'nachkauf', ['sp_nachkauf' => sp_nlm_reorder_token($last)]), 'nachkauf_artikel' => sp_nlm_items_text($last)] + sp_nlm_slots($last), 'Zeit für Nachschub?', function () use ($sub, $last) { return sp_nlm_reorder_html($sub, $last); })) {
                 $last->update_meta_data('_sp_nlm_reorder_sent', current_time('mysql'));
                 $last->save();
             }
-        } elseif ($days >= SP_NLM_WINBACK_DAYS && !$last->get_meta('_sp_nlm_winback_sent')) {
+        } elseif ($days >= $winback_days && !$last->get_meta('_sp_nlm_winback_sent')) {
             $wb = sp_nlm_winback_coupon($sub);
             $wbc = new WC_Coupon($wb);
             if (sp_nlm_dispatch($sub, 'sp_rueckgewinnung', ['comeback_code' => $wb, 'comeback_bis' => $wbc->get_date_expires() ? $wbc->get_date_expires()->date_i18n('d.m.Y') : '', 'comeback_prozent' => SP_NLM_WINBACK_PERCENT . ' %'], 'Wir vermissen dich', function () use ($sub, $wb) { return sp_nlm_winback_html($sub, $wb); })) {
@@ -439,6 +441,36 @@ add_action('sp_nlm_daily', function () {
         }
     }
 });
+
+/* Nachkauf-Zeitpunkt nach Verbrauch (2026-10-16): 1 Vial ~21 Tage, jede weitere Einheit +14, Pens ~28 Tage (+21 je weiterer),
+ * Maximum 70 Tage; reine Zubehoer-Bestellungen (Kategorie 20) bekommen keine Nachkauf-Mail (0). Aktiv mit Option sp_nlm_verbrauch = 1. */
+function sp_nlm_reorder_days($order) {
+    if (!get_option('sp_nlm_verbrauch')) {
+        return SP_NLM_REORDER_DAYS; // alte feste Regel, bis der Nutzer die neue freigibt
+    }
+    $topup = function_exists('sp_wallet_get_topup_product_id') ? (int) sp_wallet_get_topup_product_id() : 729;
+    $qty = [];
+    foreach ($order->get_items() as $item) {
+        $pid = (int) $item->get_product_id();
+        if ($item->get_meta('Geschenk') || $pid === $topup || (float) $item->get_total() <= 0 || has_term(20, 'product_cat', $pid)) {
+            continue;
+        }
+        $qty[$pid] = ($qty[$pid] ?? 0) + max(1, (int) $item->get_quantity()); // gleiche Produkte in mehreren Zeilen zusammenzaehlen
+    }
+    $days = 0;
+    foreach ($qty as $pid => $n) {
+        $days = max($days, in_array($pid, [393, 395, 396], true) ? 28 + 21 * ($n - 1) : 21 + 14 * ($n - 1));
+    }
+    return min(70, $days);
+}
+
+/* Rueckgewinnung fruehestens 3 Wochen nach dem erwarteten Nachkauf, mindestens SP_NLM_WINBACK_DAYS. */
+function sp_nlm_winback_days($order) {
+    if (!get_option('sp_nlm_verbrauch')) {
+        return SP_NLM_WINBACK_DAYS;
+    }
+    return max(SP_NLM_WINBACK_DAYS, sp_nlm_reorder_days($order) + 21);
+}
 
 /* Ablaufdatum eines Gutscheins als d.m.Y. */
 function sp_nlm_coupon_until($code) {
