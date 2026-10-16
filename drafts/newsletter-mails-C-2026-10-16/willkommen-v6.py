@@ -78,7 +78,8 @@ def build():
         + cell(f'<div style="font-size:12px;font-weight:800;letter-spacing:.18em;color:{LMUT};margin:0 4px 10px;">SO SPARST DU</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>'
                + tile('tag', '−10 %', 'ab 3 Stück eines Peptids') + gap + tile('truck', '150 €', 'ab hier Versand gratis') + gap + tile('gift', '', 'ab 200 € ein Geschenk dazu') + '</tr></table>', '18px 16px 8px', '#FFFFFF')
         + cell(f'<div style="font-size:12px;font-weight:800;letter-spacing:.18em;color:{LMUT};margin:0 4px 10px;">AUCH OFT IM ERSTEN WARENKORB</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>'
-               + prod('ghk', 'GHK-Cu', '50 mg · lyophilisiert', utm('/produkt/ghk-cu/', c)) + prod('mots', 'MOTS-C', '10 mg · lyophilisiert', utm('/produkt/mots-c/', c)) + '</tr></table>', '18px 12px 30px', '#FFFFFF')
+               + prod('ghk', 'GHK-Cu', '50 mg · lyophilisiert', utm('/produkt/ghk-cu/', c)) + prod('mots', 'MOTS-C', '10 mg · lyophilisiert', utm('/produkt/mots-c/', c)) + '</tr></table>', '18px 12px 8px', '#FFFFFF')
+        + cell(lbtn('Zum Shop →', utm('/alle-produkte/', c)), '14px 16px 32px', '#FFFFFF')
 
         + lfoot(), DK)
     return M
