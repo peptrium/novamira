@@ -20,6 +20,7 @@ def wk_items():
             f'<td style="padding:10px 6px;{bt}text-align:left;font-family:{F};"><div style="font-size:15px;font-weight:800;color:#FFF;">{S("wk_name_"+str(n))}</div><div style="font-size:12px;color:{MUT};margin-top:2px;">{S("wk_info_"+str(n))}</div></td>'
             f'<td align="right" style="padding:10px 0;{bt}font-size:15px;font-weight:800;color:#FFF;white-space:nowrap;font-family:{F};">{S("wk_preis_"+str(n))}</td></tr>')
     r+=f'<tr><td colspan="3" style="padding:2px 0 0;text-align:left;font-size:12px;color:{MUT};font-family:{F};">{S("wk_mehr")}</td></tr>'
+    r+=f'<tr><td colspan="3" style="padding:10px 0 2px;text-align:left;font-family:{F};"><div style="background:#1F242B;border-radius:10px;padding:9px 12px;font-size:13px;font-weight:700;color:#D9DDE2;">{S("wk_versand")}</div></td></tr>'
     r+=f'<tr><td colspan="2" style="padding:12px 0 0;border-top:1px solid {BD};text-align:left;font-size:14px;color:{MUT};font-family:{F};">Summe</td><td align="right" style="padding:12px 0 0;border-top:1px solid {BD};font-size:18px;font-weight:800;color:#FFF;white-space:nowrap;font-family:{F};">{S("wk_summe")}</td></tr>'
     return f'<div style="border:1px solid {BD};background:{CARD};border-radius:18px;padding:8px 16px 16px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">{r}</table></div>'
 def chips():
