@@ -121,10 +121,10 @@ ARTIKEL = [
 <h2>Der Unterschied auf einen Blick</h2>
 <table class="rg-tab">
 <tr><th></th><th>Semaglutid</th><th>Tirzepatide</th><th>Retatrutide</th></tr>
-<tr><td>Rezeptoren</td><td>GLP-1</td><td>GLP-1 + GIP</td><td>GLP-1 + GIP + Glukagon</td></tr>
-<tr><td>Bezeichnung</td><td>Mono-Agonist</td><td>Dual-Agonist</td><td>Triple-Agonist</td></tr>
-<tr><td>Entwickler</td><td>Novo Nordisk</td><td>Eli Lilly</td><td>Eli Lilly (LY3437943)</td></tr>
-<tr><td>Status</td><td>als Arzneimittel zugelassen</td><td>als Arzneimittel zugelassen</td><td>in klinischer Entwicklung (Phase 3)</td></tr>
+<tr><td>Rezeptor</td><td>GLP-1</td><td>GLP-1 + GIP</td><td>GLP-1 + GIP + Glukagon</td></tr>
+<tr><td>Typ</td><td>Mono-Agonist</td><td>Dual-Agonist</td><td>Triple-Agonist</td></tr>
+<tr><td>Entwickler</td><td>Novo Nordisk</td><td>Eli Lilly</td><td>Eli Lilly</td></tr>
+<tr><td>Status</td><td>zugelassen</td><td>zugelassen</td><td>Phase 3</td></tr>
 </table>
 
 <h2>Semaglutid: der GLP-1-Agonist</h2>
@@ -134,7 +134,7 @@ ARTIKEL = [
 <p>Tirzepatide aktiviert zwei Rezeptoren: GLP-1 und GIP. Die Idee dahinter: Beide Inkretin-Signale gleichzeitig anzusprechen, statt nur eines. Die großen Studienprogramme (SURPASS, SURMOUNT) haben Tirzepatide intensiv untersucht; als Arzneimittel ist es ebenfalls zugelassen. Mehr dazu im {a('/peptid-lexikon/tirzepatide/', 'Lexikon-Eintrag zu Tirzepatide')}.</p>
 
 <h2>Retatrutide: der Triple-Agonist</h2>
-<p>Retatrutide geht noch einen Schritt weiter und spricht zusätzlich den <strong>Glukagon-Rezeptor</strong> an. Gerade diese dritte Komponente macht es für die Forschung interessant, weil Glukagon andere Stoffwechselwege berührt als die beiden Inkretine. Nach einer viel beachteten Phase-2-Studie (veröffentlicht 2023 im New England Journal of Medicine) läuft das Phase-3-Programm (TRIUMPH). Retatrutide ist kein zugelassenes Arzneimittel. Details im {a('/peptid-lexikon/retatrutide/', 'Lexikon-Eintrag zu Retatrutide')}.</p>
+<p>Retatrutide (Entwicklungsname LY3437943) geht noch einen Schritt weiter und spricht zusätzlich den <strong>Glukagon-Rezeptor</strong> an. Gerade diese dritte Komponente macht es für die Forschung interessant, weil Glukagon andere Stoffwechselwege berührt als die beiden Inkretine. Nach einer viel beachteten Phase-2-Studie (veröffentlicht 2023 im New England Journal of Medicine) läuft das Phase-3-Programm (TRIUMPH). Retatrutide ist kein zugelassenes Arzneimittel. Details im {a('/peptid-lexikon/retatrutide/', 'Lexikon-Eintrag zu Retatrutide')}.</p>
 
 <h2>Warum der Vergleich für die Forschung spannend ist</h2>
 <p>Die drei Moleküle bilden eine Art Stufenleiter: ein, zwei, drei Rezeptoren. Damit lässt sich untersuchen, welchen Anteil das einzelne Hormon-Signal an einem Effekt hat – etwa in Zellmodellen, bei Rezeptor-Bindungsstudien oder in Vergleichsmessungen. Genau dafür werden Referenzsubstanzen in hoher, analytisch geprüfter Reinheit gebraucht.</p>

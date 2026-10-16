@@ -91,7 +91,10 @@ function sp_seo_current() {
     } elseif (is_page()) {
         $post = get_queried_object();
         $map = sp_seo_pages();
-        if (isset($map[$post->post_name]) && !$post->post_parent) {
+        $own = get_post_meta($post->ID, '_sp_seo', true);
+        if (is_array($own) && !empty($own[0]) && !empty($own[1])) {
+            $cur = [$own[0], $own[1]];
+        } elseif (isset($map[$post->post_name]) && !$post->post_parent) {
             $cur = $map[$post->post_name];
         } elseif ($post->post_parent && get_post_field('post_name', $post->post_parent) === 'peptid-lexikon') {
             $n = $post->post_title;
