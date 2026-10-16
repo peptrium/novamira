@@ -1,5 +1,5 @@
 # Willkommen 2 + 3 nach der Vorlage des Nutzers (2026-10-16, "ich will die mails in der form haben"):
-# W3: Ueberschrift steckt im hohen Set-Bild (nl-w3-hero.jpg, gerendert aus dem Nutzerbild, 1200x1600).
+# W2: Ueberschrift steckt im hohen Set-Bild des Nutzers (nl-w2-hero2.jpg, 1200x1600, Nutzer: "das sollte fuer Willkommen 2 sein").
 # W2 komplett dunkel mit Hero-Foto + 3 Bild-Schrittkarten, W3 dunkler Kopf mit Set-Foto + heller Inhalt.
 # Bilder: uploads/sp-email/nl-w2-*.jpg, nl-w3-set.jpg, Icons nl-ic-<name>-w|d.png (Linien-Icons, 96 px).
 # python3 willkommen-v6.py          -> willkommen2.body / willkommen3.body (Omnisend-Platzhalter)
@@ -31,8 +31,7 @@ def build():
     steps = ''.join(f'<div style="margin-bottom:10px;line-height:0;">{img(E + f"nl-w2-schritt{i}.jpg", alt)}</div>' for i, alt in
                     [(1, 'Schritt 1: Gefriergetrocknet – als stabiles Pulver, lange haltbar.'), (2, 'Schritt 2: HPLC- und LC-MS-geprüft – Reinheit ≥ 99 % für jede Charge.'), (3, 'Schritt 3: Neutral in 2 Werktagen – diskret verpackt, mit DHL-Sendungsnummer.')])
     M['willkommen2'] = frame(bar('So arbeiten wir')
-        + head('AUS DEM LABOR', 'Vom Labor', 'bis zu dir.', 'Das passiert mit jedem Vial, bevor es bei dir ankommt.', DK)
-        + f'<tr><td style="padding:0;line-height:0;background:{DK};">{img(E + "nl-w2-hero.jpg", "Peptrium Vials im Labor")}</td></tr>'
+        + f'<tr><td style="padding:0;line-height:0;background:{DK};">{img(E + "nl-w2-hero2.jpg", "Vom Labor bis zu dir. Das passiert mit jedem Vial, bevor es bei dir ankommt.")}</td></tr>'
         + cell(steps, '6px 12px 6px', DK)
         + cell(f'<div style="font-size:12px;font-weight:800;letter-spacing:.18em;color:{GR};margin:0 4px 10px;">PRAKTISCH FÜR DICH</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>'
                + chip('rechner', 'Rechner', utm('/peptid-rechner/', c)) + chip('lagerung', 'Lagerung', utm('/lagerungs-guide/', c)) + chip('lexikon', 'Lexikon', utm('/peptid-lexikon/', c)) + '</tr></table>', '18px 12px 8px', DK)
@@ -45,20 +44,23 @@ def build():
     c = 'willkommen-3'; LB = '#F4F5F6'
     plus = f'<td width="22" style="width:22px;text-align:center;font-size:22px;font-weight:800;color:{INK};font-family:{F};">+</td>'
     th = lambda k: f'<td><img src="{PI[k]}" width="84" height="84" alt="" style="display:block;width:84px;height:84px;border-radius:14px;border:0;background:#0D0F12;"></td>'
-    tile = lambda ic, big, t: (f'<td width="33%" valign="top" style="width:33%;padding:4px;"><div style="background:{LB};border-radius:14px;padding:14px 6px;text-align:center;font-family:{F};">'
+    # gleich hohe Kacheln: Hintergrund auf der Tabellenzelle selbst (alle Zellen einer Zeile sind gleich hoch), Abstand per weisser Zwischenzelle
+    tile = lambda ic, big, t: (f'<td width="32%" valign="top" bgcolor="{LB}" style="width:32%;background:{LB};border-radius:14px;padding:14px 6px;text-align:center;font-family:{F};">'
                                f'<img src="{E}nl-ic-{ic}-d.png" width="26" height="26" alt="" style="display:block;margin:0 auto 8px;width:26px;height:26px;border:0;">'
-                               + (f'<div style="font-size:19px;font-weight:800;color:{INK};line-height:1.1;">{big}</div>' if big else '')
-                               + f'<div style="font-size:12px;line-height:1.4;color:{LMUT};margin-top:4px;">{t}</div></div></td>')
+                               f'<div style="font-size:19px;font-weight:800;color:{INK};line-height:1.1;">{big}</div>'
+                               f'<div style="font-size:12px;line-height:1.4;color:{LMUT};margin-top:4px;">{t}</div></td>')
+    gap = '<td width="2%" style="width:2%;font-size:0;">&nbsp;</td>'
     prod = lambda k, n, i, u: (f'<td width="50%" valign="top" style="width:50%;padding:4px;"><a href="{u}" style="display:block;text-decoration:none;border:1px solid {LBD};border-radius:16px;padding:12px;background:#FFF;text-align:center;font-family:{F};">'
                                f'<img src="{PI[k]}" width="110" alt="" style="display:block;margin:0 auto;width:110px;height:110px;border-radius:12px;border:0;background:#0D0F12;"><div style="font-size:16px;font-weight:800;color:{INK};margin-top:8px;">{n}</div><div style="font-size:12px;color:{LMUT};">{i}</div></a></td>')
     M['willkommen3'] = frame(bar('Für den Start')
-        + f'<tr><td style="padding:0;line-height:0;background:{DK};">{img(E + "nl-w3-hero.jpg", "Womit die meisten starten. Alles, was du für den Anfang brauchst – in einem Set.")}</td></tr>'
+        + head('DIE BELIEBTESTE KOMBI', 'Womit die meisten', 'starten.', 'Alles, was du für den Anfang brauchst – in einem Set.', DK).replace('Womit die meisten<br>', 'Womit die<br>meisten ')
+        + f'<tr><td style="padding:0;line-height:0;background:{DK};">{img(E + "nl-w3-set.jpg", "Retatrutide Starter-Set mit Bac Water und Spritzen")}</td></tr>'
         + cell(f'<div style="background:#FFFFFF;border:1px solid {LBD};border-radius:22px;padding:20px 14px 16px;text-align:center;">'
                f'<table role="presentation" align="center" cellpadding="0" cellspacing="0"><tr>{th("reta")}{plus}{th("bac")}{plus}{th("spritze")}</tr></table>'
                f'<div style="font-size:21px;font-weight:800;color:{INK};margin-top:14px;">Retatrutide Starter-Set</div><div style="font-size:14px;line-height:1.5;color:{LMUT};margin:4px 0 10px;">Vial, Bac Water zum Anmischen und Spritzen – alles für den Anfang.</div>'
                f'<div style="font-size:28px;font-weight:800;color:{INK};margin-bottom:14px;">94,70 €</div>' + lbtn('Set ansehen', utm('/produkt/retatrutide/', c)) + '</div>', '18px 16px 8px', '#FFFFFF')
         + cell(f'<div style="font-size:12px;font-weight:800;letter-spacing:.18em;color:{LMUT};margin:0 4px 10px;">SO SPARST DU</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>'
-               + tile('tag', '−10 %', 'ab 3 Stück eines Peptids') + tile('truck', '150 €', 'ab hier Versand gratis') + tile('gift', '', 'ab 200 € ein Geschenk dazu') + '</tr></table>', '18px 12px 8px', '#FFFFFF')
+               + tile('tag', '−10 %', 'ab 3 Stück eines Peptids') + gap + tile('truck', '150 €', 'ab hier Versand gratis') + gap + tile('gift', '200 €', 'ab hier ein Geschenk dazu') + '</tr></table>', '18px 16px 8px', '#FFFFFF')
         + cell(f'<div style="font-size:12px;font-weight:800;letter-spacing:.18em;color:{LMUT};margin:0 4px 10px;">AUCH OFT IM ERSTEN WARENKORB</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>'
                + prod('ghk', 'GHK-Cu', '50 mg · lyophilisiert', utm('/produkt/ghk-cu/', c)) + prod('mots', 'MOTS-C', '10 mg · lyophilisiert', utm('/produkt/mots-c/', c)) + '</tr></table>', '18px 12px 8px', '#FFFFFF')
         + cell(f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border:1px solid {LBD};border-radius:16px;overflow:hidden;"><tr><td width="30%" style="background:{INK};padding:16px 4px;text-align:center;font-family:{F};"><div style="font-size:26px;font-weight:800;color:#FFF;line-height:1;">10 %</div></td>'
