@@ -63,6 +63,16 @@ def build():
                f'<table role="presentation" align="center" cellpadding="0" cellspacing="0"><tr>{th("reta")}{plus}{th("bac")}{plus}{th("spritze")}</tr></table>'
                f'<div style="font-size:21px;font-weight:800;color:{INK};margin-top:14px;">Retatrutide Starter-Set</div><div style="font-size:14px;line-height:1.5;color:{LMUT};margin:4px 0 10px;">Vial, Bac Water zum Anmischen und Spritzen – alles für den Anfang.</div>'
                f'<div style="font-size:28px;font-weight:800;color:{INK};margin-bottom:14px;">94,70 €</div>' + lbtn('Set ansehen', utm('/produkt/retatrutide/', c)) + '</div>', '0 16px 8px', '#FFFFFF')
+        + cell(f'<div style="text-align:center;font-size:12px;font-weight:800;letter-spacing:.18em;color:{LMUT};margin:4px 0 12px;">ODER OHNE ANMISCHEN</div>'
+               f'<div style="background:{DK};border-radius:22px;padding:20px 14px 16px;text-align:center;">'
+               f'<table role="presentation" align="center" cellpadding="0" cellspacing="0"><tr>'
+               f'<td><img src="{U}2026/08/45D2BF40-474D-46BE-9C9E-885EE2E57738-300x300.png" width="84" height="84" alt="" style="display:block;width:84px;height:84px;border-radius:14px;border:0;background:#FFF;"></td>'
+               f'<td width="22" style="width:22px;text-align:center;font-size:22px;font-weight:800;color:#FFF;font-family:{F};">+</td>'
+               f'<td><img src="{E}nl-p-pennadeln.jpg" width="84" height="84" alt="" style="display:block;width:84px;height:84px;border-radius:14px;border:0;background:#FFF;"></td></tr></table>'
+               f'<div style="display:inline-block;margin-top:14px;background:#2A2F36;color:#FFF;border-radius:999px;padding:4px 10px;font-size:11px;font-weight:800;letter-spacing:.08em;">FERTIG GEMISCHT</div>'
+               f'<div style="font-size:21px;font-weight:800;color:#FFF;margin-top:8px;">Retatrutide Pen-Set</div><div style="font-size:14px;line-height:1.5;color:{LT};margin:4px 0 10px;">Vorgefüllter Peptrium-Pen (20 mg) mit passenden Pen Nadeln – ganz ohne Anmischen.</div>'
+               f'<div style="font-size:28px;font-weight:800;color:#FFF;margin-bottom:14px;">274,80 €</div>'
+               f'<a href="{utm("/", c)}&amp;sp_set=reta-pen" style="display:block;background:#FFFFFF;color:{INK};text-align:center;text-decoration:none;font-weight:800;font-size:15px;line-height:1.2;padding:15px 12px;border-radius:12px;font-family:{F};">Mit 1 Klick in den Warenkorb</a></div>', '14px 16px 8px', '#FFFFFF')
         + cell(f'<div style="font-size:12px;font-weight:800;letter-spacing:.18em;color:{LMUT};margin:0 4px 10px;">SO SPARST DU</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>'
                + tile('tag', '−10 %', 'ab 3 Stück eines Peptids') + gap + tile('truck', '150 €', 'ab hier Versand gratis') + gap + tile('gift', '', 'ab 200 € ein Geschenk dazu') + '</tr></table>', '18px 16px 8px', '#FFFFFF')
         + cell(f'<div style="font-size:12px;font-weight:800;letter-spacing:.18em;color:{LMUT};margin:0 4px 10px;">AUCH OFT IM ERSTEN WARENKORB</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>'
