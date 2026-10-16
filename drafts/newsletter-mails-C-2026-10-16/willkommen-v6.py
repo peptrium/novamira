@@ -73,12 +73,13 @@ def build():
                f'<div style="font-size:21px;font-weight:800;color:#FFF;margin-top:8px;">Retatrutide Pen-Set</div><div style="font-size:14px;line-height:1.5;color:{LT};margin:4px 0 10px;">Vorgefüllter Peptrium-Pen (20 mg) mit passenden Pen Nadeln – ganz ohne Anmischen.</div>'
                f'<div style="font-size:28px;font-weight:800;color:#FFF;margin-bottom:14px;">274,80 €</div>'
                f'<a href="{utm("/", c)}&amp;sp_set=reta-pen" style="display:block;background:#FFFFFF;color:{INK};text-align:center;text-decoration:none;font-weight:800;font-size:15px;line-height:1.2;padding:15px 12px;border-radius:12px;font-family:{F};">Mit 1 Klick in den Warenkorb</a></div>', '14px 16px 8px', '#FFFFFF')
+        + cell(f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border:1px solid {LBD};border-radius:16px;overflow:hidden;"><tr><td width="30%" style="background:{INK};padding:16px 4px;text-align:center;font-family:{F};"><div style="font-size:26px;font-weight:800;color:#FFF;line-height:1;">10 %</div></td>'
+               f'<td style="background:{LB};padding:12px 10px;text-align:center;border-left:2px dashed #C9CDD2;font-family:{F};"><div style="font-size:19px;font-weight:800;color:{INK};word-break:break-all;">{S("hallo_code")}</div><div style="font-size:12px;color:{LMUT};margin-top:3px;">dein Code · gültig bis {S("hallo_gueltig_bis")}</div></td></tr></table>', '14px 16px 8px', '#FFFFFF')
         + cell(f'<div style="font-size:12px;font-weight:800;letter-spacing:.18em;color:{LMUT};margin:0 4px 10px;">SO SPARST DU</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>'
                + tile('tag', '−10 %', 'ab 3 Stück eines Peptids') + gap + tile('truck', '150 €', 'ab hier Versand gratis') + gap + tile('gift', '', 'ab 200 € ein Geschenk dazu') + '</tr></table>', '18px 16px 8px', '#FFFFFF')
         + cell(f'<div style="font-size:12px;font-weight:800;letter-spacing:.18em;color:{LMUT};margin:0 4px 10px;">AUCH OFT IM ERSTEN WARENKORB</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>'
-               + prod('ghk', 'GHK-Cu', '50 mg · lyophilisiert', utm('/produkt/ghk-cu/', c)) + prod('mots', 'MOTS-C', '10 mg · lyophilisiert', utm('/produkt/mots-c/', c)) + '</tr></table>', '18px 12px 8px', '#FFFFFF')
-        + cell(f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border:1px solid {LBD};border-radius:16px;overflow:hidden;"><tr><td width="30%" style="background:{INK};padding:16px 4px;text-align:center;font-family:{F};"><div style="font-size:26px;font-weight:800;color:#FFF;line-height:1;">10 %</div></td>'
-               f'<td style="background:{LB};padding:12px 10px;text-align:center;border-left:2px dashed #C9CDD2;font-family:{F};"><div style="font-size:19px;font-weight:800;color:{INK};word-break:break-all;">{S("hallo_code")}</div><div style="font-size:12px;color:{LMUT};margin-top:3px;">dein Code · gültig bis {S("hallo_gueltig_bis")}</div></td></tr></table>', '14px 16px 30px', '#FFFFFF')
+               + prod('ghk', 'GHK-Cu', '50 mg · lyophilisiert', utm('/produkt/ghk-cu/', c)) + prod('mots', 'MOTS-C', '10 mg · lyophilisiert', utm('/produkt/mots-c/', c)) + '</tr></table>', '18px 12px 30px', '#FFFFFF')
+
         + lfoot(), DK)
     return M
 
