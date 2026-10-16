@@ -83,12 +83,13 @@ if (!function_exists('sp_aff_mail_build')) {
                 }
                 $b .= '<p style="margin:18px 0 6px;font-size:17px;font-weight:800;color:' . $I . ';">Dein Start: das erste Partner-Video</p>';
                 $b .= $steps([
-                    ['Produkt aussuchen', 'Such dir ein Produkt aus unserem Sortiment aus (außer den Pens) – das schenken wir dir.'],
+                    ['Produkt aussuchen', 'Such dir ein Produkt aus unserem Sortiment aus (außer den Pens) und schreib deinem Creator Manager, welches du haben möchtest – das schenken wir dir.'],
                     ['Kostenlos geliefert', 'Es ist in der Regel innerhalb von 2 Werktagen bei dir.'],
-                    ['Erstes Video hochladen', 'Teste in Ruhe und lade innerhalb von 7 Tagen nach Erhalt dein erstes Video mit deinem Code hoch (bitte Punkt 4 der Partner-Bedingungen beachten).'],
+                    ['Erstes Video hochladen', 'Teste in Ruhe und lade dann dein erstes Video mit deinem Code hoch (bitte Punkt 4 der Partner-Bedingungen beachten).'],
                 ]);
-                $b .= $p('Schreib uns kurz, welches Produkt du dir aussuchst:', 'font-size:14px;');
-                $b .= $btn('Per Telegram schreiben', $tg) . $btn('Per E-Mail an info@peptrium.com', 'mailto:info@peptrium.com?subject=' . rawurlencode('Mein Produkt für mein erstes Partner-Video'), false);
+                $b .= $p('Schreib deinem Creator Manager, welches Produkt du dir aussuchst:', 'font-size:14px;');
+                $b .= $btn('Creator Manager per Telegram schreiben', $tg) . $btn('Per E-Mail an info@peptrium.com', 'mailto:info@peptrium.com?subject=' . rawurlencode('Mein Produkt für mein erstes Partner-Video'), false);
+                $b .= $card($lbl('💬 Dein Creator Manager') . '<p style="margin:0;font-size:14px;line-height:1.6;color:' . $I . ';">Du hast Fragen zu deinem Content – wie du deine Videos aufbaust, welche Formate gut ankommen oder wie du am effizientesten arbeitest? Tausch dich jederzeit gerne mit deinem Creator Manager aus. Gemeinsam holen wir das Maximum aus deinem Content heraus.</p>');
                 $b .= '<div style="height:6px;"></div>' . $btn('Zum Partnerkonto', $g(3) !== '' ? $g(3) : $acct, false);
                 $b .= $card('<p style="margin:0;font-size:13.5px;line-height:1.6;color:' . $I . ';"><strong>⚠️ Wichtig:</strong> Bitte lies vor deinem ersten Post unsere <a href="' . esc_url($terms) . '" style="color:' . $I . ';font-weight:700;">Partner-Bedingungen</a> einmal komplett durch.</p>', '#FFF6E5', '#FAB219');
                 $b .= $p('Willkommen im Team!<br>Dein Peptrium-Team', 'margin-top:8px;');
