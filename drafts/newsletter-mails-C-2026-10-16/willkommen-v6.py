@@ -28,15 +28,16 @@ def build():
     c = 'willkommen-2'
     def chip(ic, t, u): return (f'<td width="33%" style="width:33%;padding:4px;"><a href="{u}" style="display:block;text-decoration:none;background:{DK2};border:1px solid {DBD};border-radius:14px;padding:14px 4px 12px;text-align:center;font-family:{F};">'
                                 f'<img src="{E}nl-ic-{ic}-w.png" width="28" height="28" alt="" style="display:block;margin:0 auto;width:28px;height:28px;border:0;"><div style="font-size:13px;font-weight:800;color:#FFF;margin-top:8px;">{t}</div></a></td>')
-    steps = ''.join(f'<div style="margin-bottom:10px;line-height:0;">{img(E + f"nl-w2-schritt{i}.jpg", alt)}</div>' for i, alt in
-                    [(1, 'Schritt 1: Gefriergetrocknet – als stabiles Pulver, lange haltbar.'), (2, 'Schritt 2: HPLC- und LC-MS-geprüft – Reinheit ≥ 99 % für jede Charge.'), (3, 'Schritt 3: Neutral in 2 Werktagen – diskret verpackt, mit DHL-Sendungsnummer.')])
+    steps = ''.join(f'<div style="margin-bottom:10px;line-height:0;">{img(E + f"nl-w2-karte{i}.jpg", alt)}</div>' for i, alt in
+                    [(1, 'Schritt 1: Gefriergetrocknet – als stabiles Pulver, lange haltbar.'), (2, 'Schritt 2: HPLC- und LC-MS-geprüft – Reinheit ≥ 99 % für jede Charge.'), (3, 'Schritt 3: Diskret verpackt – neutraler Karton ohne Aufdruck, in 2 Werktagen bei dir.')])
     codebox = lambda pad: cell(f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border:2px dashed #3A4048;border-radius:14px;background:{DK2};"><tr>'
                f'<td style="padding:14px 16px;text-align:left;font-family:{F};"><div style="font-size:11px;font-weight:800;letter-spacing:.16em;color:{LT};">DEIN CODE · 10 %</div><div style="font-size:21px;font-weight:800;color:#FFF;margin-top:4px;word-break:break-all;">{S("hallo_code")}</div></td>'
                f'<td width="120" style="width:120px;padding:14px 14px 14px 0;text-align:right;"><a href="{utm("/alle-produkte/", c)}" style="display:inline-block;background:{ORG};color:#0D0F12;text-decoration:none;font-weight:800;font-size:15px;padding:12px 20px;border-radius:12px;font-family:{F};">Einlösen</a></td></tr></table>', pad, DK)
     M['willkommen2'] = frame(bar('So arbeiten wir')
         + f'<tr><td style="padding:0;line-height:0;background:{DK};">{img(E + "nl-w2-hero2.jpg", "Vom Labor bis zu dir. Das passiert mit jedem Vial, bevor es bei dir ankommt.")}</td></tr>'
-        + codebox('16px 16px 10px')
-        + cell(steps, '6px 12px 6px', DK)
+        + codebox('16px 16px 6px')
+        + cell(f'<div style="text-align:center;font-size:16px;line-height:1.5;color:{LT};">So kommt dein Peptid zu dir – <strong style="color:#FFF;">in 3 Schritten.</strong></div>', '18px 24px 14px', DK)
+        + cell(steps, '0 12px 6px', DK)
         + cell(f'<div style="font-size:12px;font-weight:800;letter-spacing:.18em;color:{GR};margin:0 4px 10px;">PRAKTISCH FÜR DICH</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>'
                + chip('rechner', 'Rechner', utm('/peptid-rechner/', c)) + chip('lagerung', 'Lagerung', utm('/lagerungs-guide/', c)) + chip('lexikon', 'Lexikon', utm('/peptid-lexikon/', c)) + '</tr></table>', '18px 12px 8px', DK)
         + codebox('14px 16px 30px')
