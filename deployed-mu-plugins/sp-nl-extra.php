@@ -509,3 +509,51 @@ function sp_nlx_privacy($html) {
 }
 add_filter('elementor/frontend/the_content', 'sp_nlx_privacy', 99);
 add_filter('the_content', 'sp_nlx_privacy', 99);
+
+/* ---------- 1-Klick-Sets aus Mails: /?sp_set=<slug> legt das Set in den Warenkorb und fuehrt zur Kasse ---------- */
+/* (2026-10-16, Nutzer: "1 klick set mit dem reta pen ... und ja ein klick button" – Willkommen 3) */
+function sp_nlx_sets() {
+    return [
+        'reta-starter' => [['p' => 65, 'v' => 555], ['p' => 74], ['p' => 80]],   // Retatrutide 10 mg + Bac Water + Insulinspritzen
+        'reta-pen'     => [['p' => 393, 'v' => 547], ['p' => 908]],              // Peptrium-Pen Retatrutide 20 mg + Pen Nadeln
+    ];
+}
+
+add_action('wp_loaded', function () {
+    if (empty($_GET['sp_set']) || is_admin() || wp_doing_ajax() || !function_exists('WC')) {
+        return;
+    }
+    $sets = sp_nlx_sets();
+    $slug = sanitize_key(wp_unslash($_GET['sp_set']));
+    if (!isset($sets[$slug]) || !WC()->cart) {
+        return;
+    }
+    if (WC()->session && !WC()->session->has_session()) {
+        WC()->session->set_customer_session_cookie(true);
+    }
+    $in_cart = [];
+    foreach (WC()->cart->get_cart() as $ci) {
+        $in_cart[(int) ($ci['variation_id'] ?: $ci['product_id'])] = true;
+    }
+    $added = 0;
+    foreach ($sets[$slug] as $it) {
+        $id = (int) ($it['v'] ?? $it['p']);
+        if (!empty($in_cart[$id])) {
+            $added++;
+            continue; // schon im Warenkorb – nicht doppelt
+        }
+        $prod = wc_get_product($id);
+        if (!$prod || !$prod->is_purchasable() || !$prod->is_in_stock()) {
+            continue;
+        }
+        $attrs = !empty($it['v']) ? $prod->get_variation_attributes() : [];
+        if (WC()->cart->add_to_cart((int) $it['p'], 1, (int) ($it['v'] ?? 0), $attrs)) {
+            $added++;
+        }
+    }
+    wc_clear_notices();
+    $keep = array_intersect_key(wp_unslash($_GET), array_flip(['utm_source', 'utm_medium', 'utm_campaign']));
+    $target = $added ? wc_get_checkout_url() : get_permalink((int) $sets[$slug][0]['p']);
+    wp_safe_redirect(add_query_arg(array_map('sanitize_text_field', $keep), $target), 302);
+    exit;
+}, 25);

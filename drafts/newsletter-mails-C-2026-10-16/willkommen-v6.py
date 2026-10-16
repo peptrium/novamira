@@ -62,7 +62,7 @@ def build():
         + cell(f'<div style="background:#FFFFFF;border:1px solid {LBD};border-radius:22px;padding:20px 14px 16px;text-align:center;box-shadow:0 8px 28px rgba(13,15,18,.10);">'
                f'<table role="presentation" align="center" cellpadding="0" cellspacing="0"><tr>{th("reta")}{plus}{th("bac")}{plus}{th("spritze")}</tr></table>'
                f'<div style="font-size:21px;font-weight:800;color:{INK};margin-top:14px;">Retatrutide Starter-Set</div><div style="font-size:14px;line-height:1.5;color:{LMUT};margin:4px 0 10px;">Vial, Bac Water zum Anmischen und Spritzen – alles für den Anfang.</div>'
-               f'<div style="font-size:28px;font-weight:800;color:{INK};margin-bottom:14px;">94,70 €</div>' + lbtn('Set ansehen', utm('/produkt/retatrutide/', c)) + '</div>', '0 16px 8px', '#FFFFFF')
+               f'<div style="font-size:28px;font-weight:800;color:{INK};margin-bottom:14px;">94,70 €</div>' + lbtn('Mit 1 Klick in den Warenkorb', utm('/', c) + '&amp;sp_set=reta-starter') + '</div>', '0 16px 8px', '#FFFFFF')
         + cell(f'<div style="text-align:center;font-size:12px;font-weight:800;letter-spacing:.18em;color:{LMUT};margin:4px 0 12px;">ODER OHNE ANMISCHEN</div>'
                f'<div style="background:{DK};border-radius:22px;padding:20px 14px 16px;text-align:center;">'
                f'<table role="presentation" align="center" cellpadding="0" cellspacing="0"><tr>'
