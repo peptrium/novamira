@@ -223,3 +223,107 @@ add_action('template_redirect', function () {
         return $html;
     });
 }, 4);
+
+/* Lexikon: Astras versteckte Titel-H1 entfernen (die Seite hat ihre eigene H1 → sonst zwei H1). */
+add_action('wp', function () {
+    if (!is_page()) {
+        return;
+    }
+    $id = (int) get_queried_object_id();
+    $lex = get_page_by_path('peptid-lexikon');
+    if ($lex && ($id === (int) $lex->ID || (int) wp_get_post_parent_id($id) === (int) $lex->ID)) {
+        add_filter('astra_the_title_enabled', '__return_false');
+    }
+});
+
+/** Ratgeber-Slugs passend zur aktuellen Produkt- bzw. Lexikon-Seite (max. 3). */
+function sp_rg_related_slugs() {
+    $R = 'peptide-rekonstituieren';
+    $V = 'retatrutide-tirzepatide-semaglutid';
+    $H = 'hplc-lc-ms-reinheit';
+    $K = 'peptide-kaufen-deutschland';
+    if (function_exists('is_product') && is_product()) {
+        $id = (int) get_queried_object_id();
+        $slug = get_post_field('post_name', $id);
+        if (in_array($id, [729, 745, 817], true)) {
+            return [];
+        }
+        if ($id === 908) {
+            return [$K];
+        }
+        if (has_term(20, 'product_cat', $id)) {
+            return [$R, $K];
+        }
+        if (strpos($slug, 'peptrium-pen') === 0) {
+            return $slug === 'peptrium-pen-retatrutide' ? [$V, $H, $K] : [$H, $K];
+        }
+        return in_array($slug, ['retatrutide', 'tirzepatide'], true) ? [$V, $R, $H] : [$R, $H, $K];
+    }
+    if (is_page()) {
+        $id = (int) get_queried_object_id();
+        $lex = get_page_by_path('peptid-lexikon');
+        if (!$lex) {
+            return [];
+        }
+        if ($id === (int) $lex->ID) {
+            return [$R, $V, $H];
+        }
+        if ((int) wp_get_post_parent_id($id) !== (int) $lex->ID) {
+            return [];
+        }
+        $slug = get_post_field('post_name', $id);
+        if (in_array($slug, ['retatrutide', 'tirzepatide'], true)) {
+            return [$V, $H];
+        }
+        if ($slug === 'bac-water') {
+            return [$R];
+        }
+        if (strpos($slug, 'peptrium-pen') === 0) {
+            return [$H, $K];
+        }
+        return [$R, $H];
+    }
+    return [];
+}
+
+add_action('wp_footer', function () {
+    if (!sp_rg_parent_id()) {
+        return;
+    }
+    $links = '';
+    foreach (sp_rg_related_slugs() as $s) {
+        $p = get_page_by_path('ratgeber/' . $s);
+        if ($p && $p->post_status === 'publish') {
+            $links .= '<a class="rgl-a" href="' . esc_url(get_permalink($p)) . '"><span>' . esc_html($p->post_title) . '</span><i aria-hidden="true">→</i></a>';
+        }
+    }
+    if (!$links) {
+        return;
+    }
+    $prod = function_exists('is_product') && is_product();
+    ?>
+<section id="sp-rg-links" class="<?php echo $prod ? 'is-prod' : 'is-lex'; ?>"><div class="rgl-in"><div class="rgl-eb">Ratgeber</div><div class="rgl-h">Mehr dazu</div><div class="rgl-list"><?php echo $links; // phpcs:ignore ?></div><a class="rgl-all" href="<?php echo esc_url(get_permalink(sp_rg_parent_id())); ?>">Alle Ratgeber-Artikel</a></div></section>
+<style id="sp-rg-links-css">
+#sp-rg-links{box-sizing:border-box;font-family:Inter,system-ui,sans-serif}
+#sp-rg-links .rgl-eb{font:700 11px/1 Sora,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#6B727A;margin-bottom:8px}
+#sp-rg-links .rgl-h{font:800 20px/1.25 Sora,sans-serif;color:#0D0F12;margin:0 0 12px}
+#sp-rg-links .rgl-list{display:flex;flex-direction:column;gap:8px}
+#sp-rg-links .rgl-a{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff;border:1px solid #E3E6E9;border-radius:14px;padding:14px 16px;color:#0D0F12!important;text-decoration:none!important;font-weight:700!important;font-size:15px;line-height:1.35;transition:border-color .2s}
+#sp-rg-links .rgl-a:hover{border-color:#A3AAB3}
+#sp-rg-links .rgl-a i{font-style:normal;color:#6B727A;flex-shrink:0}
+#sp-rg-links .rgl-all{display:inline-block;margin-top:12px;font-size:14px;font-weight:700;color:#0D0F12!important;text-decoration:underline!important;text-underline-offset:2px}
+#sp-rg-links.is-prod{margin-top:24px;padding-top:20px;border-top:1px solid #E3E6E9}
+#sp-rg-links.is-lex{margin:34px 0 10px}
+#sp-rg-links.is-lex .rgl-in{background:#F4F5F6;border:1px solid #E3E6E9;border-radius:24px;padding:24px 20px}
+@media(min-width:1024px){#sp-rg-links .rgl-list{display:grid;grid-template-columns:repeat(3,1fr)}}
+</style>
+<script id="sp-rg-links-js">
+(function(){var s=document.getElementById('sp-rg-links');if(!s)return;var n=0;
+ function place(){var a=document.querySelector('#sp-pp-about .in'),l=document.getElementById('sp-lexd')||document.getElementById('sp-lex');
+  if(s.classList.contains('is-prod')){if(a){a.appendChild(s);return true;}var r=document.querySelector('.pp-root');if(n>20&&r){s.style.order='3';s.classList.remove('is-prod');s.classList.add('is-lex');r.appendChild(s);return true;}return false;}
+  if(l){l.appendChild(s);return true;}return n>20;}
+ (function t(){if(!place()&&n++<40)setTimeout(t,150);})();
+})();
+</script>
+    <?php
+}, 60);
