@@ -1,6 +1,7 @@
 # Willkommen 2 + 3 nach der Vorlage des Nutzers (2026-10-16, "ich will die mails in der form haben"):
 # W2: Ueberschrift steckt im hohen Set-Bild des Nutzers (nl-w2-hero2.jpg, 1200x1600, Nutzer: "das sollte fuer Willkommen 2 sein").
 # Karten 1+2 = Original-Bilder des Nutzers (Text unveraendert lassen!), Karte 3 nur Text getauscht ("Diskret verpackt", Nutzer: "neutral" war unklar).
+# W3 (Nutzer-Vorlage rechts): dasselbe Hero-Foto wie W2 mit W3-Ueberschrift im Bild, unten weiss auslaufend (nl-w3-hero-w.jpg), Set-Karte direkt darunter.
 # W2 komplett dunkel mit Hero-Foto + 3 Bild-Schrittkarten, W3 dunkler Kopf mit Set-Foto + heller Inhalt.
 # Bilder: uploads/sp-email/nl-w2-*.jpg, nl-w3-set.jpg, Icons nl-ic-<name>-w|d.png (Linien-Icons, 96 px).
 # python3 willkommen-v6.py          -> willkommen2.body / willkommen3.body (Omnisend-Platzhalter)
@@ -51,20 +52,19 @@ def build():
     # gleich hohe Kacheln: Hintergrund auf der Tabellenzelle selbst (alle Zellen einer Zeile sind gleich hoch), Abstand per weisser Zwischenzelle
     tile = lambda ic, big, t: (f'<td width="32%" valign="top" bgcolor="{LB}" style="width:32%;background:{LB};border-radius:14px;padding:14px 6px;text-align:center;font-family:{F};">'
                                f'<img src="{E}nl-ic-{ic}-d.png" width="26" height="26" alt="" style="display:block;margin:0 auto 8px;width:26px;height:26px;border:0;">'
-                               f'<div style="font-size:19px;font-weight:800;color:{INK};line-height:1.1;">{big}</div>'
-                               f'<div style="font-size:12px;line-height:1.4;color:{LMUT};margin-top:4px;">{t}</div></td>')
+                               + (f'<div style="font-size:19px;font-weight:800;color:{INK};line-height:1.1;">{big}</div>' if big else '')
+                               + f'<div style="font-size:12px;line-height:1.4;color:{LMUT};margin-top:4px;">{t}</div></td>')
     gap = '<td width="2%" style="width:2%;font-size:0;">&nbsp;</td>'
     prod = lambda k, n, i, u: (f'<td width="50%" valign="top" style="width:50%;padding:4px;"><a href="{u}" style="display:block;text-decoration:none;border:1px solid {LBD};border-radius:16px;padding:12px;background:#FFF;text-align:center;font-family:{F};">'
                                f'<img src="{PI[k]}" width="110" alt="" style="display:block;margin:0 auto;width:110px;height:110px;border-radius:12px;border:0;background:#0D0F12;"><div style="font-size:16px;font-weight:800;color:{INK};margin-top:8px;">{n}</div><div style="font-size:12px;color:{LMUT};">{i}</div></a></td>')
     M['willkommen3'] = frame(bar('Für den Start')
-        + head('DIE BELIEBTESTE KOMBI', 'Womit die meisten', 'starten.', 'Alles, was du für den Anfang brauchst – in einem Set.', DK).replace('Womit die meisten<br>', 'Womit die<br>meisten ')
-        + f'<tr><td style="padding:0;line-height:0;background:{DK};">{img(E + "nl-w3-set.jpg", "Retatrutide Starter-Set mit Bac Water und Spritzen")}</td></tr>'
-        + cell(f'<div style="background:#FFFFFF;border:1px solid {LBD};border-radius:22px;padding:20px 14px 16px;text-align:center;">'
+        + f'<tr><td style="padding:0;line-height:0;background:#FFFFFF;">{img(E + "nl-w3-hero-w.jpg", "Womit die meisten starten. Alles, was du für den Anfang brauchst – in einem Set.")}</td></tr>'
+        + cell(f'<div style="background:#FFFFFF;border:1px solid {LBD};border-radius:22px;padding:20px 14px 16px;text-align:center;box-shadow:0 8px 28px rgba(13,15,18,.10);">'
                f'<table role="presentation" align="center" cellpadding="0" cellspacing="0"><tr>{th("reta")}{plus}{th("bac")}{plus}{th("spritze")}</tr></table>'
                f'<div style="font-size:21px;font-weight:800;color:{INK};margin-top:14px;">Retatrutide Starter-Set</div><div style="font-size:14px;line-height:1.5;color:{LMUT};margin:4px 0 10px;">Vial, Bac Water zum Anmischen und Spritzen – alles für den Anfang.</div>'
-               f'<div style="font-size:28px;font-weight:800;color:{INK};margin-bottom:14px;">94,70 €</div>' + lbtn('Set ansehen', utm('/produkt/retatrutide/', c)) + '</div>', '18px 16px 8px', '#FFFFFF')
+               f'<div style="font-size:28px;font-weight:800;color:{INK};margin-bottom:14px;">94,70 €</div>' + lbtn('Set ansehen', utm('/produkt/retatrutide/', c)) + '</div>', '0 16px 8px', '#FFFFFF')
         + cell(f'<div style="font-size:12px;font-weight:800;letter-spacing:.18em;color:{LMUT};margin:0 4px 10px;">SO SPARST DU</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>'
-               + tile('tag', '−10 %', 'ab 3 Stück eines Peptids') + gap + tile('truck', '150 €', 'ab hier Versand gratis') + gap + tile('gift', '200 €', 'ab hier ein Geschenk dazu') + '</tr></table>', '18px 16px 8px', '#FFFFFF')
+               + tile('tag', '−10 %', 'ab 3 Stück eines Peptids') + gap + tile('truck', '150 €', 'ab hier Versand gratis') + gap + tile('gift', '', 'ab 200 € ein Geschenk dazu') + '</tr></table>', '18px 16px 8px', '#FFFFFF')
         + cell(f'<div style="font-size:12px;font-weight:800;letter-spacing:.18em;color:{LMUT};margin:0 4px 10px;">AUCH OFT IM ERSTEN WARENKORB</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>'
                + prod('ghk', 'GHK-Cu', '50 mg · lyophilisiert', utm('/produkt/ghk-cu/', c)) + prod('mots', 'MOTS-C', '10 mg · lyophilisiert', utm('/produkt/mots-c/', c)) + '</tr></table>', '18px 12px 8px', '#FFFFFF')
         + cell(f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border:1px solid {LBD};border-radius:16px;overflow:hidden;"><tr><td width="30%" style="background:{INK};padding:16px 4px;text-align:center;font-family:{F};"><div style="font-size:26px;font-weight:800;color:#FFF;line-height:1;">10 %</div></td>'
