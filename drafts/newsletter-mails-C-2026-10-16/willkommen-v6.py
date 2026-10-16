@@ -1,4 +1,5 @@
 # Willkommen 2 + 3 nach der Vorlage des Nutzers (2026-10-16, "ich will die mails in der form haben"):
+# W3: Ueberschrift steckt im hohen Set-Bild (nl-w3-hero.jpg, gerendert aus dem Nutzerbild, 1200x1600).
 # W2 komplett dunkel mit Hero-Foto + 3 Bild-Schrittkarten, W3 dunkler Kopf mit Set-Foto + heller Inhalt.
 # Bilder: uploads/sp-email/nl-w2-*.jpg, nl-w3-set.jpg, Icons nl-ic-<name>-w|d.png (Linien-Icons, 96 px).
 # python3 willkommen-v6.py          -> willkommen2.body / willkommen3.body (Omnisend-Platzhalter)
@@ -51,8 +52,7 @@ def build():
     prod = lambda k, n, i, u: (f'<td width="50%" valign="top" style="width:50%;padding:4px;"><a href="{u}" style="display:block;text-decoration:none;border:1px solid {LBD};border-radius:16px;padding:12px;background:#FFF;text-align:center;font-family:{F};">'
                                f'<img src="{PI[k]}" width="110" alt="" style="display:block;margin:0 auto;width:110px;height:110px;border-radius:12px;border:0;background:#0D0F12;"><div style="font-size:16px;font-weight:800;color:{INK};margin-top:8px;">{n}</div><div style="font-size:12px;color:{LMUT};">{i}</div></a></td>')
     M['willkommen3'] = frame(bar('Für den Start')
-        + head('DIE BELIEBTESTE KOMBI', 'Womit die meisten', 'starten.', 'Alles, was du für den Anfang brauchst – in einem Set.', DK).replace('Womit die meisten<br>', 'Womit die<br>meisten ')
-        + f'<tr><td style="padding:0;line-height:0;background:{DK};">{img(E + "nl-w3-set.jpg", "Retatrutide Starter-Set mit Bac Water und Spritzen")}</td></tr>'
+        + f'<tr><td style="padding:0;line-height:0;background:{DK};">{img(E + "nl-w3-hero.jpg", "Womit die meisten starten. Alles, was du für den Anfang brauchst – in einem Set.")}</td></tr>'
         + cell(f'<div style="background:#FFFFFF;border:1px solid {LBD};border-radius:22px;padding:20px 14px 16px;text-align:center;">'
                f'<table role="presentation" align="center" cellpadding="0" cellspacing="0"><tr>{th("reta")}{plus}{th("bac")}{plus}{th("spritze")}</tr></table>'
                f'<div style="font-size:21px;font-weight:800;color:{INK};margin-top:14px;">Retatrutide Starter-Set</div><div style="font-size:14px;line-height:1.5;color:{LMUT};margin:4px 0 10px;">Vial, Bac Water zum Anmischen und Spritzen – alles für den Anfang.</div>'
