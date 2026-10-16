@@ -36,28 +36,25 @@ def pimg(src, s=78, bg='#F5F6F7'): return f'<img src="{src}" width="{s}" height=
 
 def build():
     M = {}
-    # ---------- Willkommen 2 · BLAU (Labor, Vertrauen) ----------
+    # ---------- Willkommen 2 · bildlastig (2026-10-16, Nutzer: "viel Text, mehr mit Bildern") ----------
     c = 'willkommen-2'; A, AL, HB, HT, HS, HP, HE = pal('#2563EB', '#EAF1FE')
-    def tl(n, t, d, last=False):
-        line = '' if last else f'<div style="width:2px;min-height:30px;height:30px;background:{"#C9D8F8" if THEME == "bunt" else LBD};margin:4px auto 0;"></div>'
-        return (f'<tr><td width="48" valign="top" style="width:48px;padding:0;"><div style="width:36px;height:36px;line-height:36px;border-radius:50%;background:{A};color:#FFF;font-weight:800;font-size:15px;text-align:center;margin:0 auto;font-family:{F};">{n}</div>{line}</td>'
-                f'<td valign="top" style="padding:5px 0 {0 if last else 14}px 8px;text-align:left;font-family:{F};"><div style="font-size:16px;font-weight:800;color:{INK};">{t}</div><div style="font-size:13px;line-height:1.55;color:{LMUT};margin-top:3px;">{d}</div></td></tr>')
-    def tool(ic, t, d, u): return (f'<a href="{u}" style="display:block;text-decoration:none;border:1px solid {LBD};background:#FFF;border-radius:14px;padding:12px;margin-bottom:8px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>'
-                                    f'<td width="46" style="width:46px;"><div style="width:36px;height:36px;line-height:36px;border-radius:10px;background:{AL};text-align:center;font-size:17px;">{ic}</div></td>'
-                                    f'<td style="text-align:left;font-family:{F};"><div style="font-size:14px;font-weight:800;color:{INK};">{t}</div><div style="font-size:12px;color:{LMUT};">{d}</div></td><td width="20" style="width:20px;text-align:right;color:{A};font-size:20px;font-weight:800;font-family:{F};">›</td></tr></table></a>')
+    E = U + 'sp-email/'
+    def step(n, img, t, d): return (f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border:1px solid {LBD};border-radius:18px;margin-bottom:10px;background:#FFF;"><tr>'
+        f'<td width="116" valign="middle" style="width:116px;padding:8px;"><img src="{E}{img}" width="108" height="108" alt="" style="display:block;width:108px;height:108px;border-radius:12px;border:0;"></td>'
+        f'<td valign="middle" style="padding:8px 14px 8px 6px;text-align:left;font-family:{F};"><div style="display:inline-block;width:24px;height:24px;line-height:24px;border-radius:50%;background:{A};color:#FFF;font-size:12px;font-weight:800;text-align:center;">{n}</div>'
+        f'<div style="font-size:16px;font-weight:800;color:{INK};margin-top:6px;line-height:1.25;">{t}</div><div style="font-size:13px;line-height:1.45;color:{LMUT};margin-top:3px;">{d}</div></td></tr></table>')
+    def chip(ic, t, u): return (f'<td width="33%" style="width:33%;padding:4px;"><a href="{u}" style="display:block;text-decoration:none;background:#F5F6F7;border-radius:14px;padding:12px 4px;text-align:center;font-family:{F};">'
+        f'<div style="font-size:22px;line-height:1;">{ic}</div><div style="font-size:12px;font-weight:800;color:{INK};margin-top:6px;">{t}</div></a></td>')
     M['willkommen2'] = wrap(bar('So arbeiten wir')
-        + lrow(eyebrow('AUS DEM LABOR', HE) + h1('Vom Labor', 'bis zu dir.', HT, HS) + p('Was mit jedem Vial passiert, bevor es bei dir ankommt – in 4 Schritten.', col=HP), '34px 20px 26px', HB)
-        + lrow('<table role="presentation" width="100%" cellpadding="0" cellspacing="0">'
-               + tl(1, 'Hergestellt &amp; gefriergetrocknet'.replace('&amp;', 'und'), 'Jedes Peptid kommt als lyophilisiertes Pulver – stabil und lange haltbar.')
-               + tl(2, 'Geprüft per HPLC und LC-MS', 'Reinheit (≥ 99 %) und Identität werden für jede Charge geprüft.')
-               + tl(3, 'Neutral verpackt', 'Ohne Hinweis auf den Inhalt, sicher gepolstert.')
-               + tl(4, 'In 2 Werktagen bei dir', 'Versand mit DHL, die Sendungsnummer bekommst du per E-Mail.', True) + '</table>', '28px 20px 10px')
-        + lrow(eyebrow('DEINE WERKZEUGE', LMUT) + tool('🧮', 'Peptid-Rechner', 'Die richtige Menge Bac Water berechnen', utm('/peptid-rechner/', c))
-               + tool('❄️', 'Lagerungs-Guide', 'So bleiben deine Peptide stabil', utm('/lagerungs-guide/', c))
-               + tool('📖', 'Peptid-Lexikon', 'Was über jedes Peptid erforscht wird', utm('/peptid-lexikon/', c)), '18px 20px 14px')
+        + lrow(eyebrow('AUS DEM LABOR', HE) + h1('Vom Labor', 'bis zu dir.', HT, HS) + p('Das passiert mit jedem Vial, bevor es bei dir ankommt.', col=HP), '34px 20px 24px', HB)
+        + f'<tr><td style="padding:0;line-height:0;background:{HB};"><img src="{E}nl-w2-labor.jpg" width="600" alt="" style="display:block;width:100%;max-width:600px;height:auto;border:0;"></td></tr>'
+        + lrow(step(1, 'nl-w2-vial.jpg', 'Gefriergetrocknet', 'Als stabiles Pulver – lange haltbar.')
+               + step(2, 'nl-w2-test.jpg', 'HPLC- und LC-MS-geprüft', 'Reinheit ≥ 99 % für jede Charge.')
+               + step(3, 'nl-w2-paket.jpg', 'Neutral in 2 Werktagen', 'Diskret verpackt, mit DHL-Sendungsnummer.'), '24px 16px 8px')
+        + lrow(eyebrow('PRAKTISCH FÜR DICH', LMUT) + f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>{chip("🧮", "Rechner", utm("/peptid-rechner/", c))}{chip("❄️", "Lagerung", utm("/lagerungs-guide/", c))}{chip("📖", "Lexikon", utm("/peptid-lexikon/", c))}</tr></table>', '16px 16px 8px')
         + lrow(f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border:2px dashed {A};border-radius:14px;background:{AL};"><tr>'
                f'<td style="padding:14px;text-align:left;font-family:{F};"><div style="font-size:11px;font-weight:800;letter-spacing:.16em;color:{A};">DEIN CODE · 10 %</div><div style="font-size:19px;font-weight:800;font-family:{MONO};color:{INK};margin-top:4px;word-break:break-all;">{S("hallo_code")}</div></td>'
-               f'<td width="100" style="width:100px;padding:14px 14px 14px 0;text-align:right;"><a href="{utm("/alle-produkte/", c)}" style="display:inline-block;background:{A};color:#FFF;text-decoration:none;font-weight:800;font-size:13px;padding:11px 14px;border-radius:10px;font-family:{F};">Einlösen</a></td></tr></table>', '6px 20px 32px')
+               f'<td width="100" style="width:100px;padding:14px 14px 14px 0;text-align:right;"><a href="{utm("/alle-produkte/", c)}" style="display:inline-block;background:{A};color:#FFF;text-decoration:none;font-weight:800;font-size:13px;padding:11px 14px;border-radius:10px;font-family:{F};">Einlösen</a></td></tr></table>', '12px 20px 32px')
         + lfoot())
 
     # ---------- Willkommen 3 · SAND/WARM (Start-Set) ----------
