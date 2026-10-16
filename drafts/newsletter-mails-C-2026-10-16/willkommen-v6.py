@@ -1,5 +1,6 @@
 # Willkommen 2 + 3 nach der Vorlage des Nutzers (2026-10-16, "ich will die mails in der form haben"):
 # W2: Ueberschrift steckt im hohen Set-Bild des Nutzers (nl-w2-hero2.jpg, 1200x1600, Nutzer: "das sollte fuer Willkommen 2 sein").
+# Karten 1+2 = Original-Bilder des Nutzers (Text unveraendert lassen!), Karte 3 nur Text getauscht ("Diskret verpackt", Nutzer: "neutral" war unklar).
 # W2 komplett dunkel mit Hero-Foto + 3 Bild-Schrittkarten, W3 dunkler Kopf mit Set-Foto + heller Inhalt.
 # Bilder: uploads/sp-email/nl-w2-*.jpg, nl-w3-set.jpg, Icons nl-ic-<name>-w|d.png (Linien-Icons, 96 px).
 # python3 willkommen-v6.py          -> willkommen2.body / willkommen3.body (Omnisend-Platzhalter)
@@ -28,7 +29,7 @@ def build():
     c = 'willkommen-2'
     def chip(ic, t, u): return (f'<td width="33%" style="width:33%;padding:4px;"><a href="{u}" style="display:block;text-decoration:none;background:{DK2};border:1px solid {DBD};border-radius:14px;padding:14px 4px 12px;text-align:center;font-family:{F};">'
                                 f'<img src="{E}nl-ic-{ic}-w.png" width="28" height="28" alt="" style="display:block;margin:0 auto;width:28px;height:28px;border:0;"><div style="font-size:13px;font-weight:800;color:#FFF;margin-top:8px;">{t}</div></a></td>')
-    steps = ''.join(f'<div style="margin-bottom:10px;line-height:0;">{img(E + f"nl-w2-karte{i}.jpg", alt)}</div>' for i, alt in
+    steps = ''.join(f'<div style="margin-bottom:10px;line-height:0;">{img(E + ("nl-w2-karte3b.jpg" if i == 3 else f"nl-w2-schritt{i}.jpg"), alt)}</div>' for i, alt in
                     [(1, 'Schritt 1: Gefriergetrocknet – als stabiles Pulver, lange haltbar.'), (2, 'Schritt 2: HPLC- und LC-MS-geprüft – Reinheit ≥ 99 % für jede Charge.'), (3, 'Schritt 3: Diskret verpackt – neutraler Karton ohne Aufdruck, in 2 Werktagen bei dir.')])
     codebox = lambda pad: cell(f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border:2px dashed #3A4048;border-radius:14px;background:{DK2};"><tr>'
                f'<td style="padding:14px 16px;text-align:left;font-family:{F};"><div style="font-size:11px;font-weight:800;letter-spacing:.16em;color:{LT};">DEIN CODE · 10 %</div><div style="font-size:21px;font-weight:800;color:#FFF;margin-top:4px;word-break:break-all;">{S("hallo_code")}</div></td>'
