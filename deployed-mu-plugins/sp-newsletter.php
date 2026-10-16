@@ -154,13 +154,13 @@ function sp_nl_ajax_subscribe() {
     if (!is_email($email)) {
         wp_send_json_error(['msg' => 'Bitte gib eine gültige E-Mail-Adresse ein.']);
     }
-    $src = (isset($_POST['src']) && $_POST['src'] === 'startseite') ? 'startseite' : 'footer';
+    $src = (isset($_POST['src']) && in_array($_POST['src'], ['startseite', 'popup'], true)) ? $_POST['src'] : 'footer';
     $res = sp_nl_subscribe($email, '', '', $src);
     if ($res === 'already') {
-        wp_send_json_success(['msg' => 'Du bist schon angemeldet – danke! 💌']);
+        wp_send_json_success(['msg' => 'Du bist schon angemeldet – danke! 💌', 'state' => 'already']);
     }
     if ($res === 'pending' || $res === 'wait') {
-        wp_send_json_success(['msg' => 'Fast geschafft! Bitte bestätige deine Anmeldung über den Link in der E-Mail (schau auch im Spam-Ordner).']);
+        wp_send_json_success(['msg' => 'Fast geschafft! Bitte bestätige deine Anmeldung über den Link in der E-Mail (schau auch im Spam-Ordner).', 'state' => $res]);
     }
     wp_send_json_error(['msg' => 'Das hat leider nicht geklappt – bitte versuch es noch einmal.']);
 }

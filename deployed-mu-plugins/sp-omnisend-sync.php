@@ -45,6 +45,8 @@ function sp_os_payload($sub, $status) {
                 $src = 'startseite';
             } elseif (stripos($t->title, 'Bestellmail') !== false) {
                 $src = 'bestellmail';
+            } elseif (stripos($t->title, 'Popup') !== false) {
+                $src = 'popup';
             }
         }
         $data['tags'] = ['newsletter', 'quelle-' . $src];
