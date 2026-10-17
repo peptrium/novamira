@@ -115,6 +115,27 @@ function sp_st_price($ids) {
     return number_format($sum, 2, ',', '.') . ' €';
 }
 
+/** Sterne wie auf den Produktseiten (feste Werte aus sp_abo_picker_rating_map()). */
+function sp_st_stars($pid) {
+    $m = function_exists('sp_abo_picker_rating_map') ? sp_abo_picker_rating_map() : [];
+    if (empty($m[$pid])) {
+        return '';
+    }
+    return '<div class="st-stars"><span>★★★★★</span> <b>' . esc_html(number_format((float) $m[$pid]['num'], 1, ',', '')) . '</b> <small>(' . (int) $m[$pid]['count'] . ' Bewertungen)</small></div>';
+}
+
+/** Kundenstimmen = dieselben Texte wie in den Kundenstimmen der Retatrutide-Produktseiten. */
+function sp_st_reviews() {
+    return [
+        ['Vanessa B.', 'Ich bin jetzt schon bei der dritten Bestellung und bin nach wie vor begeistert von der Qualität, der Verpackung und dem schnellen Versand. Absolute Kaufempfehlung, komme auf jeden Fall wieder.', 5],
+        ['Jasmin T.', 'Wirklich zufrieden mit der Qualität und dem ganzen Ablauf. Werde definitiv wieder bestellen.', 5],
+        ['Nadine S.', 'Bestelle hier jetzt regelmäßig weil einfach alles passt Qualität Verpackung und der Support', 5],
+        ['Tobias W.', 'Sehr zufrieden. Zweite Bestellung war genauso gut wie die erste.', 5],
+        ['Marco P.', 'Gute Erfahrung gemacht auch wenn der Versand einen Tag länger gedauert hat als angegeben aber inhaltlich alles top', 4],
+        ['Katharina D.', 'Hat alles gepasst, bin sehr zufrieden und werde wieder bestellen.', 5],
+    ];
+}
+
 function sp_st_tg_icon() {
     return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M21.9 4.3 18.6 19.9c-.2 1.1-.9 1.4-1.8.9l-5-3.7-2.4 2.3c-.3.3-.5.5-1 .5l.4-5.1 9.3-8.4c.4-.4-.1-.6-.6-.2L5.9 13.4l-4.9-1.5c-1.1-.3-1.1-1.1.2-1.6L20.4 2.9c.9-.3 1.7.2 1.5 1.4Z"/></svg>';
 }
@@ -159,10 +180,10 @@ add_filter('the_content', function ($html) {
  <div class="st-in">
   <section class="st-sec" data-sec="auswahl"><h2>Welche Variante passt zu dir?</h2><p class="st-sub">Das Peptid ist dasselbe. Der Unterschied liegt nur in der Vorbereitung.</p>
    <div class="st-choose">
-    <div class="st-opt"><div class="st-row"><img src="<?php echo esc_url($pen_img); ?>" alt="Peptrium-Pen Retatrutide" loading="lazy"><div><div class="st-who">Am einfachsten · ohne Vorkenntnisse</div><h3>Peptrium-Pen</h3><p>Fertig gemischt. Kein Anmischen, kein Abmessen.</p></div></div>
+    <div class="st-opt"><div class="st-row"><img src="<?php echo esc_url($pen_img); ?>" alt="Peptrium-Pen Retatrutide" loading="lazy"><div><div class="st-who">Am einfachsten · ohne Vorkenntnisse</div><h3>Peptrium-Pen</h3><?php echo sp_st_stars(393); ?><p>Fertig gemischt. Kein Anmischen, kein Abmessen.</p></div></div>
      <div class="st-inset"><b>Im Set:</b> Pen mit Retatrutide 20 mg · Pen Nadeln (15 Stück)</div>
      <div class="st-ft"><b><?php echo esc_html(sp_st_price([547, 908])); ?><small>auch mit <a href="<?php echo $u('/produkt/peptrium-pen-retatrutide/'); ?>" data-ev="pen-groessen">30 oder 40 mg</a></small></b><a class="st-btn" data-ev="set-pen" data-items="547,908" href="<?php echo $u('/?sp_set=reta-pen'); ?>">In den Warenkorb</a></div></div>
-    <div class="st-opt"><div class="st-row"><img src="<?php echo esc_url($set_img); ?>" alt="Retatrutide Starter-Set" loading="lazy"><div><div class="st-who">Günstiger · mit Anmischen</div><h3>Starter-Set Fläschchen</h3><p>Wird vor der Verwendung mit Bac Water angemischt.</p></div></div>
+    <div class="st-opt"><div class="st-row"><img src="<?php echo esc_url($set_img); ?>" alt="Retatrutide Starter-Set" loading="lazy"><div><div class="st-who">Günstiger · mit Anmischen</div><h3>Starter-Set Fläschchen</h3><?php echo sp_st_stars(65); ?><p>Wird vor der Verwendung mit Bac Water angemischt.</p></div></div>
      <div class="st-inset"><b>Im Set:</b> Retatrutide 10 mg (Pulver) · Bac Water · 10 Spritzen mit Skala</div>
      <div class="st-ft"><b><?php echo esc_html(sp_st_price([555, 74, 80])); ?><small>komplett, alles dabei</small></b><a class="st-btn" data-ev="set-starter" data-items="555,74,80" href="<?php echo $u('/?sp_set=reta-starter'); ?>">In den Warenkorb</a></div></div>
    </div>
@@ -175,6 +196,10 @@ add_filter('the_content', function ($html) {
    <div class="st-st"><span>3</span><div><b>Versand</b>In 2 Werktagen per DHL, neutral verpackt.<i>✉ Mail mit deiner DHL-Sendungsnummer.</i></div></div>
    <div class="st-st"><span>4</span><div><b>Ankommen</b>Etwas unklar oder beschädigt?<i><?php echo $ic; ?> Kurz auf Telegram melden, wir kümmern uns.</i></div></div>
   </div></section>
+  <section class="st-sec st-rev" data-sec="stimmen"><h2>Das sagen unsere Kunden</h2><div class="st-revs"><?php
+   foreach (sp_st_reviews() as $r) {
+       echo '<figure class="st-rc"><div class="st-rs" aria-label="' . (int) $r[2] . ' von 5 Sternen">' . str_repeat('★', (int) $r[2]) . '<span>' . str_repeat('★', 5 - (int) $r[2]) . '</span></div><blockquote>' . esc_html($r[1]) . '</blockquote><figcaption><i>' . esc_html(implode('', array_map(function ($w) { return mb_substr($w, 0, 1); }, explode(' ', $r[0])))) . '</i>' . esc_html($r[0]) . '</figcaption></figure>';
+   } ?></div></section>
   <section class="st-help" data-sec="hilfe"><b>Fragen? Schreib uns einfach.</b><p>Auf Telegram bekommst du eine persönliche Antwort. Wir helfen dir zum Beispiel bei:</p>
    <ul><li>der Wahl zwischen Pen und Fläschchen</li><li>Fragen zur Bestellung und Bezahlung</li><li>deiner Sendung</li></ul>
    <a class="st-tg" data-ev="tg-box" href="<?php echo $tg; ?>" target="_blank" rel="noopener"><?php echo $ic; ?> Auf Telegram schreiben (@peptrium)</a>
@@ -246,6 +271,13 @@ body.sp-start-page #sp-cart-fab{transform:translateY(-64px)}
 #sp-start .st-row img{width:84px;height:84px;object-fit:cover;border-radius:12px;flex:0 0 84px;background:#0D0F12}
 #sp-start .st-who{font-size:11.5px;font-weight:800;letter-spacing:.05em;color:var(--mu);text-transform:uppercase}
 #sp-start h3{margin:2px 0 4px;font-size:17px;font-family:Sora,sans-serif;color:var(--d)}
+#sp-start .st-stars{display:flex;align-items:baseline;gap:4px;font-size:13px;margin:0 0 4px;color:var(--mu)}#sp-start .st-stars span{color:#F5A623;letter-spacing:1px}#sp-start .st-stars b{color:var(--fg)}
+#sp-start .st-revs{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px;padding:2px 16px 8px;scrollbar-width:none}#sp-start .st-revs::-webkit-scrollbar{display:none}
+#sp-start .st-rc{flex:0 0 78%;max-width:300px;scroll-snap-align:start;margin:0;background:#fff;border:1px solid var(--ln);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px}
+#sp-start .st-rs{color:#F5A623;letter-spacing:2px;font-size:15px}#sp-start .st-rs span{color:#D5D9DE}
+#sp-start .st-rc blockquote{margin:0;padding:0;border:0;font-size:14.5px;line-height:1.55;color:#2B3036;font-style:normal;flex:1}
+#sp-start .st-rc figcaption{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;color:var(--fg)}#sp-start .st-rc figcaption i{width:30px;height:30px;border-radius:50%;background:#0D0F12;color:#fff;font-style:normal;font-size:11.5px;display:flex;align-items:center;justify-content:center}
+@media(min-width:700px){#sp-start .st-rc{flex-basis:46%}}
 #sp-start .st-row p{margin:0;color:var(--mu);font-size:14px;line-height:1.45}
 #sp-start .st-inset{margin:0 14px 12px;background:#F4F5F7;border-radius:12px;padding:10px 12px;font-size:13.5px;color:#3A4047;line-height:1.55}
 #sp-start .st-ft{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid var(--ln);padding:12px 14px}
