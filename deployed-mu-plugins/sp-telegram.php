@@ -394,6 +394,12 @@ function sp_tg_on_private($msg) {
         sp_tg_api('sendMessage', ['chat_id' => $chat, 'parse_mode' => 'HTML', 'text' => "Für Fragen zu deiner Bestellung schreib bitte direkt an @" . SP_TG_SUPPORT . " – mit deiner Bestellnummer.\n\nDen Status kannst du auch selbst prüfen: https://peptrium.com/bestellstatus/", 'link_preview_options' => ['is_disabled' => true]]);
         return;
     }
+    if ($t !== '' && stripos($t, '/start') !== 0) {
+        $key = sp_tg_faq_find($t);
+        if ($key) { sp_tg_faq_send($chat, $key); return; }
+        sp_tg_api('sendMessage', ['chat_id' => $chat, 'parse_mode' => 'HTML', 'text' => sp_tg_faq_nomatch_html()]);
+        return;
+    }
     $kb = [[['text' => '🛍 Zum Shop', 'url' => 'https://peptrium.com/?utm_source=telegram&utm_medium=bot&utm_campaign=start']]];
     if (!empty($links['g_direkt'])) $kb[] = [['text' => '💬 Community beitreten', 'url' => $links['g_direkt']]];
     if (!empty($links['c_main']))   $kb[] = [['text' => '📣 Kanal: Neuheiten & Aktionen', 'url' => $links['c_main']]];
@@ -498,10 +504,11 @@ function sp_tg_moderate($msg) {
     }
     // Admins, anonyme Admins (sender_chat = Gruppe), automatische Weiterleitungen aus dem Kanal
     if (!empty($msg['is_automatic_forward'])) return;
-    if (!empty($msg['sender_chat']) && ((int) $msg['sender_chat']['id'] === $gid || (int) $msg['sender_chat']['id'] === sp_tg_channel_id())) return;
+    if (!empty($msg['sender_chat']) && (int) $msg['sender_chat']['id'] === $gid) { sp_tg_maybe_faq($msg); return; } // anonymer Admin
+    if (!empty($msg['sender_chat']) && (int) $msg['sender_chat']['id'] === sp_tg_channel_id()) return;
     $uid = (int) ($msg['from']['id'] ?? 0);
     if (!$uid || !empty($msg['from']['is_bot']) && $uid === (int) (get_option('sp_tg_bot')['id'] ?? 0)) return;
-    if (sp_tg_is_admin($gid, $uid)) return;
+    if (sp_tg_is_admin($gid, $uid)) { sp_tg_maybe_faq($msg); return; }
     if (!empty($msg['sender_chat'])) { // als fremder Kanal geschrieben
         sp_tg_api('deleteMessage', ['chat_id' => $gid, 'message_id' => $msg['message_id']]);
         sp_tg_api('banChatSenderChat', ['chat_id' => $gid, 'sender_chat_id' => $msg['sender_chat']['id']]);
@@ -523,7 +530,7 @@ function sp_tg_moderate($msg) {
     $joined = (array) get_option('sp_tg_joined', []);
     $is_new = isset($joined[$uid]) && $joined[$uid] > time() - DAY_IN_SECONDS;
     list($act, $why) = sp_tg_check($msg, $is_new);
-    if ($act === '') return;
+    if ($act === '') { sp_tg_maybe_faq($msg); return; }
 
     sp_tg_api('deleteMessage', ['chat_id' => $gid, 'message_id' => $msg['message_id']]);
     $mention = '<a href="tg://user?id=' . $uid . '">' . esc_html($msg['from']['first_name'] ?? 'Mitglied') . '</a>';
@@ -561,6 +568,136 @@ function sp_tg_moderate($msg) {
 add_action('sp_tg_delete_later', function ($chat, $mid) {
     sp_tg_api('deleteMessage', ['chat_id' => (int) $chat, 'message_id' => (int) $mid]);
 }, 10, 2);
+
+/* ---------- FAQ: Peptid-Name eingeben → Bot antwortet mit der Erklärung ---------- */
+
+/** Einträge: key => [title, aliases[], text (Telegram-HTML), url] */
+function sp_tg_faq_entries() { return (array) get_option('sp_tg_faq', []); }
+
+function sp_tg_norm($s) {
+    $s = mb_strtolower((string) $s);
+    $s = strtr($s, ['ä' => 'ae', 'ö' => 'oe', 'ü' => 'ue', 'ß' => 'ss']);
+    return preg_replace('/[^a-z0-9]+/', '', $s);
+}
+
+/** Findet den passenden Eintrag (exakter Name/Stichwort zuerst, sonst das längste enthaltene). */
+function sp_tg_faq_find($text) {
+    $text = preg_replace('~^/(peptid|faq|info)(@\w+)?\s*~i', '', trim((string) $text));
+    $n = sp_tg_norm($text);
+    if ($n === '' || mb_strlen($text) > 120) return '';
+    $best = ''; $bestLen = 0;
+    foreach (sp_tg_faq_entries() as $key => $e) {
+        if (trim((string) ($e['text'] ?? '')) === '') continue;
+        foreach (array_merge([$e['title']], (array) ($e['aliases'] ?? [])) as $a) {
+            $an = sp_tg_norm($a);
+            if ($an === '') continue;
+            if ($an === $n) return $key;
+            if (strlen($an) >= 3 && strpos($n, $an) !== false && strlen($an) > $bestLen) { $best = $key; $bestLen = strlen($an); }
+        }
+    }
+    return $best;
+}
+
+function sp_tg_faq_titles() {
+    $t = [];
+    foreach (sp_tg_faq_entries() as $e) if (trim((string) ($e['text'] ?? '')) !== '') $t[] = $e['title'];
+    natcasesort($t);
+    return array_values($t);
+}
+
+function sp_tg_faq_nomatch_html() {
+    $t = sp_tg_faq_titles();
+    return "🔎 Dazu habe ich leider keinen Eintrag.\n\n" . ($t ? "Schreib einfach einen dieser Namen:\n<b>" . esc_html(implode(' · ', $t)) . "</b>" : 'Die Einträge folgen in Kürze.');
+}
+
+/** Sendet einen Eintrag (Texte > 4000 Zeichen werden an Absätzen geteilt). */
+function sp_tg_faq_send($chat, $key, $thread = 0, $reply_to = 0) {
+    $e = sp_tg_faq_entries()[$key] ?? null;
+    if (!$e) return;
+    $parts = []; $cur = '';
+    foreach (preg_split("/\n{2,}/", trim($e['text'])) as $p) {
+        if ($cur !== '' && mb_strlen($cur . "\n\n" . $p) > 3900) { $parts[] = $cur; $cur = $p; }
+        else $cur = $cur === '' ? $p : $cur . "\n\n" . $p;
+    }
+    if ($cur !== '') $parts[] = $cur;
+    foreach ($parts as $i => $p) {
+        $m = ['chat_id' => $chat, 'text' => $p, 'parse_mode' => 'HTML', 'link_preview_options' => ['is_disabled' => true]];
+        if ($thread) $m['message_thread_id'] = $thread;
+        if ($reply_to && $i === 0) $m['reply_parameters'] = ['message_id' => $reply_to, 'allow_sending_without_reply' => true];
+        if ($i === count($parts) - 1 && !empty($e['url'])) {
+            $m['reply_markup'] = ['inline_keyboard' => [[['text' => '🛍 ' . $e['title'] . ' im Shop', 'url' => add_query_arg(['utm_source' => 'telegram', 'utm_medium' => 'faq', 'utm_campaign' => sanitize_title($e['title'])], $e['url'])]]]];
+        }
+        $r = sp_tg_api('sendMessage', $m);
+        if (empty($r['ok']) && stripos((string) ($r['description'] ?? ''), 'parse') !== false) { // HTML-Fehler → als reiner Text
+            $m['text'] = wp_strip_all_tags($p);
+            unset($m['parse_mode']);
+            sp_tg_api('sendMessage', $m);
+        }
+    }
+    $st = (array) get_option('sp_tg_faq_stats', []);
+    $st[$key] = (int) ($st[$key] ?? 0) + 1;
+    update_option('sp_tg_faq_stats', $st, false);
+}
+
+/** In der Gruppe: nur im Thema FAQ auf Peptid-Namen antworten. */
+function sp_tg_maybe_faq($msg) {
+    $topics = (array) get_option('sp_tg_topics', []);
+    $thread = (int) ($msg['message_thread_id'] ?? 0);
+    if (empty($topics['faq']) || $thread !== (int) $topics['faq'] || empty($msg['text']) || !empty($msg['edit_date'])) return;
+    $key = sp_tg_faq_find($msg['text']);
+    if ($key) { sp_tg_faq_send((int) $msg['chat']['id'], $key, $thread, (int) $msg['message_id']); return; }
+    sp_tg_api('sendMessage', ['chat_id' => (int) $msg['chat']['id'], 'message_thread_id' => $thread, 'parse_mode' => 'HTML', 'text' => sp_tg_faq_nomatch_html(),
+        'reply_parameters' => ['message_id' => (int) $msg['message_id'], 'allow_sending_without_reply' => true]]);
+}
+
+function sp_tg_faq_intro_html() {
+    $t = sp_tg_faq_titles();
+    return "<b>❓ FAQ – Peptid-Infos per Stichwort</b>\n\n"
+        . "Schreib hier einfach den <b>Namen eines Peptids</b> (z. B. <i>GHK-Cu</i>) – der Bot antwortet mit der Erklärung.\n\n"
+        . ($t ? "Verfügbar: <b>" . esc_html(implode(' · ', $t)) . "</b>\n\n" : "Die Einträge werden gerade befüllt.\n\n")
+        . "Das geht auch privat beim Bot: @" . esc_html(get_option('sp_tg_bot')['username'] ?? 'Peptriumhilfebot') . "\n\n"
+        . "<i>Der Bot ist keine KI – die Antworten sind feste, von uns geprüfte Texte. Alle Produkte ausschließlich für Laborforschungszwecke.</i>";
+}
+
+/** Thema FAQ anlegen (oder das alte "Peptid-Wissen" umbenennen) und den angepinnten Hinweis aktualisieren. */
+function sp_tg_faq_setup() {
+    $gid = sp_tg_group_id();
+    if (!$gid) return 'keine Gruppe';
+    $topics = (array) get_option('sp_tg_topics', []);
+    $posted = (array) get_option('sp_tg_posted', []);
+    $icon = '5377316857231450742'; // ❓
+    if (empty($topics['faq'])) {
+        if (!empty($topics['wissen'])) {
+            $r = sp_tg_api('editForumTopic', ['chat_id' => $gid, 'message_thread_id' => $topics['wissen'], 'name' => 'FAQ', 'icon_custom_emoji_id' => $icon]);
+            $topics['faq'] = $topics['wissen'];
+            unset($topics['wissen']);
+            if (!empty($posted['wissen'])) { $posted['faq'] = $posted['wissen']; unset($posted['wissen']); }
+        } else {
+            $r = sp_tg_api('createForumTopic', ['chat_id' => $gid, 'name' => 'FAQ', 'icon_custom_emoji_id' => $icon]);
+            if (!empty($r['ok'])) $topics['faq'] = (int) $r['result']['message_thread_id'];
+        }
+        update_option('sp_tg_topics', $topics, false);
+    }
+    if (empty($topics['faq'])) return 'Thema fehlt';
+    if (!empty($posted['faq'])) {
+        $r = sp_tg_api('editMessageText', ['chat_id' => $gid, 'message_id' => $posted['faq'], 'text' => sp_tg_faq_intro_html(), 'parse_mode' => 'HTML', 'link_preview_options' => ['is_disabled' => true]]);
+        if (empty($r['ok']) && stripos((string) ($r['description'] ?? ''), 'not modified') === false) unset($posted['faq']);
+    }
+    if (empty($posted['faq'])) {
+        $r = sp_tg_api('sendMessage', ['chat_id' => $gid, 'message_thread_id' => $topics['faq'], 'text' => sp_tg_faq_intro_html(), 'parse_mode' => 'HTML', 'link_preview_options' => ['is_disabled' => true]]);
+        if (!empty($r['ok'])) {
+            $posted['faq'] = $r['result']['message_id'];
+            sp_tg_api('pinChatMessage', ['chat_id' => $gid, 'message_id' => $posted['faq'], 'disable_notification' => true]);
+        }
+    }
+    update_option('sp_tg_posted', $posted, false);
+    return 'ok';
+}
+
+function sp_tg_faq_kses($html) {
+    $html = str_replace(["\r\n", "\r"], "\n", (string) $html);
+    return wp_kses($html, ['b' => [], 'strong' => [], 'i' => [], 'em' => [], 'u' => [], 's' => [], 'code' => [], 'pre' => [], 'blockquote' => [], 'tg-spoiler' => [], 'a' => ['href' => true]]);
+}
 
 /* ---------- Admin ---------- */
 add_action('admin_menu', function () {
@@ -605,6 +742,23 @@ function sp_tg_render_admin() {
         delete_option('sp_tg_warns');
         $note = '<div class="notice notice-success"><p>Alle Verwarnungen zurückgesetzt.</p></div>';
     }
+    if (!empty($_POST['sp_tg_faq_save']) && check_admin_referer('sp_tg_faq')) {
+        $faq = sp_tg_faq_entries();
+        $title = sanitize_text_field(wp_unslash($_POST['faq_title'] ?? ''));
+        $key = sanitize_key(wp_unslash($_POST['faq_key'] ?? '')) ?: sanitize_title($title);
+        if (!empty($_POST['faq_delete'])) { unset($faq[$key]); }
+        elseif ($title !== '') {
+            $faq[$key] = [
+                'title'   => $title,
+                'aliases' => array_values(array_filter(array_map('trim', explode(',', sanitize_text_field(wp_unslash($_POST['faq_aliases'] ?? '')))))),
+                'url'     => esc_url_raw(wp_unslash($_POST['faq_url'] ?? '')),
+                'text'    => sp_tg_faq_kses(wp_unslash($_POST['faq_text'] ?? '')),
+            ];
+        }
+        update_option('sp_tg_faq', $faq, false);
+        $res = sp_tg_faq_setup();
+        $note = '<div class="notice notice-success"><p>FAQ gespeichert ✓' . ($res !== 'ok' ? ' (Telegram: ' . esc_html($res) . ')' : '') . '</p></div>';
+    }
     $bot = get_option('sp_tg_bot');
     $chats = (array) get_option('sp_tg_chats', []);
     $links = (array) get_option('sp_tg_links', []);
@@ -638,6 +792,29 @@ function sp_tg_render_admin() {
         }
         echo '</tbody></table><p class="description">Gruppen-Links funktionieren nur per Beitrittsanfrage: der Bot schickt die Regeln privat, nach „Regeln gelesen“ ist man drin.</p>';
     }
+    // FAQ-Einträge
+    $faq = sp_tg_faq_entries();
+    $fst = (array) get_option('sp_tg_faq_stats', []);
+    $edit = isset($_GET['faq']) ? sanitize_key($_GET['faq']) : '';
+    $e = $faq[$edit] ?? ['title' => '', 'aliases' => [], 'url' => '', 'text' => ''];
+    echo '<h2 id="faq">FAQ-Einträge (Thema „FAQ“ + Privatchat)</h2>';
+    if ($faq) {
+        uasort($faq, function ($a, $b) { return strnatcasecmp($a['title'], $b['title']); });
+        echo '<table class="widefat striped" style="max-width:960px"><thead><tr><th>Peptid</th><th>Stichwörter</th><th>Text</th><th>Abrufe</th><th></th></tr></thead><tbody>';
+        foreach ($faq as $k => $x) echo '<tr><td><b>' . esc_html($x['title']) . '</b></td><td>' . esc_html(implode(', ', $x['aliases'])) . '</td><td>' . (trim($x['text']) !== '' ? mb_strlen(wp_strip_all_tags($x['text'])) . ' Zeichen' : '<em>leer – wird nicht angezeigt</em>') . '</td><td>' . (int) ($fst[$k] ?? 0) . '</td><td><a href="' . esc_url(admin_url('admin.php?page=sp-telegram&faq=' . $k . '#faq')) . '">Bearbeiten</a></td></tr>';
+        echo '</tbody></table>';
+    }
+    echo '<form method="post" style="max-width:960px;margin-top:14px">';
+    wp_nonce_field('sp_tg_faq');
+    echo '<input type="hidden" name="faq_key" value="' . esc_attr($edit) . '">';
+    echo '<h3>' . ($edit ? 'Eintrag bearbeiten: ' . esc_html($e['title']) : 'Neuer Eintrag') . '</h3><table class="form-table">'
+        . '<tr><th>Peptid-Name</th><td><input name="faq_title" class="regular-text" value="' . esc_attr($e['title']) . '" placeholder="GHK-Cu"></td></tr>'
+        . '<tr><th>Weitere Stichwörter</th><td><input name="faq_aliases" class="large-text" value="' . esc_attr(implode(', ', $e['aliases'])) . '" placeholder="ghk, kupferpeptid"><p class="description">Komma-getrennt. Groß/Klein, Leerzeichen und Bindestriche egal.</p></td></tr>'
+        . '<tr><th>Shop-Link (optional)</th><td><input name="faq_url" class="large-text" value="' . esc_attr($e['url']) . '" placeholder="https://peptrium.com/produkt/ghk-cu/"></td></tr>'
+        . '<tr><th>Erklärung</th><td><textarea name="faq_text" rows="14" class="large-text code">' . esc_textarea($e['text']) . '</textarea><p class="description">Erlaubt: &lt;b&gt;fett&lt;/b&gt;, &lt;i&gt;kursiv&lt;/i&gt;, &lt;u&gt;, &lt;a href="…"&gt;Link&lt;/a&gt;, Emojis. Leerzeile = neuer Absatz. Keine Dosierungsangaben.</p></td></tr></table>'
+        . '<p><button class="button button-primary" name="sp_tg_faq_save" value="1">Speichern</button>'
+        . ($edit ? ' <button class="button" name="faq_delete" value="1" onclick="return confirm(\'Eintrag löschen?\')">Löschen</button> <a class="button-link" href="' . esc_url(admin_url('admin.php?page=sp-telegram#faq')) . '">Neu anlegen</a>' : '') . '</p></form>';
+
     $mod = (array) get_option('sp_tg_modlog', []);
     echo '<h2>Moderation (letzte 100)</h2>';
     if (!$mod) echo '<p>Noch nichts.</p>';
