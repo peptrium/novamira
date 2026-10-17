@@ -124,15 +124,19 @@ function sp_st_stars($pid) {
     return '<div class="st-stars"><span>★★★★★</span> <b>' . esc_html(number_format((float) $m[$pid]['num'], 1, ',', '')) . '</b> <small>(' . (int) $m[$pid]['count'] . ' Bewertungen)</small></div>';
 }
 
-/** Kundenstimmen = dieselben Texte wie in den Kundenstimmen der Retatrutide-Produktseiten. */
+/** Kundenstimmen = dieselben Texte wie auf der Startseite und den Retatrutide-Produktseiten. */
 function sp_st_reviews() {
     return [
-        ['Vanessa B.', 'Ich bin jetzt schon bei der dritten Bestellung und bin nach wie vor begeistert von der Qualität, der Verpackung und dem schnellen Versand. Absolute Kaufempfehlung, komme auf jeden Fall wieder.', 5],
+        ['Fabian K.', 'Schon meine dritte Bestellung und wieder alles top gerne wieder', 5],
         ['Jasmin T.', 'Wirklich zufrieden mit der Qualität und dem ganzen Ablauf. Werde definitiv wieder bestellen.', 5],
+        ['Robert N.', 'Alles gut gelaufen, bin zufrieden.', 4],
+        ['Vanessa B.', 'Ich bin jetzt schon bei der dritten Bestellung und bin nach wie vor begeistert von der Qualität, der Verpackung und dem schnellen Versand. Absolute Kaufempfehlung, komme auf jeden Fall wieder.', 5],
+        ['Sebastian R.', 'top service komme wieder', 5],
+        ['Katharina D.', 'Hat alles gepasst, bin sehr zufrieden und werde wieder bestellen.', 5],
+        ['Marco P.', 'Gute Erfahrung gemacht auch wenn der Versand einen Tag länger gedauert hat als angegeben aber inhaltlich alles top', 4],
         ['Nadine S.', 'Bestelle hier jetzt regelmäßig weil einfach alles passt Qualität Verpackung und der Support', 5],
         ['Tobias W.', 'Sehr zufrieden. Zweite Bestellung war genauso gut wie die erste.', 5],
-        ['Marco P.', 'Gute Erfahrung gemacht auch wenn der Versand einen Tag länger gedauert hat als angegeben aber inhaltlich alles top', 4],
-        ['Katharina D.', 'Hat alles gepasst, bin sehr zufrieden und werde wieder bestellen.', 5],
+        ['Michaela H.', 'Rundum zufrieden, komme auf jeden Fall wieder', 5],
     ];
 }
 
@@ -196,10 +200,21 @@ add_filter('the_content', function ($html) {
    <div class="st-st"><span>3</span><div><b>Versand</b>In 2 Werktagen per DHL, neutral verpackt.<i>✉ Mail mit deiner DHL-Sendungsnummer.</i></div></div>
    <div class="st-st"><span>4</span><div><b>Ankommen</b>Etwas unklar oder beschädigt?<i><?php echo $ic; ?> Kurz auf Telegram melden, wir kümmern uns.</i></div></div>
   </div></section>
-  <section class="st-sec st-rev" data-sec="stimmen"><h2>Das sagen unsere Kunden</h2><div class="st-revs"><?php
-   foreach (sp_st_reviews() as $r) {
-       echo '<figure class="st-rc"><div class="st-rs" aria-label="' . (int) $r[2] . ' von 5 Sternen">' . str_repeat('★', (int) $r[2]) . '<span>' . str_repeat('★', 5 - (int) $r[2]) . '</span></div><blockquote>' . esc_html($r[1]) . '</blockquote><figcaption><i>' . esc_html(implode('', array_map(function ($w) { return mb_substr($w, 0, 1); }, explode(' ', $r[0])))) . '</i>' . esc_html($r[0]) . '</figcaption></figure>';
-   } ?></div></section>
+  <section class="st-sec st-proof" data-sec="stimmen"><h2>Das sagen unsere Kunden</h2>
+   <div class="st-sum"><div class="big">4,8</div><div><div class="st">★★★★★</div><div class="t">Durchschnitt unserer<br>Kundenbewertungen</div></div></div>
+   <div class="st-stage"><?php
+   $rv = sp_st_reviews();
+   foreach ([0, 1] as $row) {
+       echo '<div class="st-mq' . ($row ? ' r2' : '') . '"><div class="tr">';
+       foreach ($rv as $k => $r) {
+           if ($k % 2 !== $row) {
+               continue;
+           }
+           $ini = implode('', array_map(function ($w) { return mb_substr($w, 0, 1); }, explode(' ', $r[0])));
+           echo '<div class="st-rv"><div class="st">' . str_repeat('★', (int) $r[2]) . '</div><p>„' . esc_html($r[1]) . '“</p><div class="au"><i>' . esc_html($ini) . '</i><b>' . esc_html($r[0]) . '</b></div></div>';
+       }
+       echo '</div></div>';
+   } ?><div class="st-glow"></div><div class="st-bshadow"></div><div class="st-bottle"><img src="<?php echo esc_url(content_url('uploads/2026/08/retatrutide-tilted-glass-v3.png')); ?>" alt="Peptrium Fläschchen" loading="lazy"></div></div></section>
   <section class="st-help" data-sec="hilfe"><b>Fragen? Schreib uns einfach.</b><p>Auf Telegram bekommst du eine persönliche Antwort. Wir helfen dir zum Beispiel bei:</p>
    <ul><li>der Wahl zwischen Pen und Fläschchen</li><li>Fragen zur Bestellung und Bezahlung</li><li>deiner Sendung</li></ul>
    <a class="st-tg" data-ev="tg-box" href="<?php echo $tg; ?>" target="_blank" rel="noopener"><?php echo $ic; ?> Auf Telegram schreiben (@peptrium)</a>
@@ -272,12 +287,25 @@ body.sp-start-page #sp-cart-fab{transform:translateY(-64px)}
 #sp-start .st-who{font-size:11.5px;font-weight:800;letter-spacing:.05em;color:var(--mu);text-transform:uppercase}
 #sp-start h3{margin:2px 0 4px;font-size:17px;font-family:Sora,sans-serif;color:var(--d)}
 #sp-start .st-stars{display:flex;align-items:baseline;gap:4px;font-size:13px;margin:0 0 4px;color:var(--mu)}#sp-start .st-stars span{color:#F5A623;letter-spacing:1px}#sp-start .st-stars b{color:var(--fg)}
-#sp-start .st-revs{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px;padding:2px 16px 8px;scrollbar-width:none}#sp-start .st-revs::-webkit-scrollbar{display:none}
-#sp-start .st-rc{flex:0 0 78%;max-width:300px;scroll-snap-align:start;margin:0;background:#fff;border:1px solid var(--ln);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px}
-#sp-start .st-rs{color:#F5A623;letter-spacing:2px;font-size:15px}#sp-start .st-rs span{color:#D5D9DE}
-#sp-start .st-rc blockquote{margin:0;padding:0;border:0;font-size:14.5px;line-height:1.55;color:#2B3036;font-style:normal;flex:1}
-#sp-start .st-rc figcaption{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;color:var(--fg)}#sp-start .st-rc figcaption i{width:30px;height:30px;border-radius:50%;background:#0D0F12;color:#fff;font-style:normal;font-size:11.5px;display:flex;align-items:center;justify-content:center}
-@media(min-width:700px){#sp-start .st-rc{flex-basis:46%}}
+#sp-start .st-proof h2{text-align:center}
+#sp-start .st-sum{display:flex;align-items:center;justify-content:center;gap:16px;margin:12px auto 0;padding:14px 20px;max-width:340px;background:#fff;border:1px solid var(--ln);border-radius:18px;box-shadow:0 8px 24px rgba(13,15,18,.06)}
+#sp-start .st-sum .big{font:800 40px/1 Sora,sans-serif;color:var(--d)}#sp-start .st-sum .st{color:#F5A623;font-size:17px;letter-spacing:2px}#sp-start .st-sum .t{font-size:12.5px;color:var(--mu);line-height:1.45}
+#sp-start .st-stage{position:relative;margin:0 -16px;padding:40px 0 30px;overflow:hidden}
+#sp-start .st-mq{position:relative;overflow:hidden;margin:0 0 14px}
+#sp-start .st-mq:before,#sp-start .st-mq:after{content:'';position:absolute;top:0;bottom:0;width:28px;z-index:1;pointer-events:none}
+#sp-start .st-mq:before{left:0;background:linear-gradient(90deg,#F4F5F7,rgba(244,245,247,0))}#sp-start .st-mq:after{right:0;background:linear-gradient(270deg,#F4F5F7,rgba(244,245,247,0))}
+#sp-start .st-mq .tr{display:flex;gap:14px;width:max-content}
+#sp-start .st-mq .tr.js{position:relative;display:block;width:auto}
+#sp-start .st-mq .tr.js>.st-rv{position:absolute;top:0;left:0;width:270px;box-sizing:border-box;will-change:transform;transform:translateZ(0)}
+#sp-start .st-rv{flex:0 0 270px;display:flex;flex-direction:column;gap:10px;background:#fff;border:1px solid var(--ln);border-radius:18px;padding:16px}
+#sp-start .st-rv .st{color:#F5A623;font-size:13px;letter-spacing:2px}
+#sp-start .st-rv p{margin:0;font-size:13.5px;line-height:1.55;color:#2A2F35;flex:1;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;min-height:4.65em}
+#sp-start .st-rv .au{display:flex;align-items:center;gap:10px;font-size:12.5px}
+#sp-start .st-rv .au i{font-style:normal;width:32px;height:32px;border-radius:50%;background:#0D0F12;color:#fff;font-weight:700;font-size:11.5px;display:flex;align-items:center;justify-content:center}#sp-start .st-rv .au b{color:var(--d)}
+#sp-start .st-bottle{position:absolute;z-index:2;left:50%;top:50%;width:190px;margin:-150px 0 0 -95px;pointer-events:none;will-change:transform}#sp-start .st-bottle img{width:100%;height:auto;display:block}
+#sp-start .st-glow{position:absolute;z-index:1;left:50%;top:50%;width:300px;height:300px;margin:-150px 0 0 -150px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.95),rgba(255,255,255,0) 65%);pointer-events:none}
+#sp-start .st-bshadow{position:absolute;z-index:1;left:50%;top:50%;width:150px;height:36px;margin:120px 0 0 -75px;border-radius:50%;background:radial-gradient(ellipse,rgba(13,15,18,.28),rgba(13,15,18,0) 70%);pointer-events:none}
+@media(min-width:700px){#sp-start .st-stage{margin:0 calc(320px - 50vw)}}
 #sp-start .st-row p{margin:0;color:var(--mu);font-size:14px;line-height:1.45}
 #sp-start .st-inset{margin:0 14px 12px;background:#F4F5F7;border-radius:12px;padding:10px 12px;font-size:13.5px;color:#3A4047;line-height:1.55}
 #sp-start .st-ft{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid var(--ln);padding:12px 14px}
@@ -338,6 +366,29 @@ add_action('wp_footer', function () {
     setTimeout(function(){b.classList.remove('is-done');b.textContent=txt;},4000);})
   .catch(function(){location.href=b.href;});
  });});
+ /* Kundenstimmen: Laufband (jede Karte einzeln bewegt, wie Startseite) + Flasche folgt dem Scrollen */
+ document.querySelectorAll('#sp-start .st-mq').forEach(function(m){
+   var tr=m.querySelector('.tr');var cards=[].slice.call(tr.children);if(!cards.length)return;
+   var dir=m.classList.contains('r2')?1:-1,speed=46,gap=14,off=0,last=0,vis=true,hold=false,step,total,H;
+   function layout(){var w=cards[0].getBoundingClientRect().width||270;step=w+gap;
+     var need=m.clientWidth+2*step;while(cards.length*step<need){var c=cards.slice(0,Math.max(1,cards.length/2|0)).map(function(x){var y=x.cloneNode(true);tr.appendChild(y);return y;});cards=cards.concat(c);}
+     total=cards.length*step;H=0;cards.forEach(function(c){c.style.height='';H=Math.max(H,c.offsetHeight);});cards.forEach(function(c){c.style.height=H+'px';});tr.style.height=H+'px';}
+   function paint(){cards.forEach(function(c,i){var x=((i*step+dir*off)%total+total)%total-step;c.style.transform='translate3d('+x.toFixed(1)+'px,0,0)';});}
+   function tick(t){if(!vis){last=0;return;}if(last&&!hold)off+=speed*Math.min(.05,(t-last)/1000);last=t;paint();requestAnimationFrame(tick);}
+   tr.classList.add('js');layout();off=dir>0?step*0.45:0;paint();
+   if('IntersectionObserver' in window){new IntersectionObserver(function(e){var v=e[0].isIntersecting;if(v&&!vis){vis=true;requestAnimationFrame(tick);}vis=v;},{rootMargin:'150px 0px'}).observe(m);}
+   m.addEventListener('touchstart',function(){hold=true;},{passive:true});m.addEventListener('touchend',function(){hold=false;},{passive:true});
+   window.addEventListener('resize',function(){layout();paint();});
+   if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+   requestAnimationFrame(tick);});
+ (function(){var stage=document.querySelector('#sp-start .st-stage');if(!stage)return;var bottle=stage.querySelector('.st-bottle'),bsh=stage.querySelector('.st-bshadow');
+   var cur=0,tgt=0,run=false,vis=false;
+   function target(){var r=stage.getBoundingClientRect(),vh=window.innerHeight;return Math.max(-1,Math.min(1,((r.top+r.height/2)-vh/2)/vh));}
+   function paint(p){bottle.style.transform='translate3d(0,'+(p*110).toFixed(1)+'px,0) rotate('+(p*-22+6).toFixed(2)+'deg)';bsh.style.transform='translate3d(0,'+(p*40).toFixed(1)+'px,0) scale('+(1-Math.abs(p)*0.25).toFixed(3)+')';bsh.style.opacity=(1-Math.abs(p)*0.5).toFixed(2);}
+   function loop(){cur+=(tgt-cur)*0.12;paint(cur);if(Math.abs(tgt-cur)>0.0005&&vis){requestAnimationFrame(loop);}else{run=false;}}
+   function kick(){tgt=target();if(!run&&vis){run=true;requestAnimationFrame(loop);}}
+   if('IntersectionObserver' in window){new IntersectionObserver(function(e){vis=e[0].isIntersecting;if(vis)kick();},{rootMargin:'200px 0px'}).observe(stage);}else{vis=true;}
+   if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches)window.addEventListener('scroll',kick,{passive:true});cur=tgt=target();paint(cur);})();
  if('IntersectionObserver' in window){var io=new IntersectionObserver(function(es){es.forEach(function(x){if(x.isIntersecting){ev('scroll',x.target.getAttribute('data-sec'));io.unobserve(x.target);}});},{threshold:.4});
   document.querySelectorAll('#sp-start [data-sec]').forEach(function(s){io.observe(s);});}
 })();
