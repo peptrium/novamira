@@ -2,13 +2,28 @@
 /**
  * Plugin Name: SP Buybox Volumen
  * Description: Die Elementor-Kaufboxen (#rx-buybox) haben fest eine einzige Volumen-Kachel
- * (z. B. Retatrutide "10 mg", rx-tier--static). Hat das variable Produkt mehrere kaufbare
- * Varianten, wird die Kachel beim Ausgeben durch je eine Kachel pro Variante ersetzt
- * (mit Preis). Die vorhandene Kaufbox-JS (initVolumeSelector) bindet die Kacheln selbst.
+ * (z. B. Retatrutide "10 mg", GHK-Cu "50 mg", rx-tier--static). Hat das variable Produkt mehrere
+ * kaufbare Varianten, wird die Kachel beim Ausgeben durch je eine Kachel pro Variante ersetzt
+ * (mit Preis). Retatrutide bringt die Umschalt-JS (initVolumeSelector) selbst mit; bei Kaufboxen
+ * ohne diese JS (GHK-Cu war früher ein einfaches Produkt) wird sie hier ergänzt.
  * Nichts in Elementor gespeichert wird verändert.
  */
 
 if (!defined('ABSPATH')) exit;
+
+/**
+ * Produkte, die früher einfache Produkte waren und jetzt variabel sind: alte Bestellungen /
+ * Warenkorb-Snapshots haben keine variation_id. Liefert [variation_id, attribute] der
+ * Standard-Variante (die alte Größe) oder null.
+ */
+function sp_bbv_legacy_variation($product_id) {
+    $map = (array) get_option('sp_bbv_legacy', []);
+    $vid = isset($map[(int) $product_id]) ? (int) $map[(int) $product_id] : 0;
+    if (!$vid) return null;
+    $v = wc_get_product($vid);
+    if (!$v || !$v->is_type('variation')) return null;
+    return [$vid, $v->get_variation_attributes()];
+}
 
 /* Alle Werte VOR ob_start berechnen - im Callback nur Stringarbeit (siehe CLAUDE.md). */
 add_action('template_redirect', function () {
@@ -41,32 +56,64 @@ add_action('template_redirect', function () {
             . '<span class="rx-tier__q">' . esc_html($v['q']) . '</span><span class="rx-tier__unit">' . esc_html($v['unit']) . '</span></button>';
     }
     $GLOBALS['sp_bbv_tiles'] = $tiles;
+    $GLOBALS['sp_bbv_own']   = false;
 
     ob_start(function ($html) {
         if (empty($GLOBALS['sp_bbv_tiles']) || strpos($html, 'rx-tier--static') === false) return $html;
         $out = preg_replace(
-            '~<div class="rx-tier is-active rx-tier--static" data-vol="[^"]*">\s*<span class="rx-tier__q">[^<]*</span><span class="rx-tier__unit">[^<]*</span>\s*</div>~',
+            '~<div class="rx-tier is-active rx-tier--static"(?: data-vol="[^"]*")?>\s*<span class="rx-tier__q">[^<]*</span><span class="rx-tier__unit">[^<]*</span>\s*</div>~',
             $GLOBALS['sp_bbv_tiles'], $html, 1, $n);
-        return ($n && is_string($out)) ? $out : $html;
+        if (!$n || !is_string($out)) return $html;
+        // Kaufbox ohne eigene Varianten-JS: Container-ID setzen und der (geschlossenen)
+        // Kaufbox-JS einen Weg geben, den Stückpreis zu ändern.
+        if (strpos($out, 'initVolumeSelector') === false) {
+            $out = str_replace('<div class="rx-tiers rx-tiers--single">', '<div class="rx-tiers rx-tiers--single" id="rx-vol-tiers">', $out);
+            $i = strpos($out, 'var unitPrice');
+            $k = $i !== false ? strpos($out, "update(1);", $i) : false;
+            if ($k !== false) {
+                $out = substr_replace($out, 'update(1); window.spBBSetPrice = function(p){ unitPrice = p; update(parseInt(qtyField.value, 10) || 1); };', $k, strlen('update(1);'));
+                $out = str_replace('</body>', '<script>window.spBBOwn = 1;</script></body>', $out);
+            }
+        }
+        return $out;
     });
 }, 5);
 
-/* Der große Preis oben in der Kaufbox wird von der Elementor-JS nur einmal gesetzt -
-   beim Wechsel der Variante mitziehen. */
+add_action('wp_head', function () {
+    if (empty($GLOBALS['sp_bbv_tiles'])) return;
+    echo '<style>#sp-reta-buybox-el .variations,#sp-reta-buybox-el .reset_variations{display:none!important}#sp-reta-buybox-el .single_variation{display:none!important;margin:0!important;padding:0!important}</style>';
+}, 99);
+
 add_action('wp_footer', function () {
     if (empty($GLOBALS['sp_bbv_tiles'])) return;
     ?>
 <script>
 (function(){
   if (!window.jQuery) return;
-  jQuery(function($){
-    $('#rx-buybox').closest('body').find('form.variations_form').on('found_variation', function(e, v){
+  jQuery(function($){ setTimeout(function(){
+    var form = document.querySelector('#sp-reta-buybox-el form.variations_form') || document.querySelector('form.variations_form');
+    if (!form) return;
+    function fmt(n){ return Number(n).toLocaleString('de-DE', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' €'; }
+    /* Großer Preis oben: die Elementor-JS setzt ihn nur einmal. */
+    $(form).on('found_variation', function(e, v){
+      if (!v || v.display_price == null) return;
+      if (window.spBBOwn && window.spBBSetPrice) window.spBBSetPrice(parseFloat(v.display_price));
       var el = document.getElementById('rx-price');
-      if (el && v && v.display_price != null) {
-        el.textContent = Number(v.display_price).toLocaleString('de-DE', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' €';
-      }
+      if (el) el.textContent = fmt(v.display_price);
     });
-  });
+    if (!window.spBBOwn) return; /* Retatrutide: Kachel-Logik hat die Kaufbox selbst */
+    var select = form.querySelector('select[name="attribute_volumen"]');
+    var tiles = document.querySelectorAll('#rx-vol-tiers .rx-tier');
+    if (!select || !tiles.length) return;
+    function pick(vol){
+      select.value = vol;
+      $(select).trigger('change');
+      tiles.forEach(function(t){ t.classList.toggle('is-active', t.getAttribute('data-vol') === vol); });
+    }
+    tiles.forEach(function(t){ t.addEventListener('click', function(){ pick(t.getAttribute('data-vol')); }); });
+    var a = document.querySelector('#rx-vol-tiers .rx-tier.is-active') || tiles[0];
+    pick(a.getAttribute('data-vol'));
+  }, 0); });
 })();
 </script>
     <?php
