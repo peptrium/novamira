@@ -135,7 +135,7 @@
   "shop_url": "",
   "question": "Was ist Cerebrolysin?",
   "skip": false,
-  "text": "<b>🧪 Cerebrolysin</b>\n<i>Peptid-Gemisch aus Schweinehirn-Proteinen</i>\n\n<b>Was ist es?</b>\nCerebrolysin ist kein einzelnes Peptid, sondern ein Gemisch aus kurzen Peptiden und freien Aminosäuren. Es wird durch enzymatische Spaltung von Proteinen aus Schweinehirn gewonnen und von einem österreichischen Hersteller produziert.\n\n<b>Wie funktioniert es?</b>\nEinige Bestandteile sollen in ihrer Wirkung neurotrophen Faktoren ähneln – also körpereigenen Signalstoffen, die das Überleben und Wachstum von Nervenzellen beeinflussen. In Zell- und Tiermodellen wurden Effekte auf Nervenzellschutz und Neuroplastizität beschrieben.\n\n<b>In Studien untersucht</b>\n• Schlaganfall und Rehabilitation danach\n• Schädel-Hirn-Trauma\n• Demenzerkrankungen\n• Neuroplastizität in Tiermodellen\n\n<b>Studienlage</b>\nZahlreiche klinische Studien mit gemischten Ergebnissen; Übersichtsarbeiten bewerten den Nutzen teils zurückhaltend. In Österreich und mehreren Ländern Osteuropas und Asiens als Arzneimittel zugelassen, in den USA nicht.\n\n<b>Gut zu wissen</b>\nAls zugelassenes Arzneimittel gehört Cerebrolysin in ärztliche Hände – es ist kein Forschungspeptid im üblichen Sinn.\n\n<i>Alle Angaben zu Forschungszwecken. Nicht für den menschlichen oder veterinärmedizinischen Gebrauch.</i>"
+  "text": "<b>🧪 Cerebrolysin</b>\n<i>Peptid-Gemisch aus Schweinehirn-Proteinen</i>\n\n<b>Was ist es?</b>\nCerebrolysin ist kein einzelnes Peptid, sondern ein Gemisch aus kurzen Peptiden und freien Aminosäuren. Es wird durch enzymatische Spaltung von Proteinen aus Schweinehirn gewonnen.\n\n<b>Wie funktioniert es?</b>\nEinige Bestandteile sollen in ihrer Wirkung neurotrophen Faktoren ähneln – also körpereigenen Signalstoffen, die das Überleben und Wachstum von Nervenzellen beeinflussen. In Zell- und Tiermodellen wurden Effekte auf Nervenzellschutz und Neuroplastizität beschrieben.\n\n<b>In Studien untersucht</b>\n• Schlaganfall und Rehabilitation danach\n• Schädel-Hirn-Trauma\n• Demenzerkrankungen\n• Neuroplastizität in Tiermodellen\n\n<b>Studienlage</b>\nZahlreiche klinische Studien mit gemischten Ergebnissen; Übersichtsarbeiten bewerten den Nutzen teils zurückhaltend. In Österreich und mehreren Ländern Osteuropas und Asiens als Arzneimittel zugelassen, in den USA nicht.\n\n<i>Alle Angaben zu Forschungszwecken. Nicht für den menschlichen oder veterinärmedizinischen Gebrauch.</i>"
  },
  {
   "key": "chonluten",
@@ -616,7 +616,7 @@
   "shop_url": "",
   "question": "Was ist PT-141?",
   "skip": false,
-  "text": "<b>🧪 PT-141</b>\n<i>Melanocortin-Rezeptor-Agonist · Bremelanotid</i>\n\n<b>Was ist es?</b>\nPT-141 ist ein synthetisches, ringförmiges Peptid und ein Abbauprodukt von Melanotan 2. Der Wirkstoffname lautet Bremelanotid.\n\n<b>Wie funktioniert es?</b>\nPT-141 aktiviert vor allem die Melanocortin-Rezeptoren MC3R und MC4R im zentralen Nervensystem. Anders als klassische Potenzmittel setzt es nicht an den Blutgefäßen an, sondern an Signalwegen im Gehirn, die mit sexuellem Verlangen verknüpft sind.\n\n<b>In Studien untersucht</b>\n• Sexuelles Verlangen und Erregung\n• Zentrale Melanocortin-Signalwege\n• Abgrenzung zu gefäßwirksamen Wirkstoffen\n\n<b>Studienlage</b>\nIn den USA ist Bremelanotid seit 2019 (Handelsname Vyleesi) als verschreibungspflichtiges Medikament für eine eng definierte Indikation bei Frauen vor den Wechseljahren zugelassen. In der EU besteht keine Zulassung.\n\n<b>Gut zu wissen</b>\nGegenüber Melanotan 2 fehlt PT-141 die ausgeprägte Wirkung auf die Pigmentbildung weitgehend.\n\n<i>Alle Angaben zu Forschungszwecken. Nicht für den menschlichen oder veterinärmedizinischen Gebrauch.</i>"
+  "text": "<b>🧪 PT-141</b>\n<i>Melanocortin-Rezeptor-Agonist · Bremelanotid</i>\n\n<b>Was ist es?</b>\nPT-141 ist ein synthetisches, ringförmiges Peptid und ein Abbauprodukt von Melanotan 2. Der Wirkstoffname lautet Bremelanotid.\n\n<b>Wie funktioniert es?</b>\nPT-141 aktiviert vor allem die Melanocortin-Rezeptoren MC3R und MC4R im zentralen Nervensystem. Anders als klassische Potenzmittel setzt es nicht an den Blutgefäßen an, sondern an Signalwegen im Gehirn, die mit sexuellem Verlangen verknüpft sind.\n\n<b>In Studien untersucht</b>\n• Sexuelles Verlangen und Erregung\n• Zentrale Melanocortin-Signalwege\n• Abgrenzung zu gefäßwirksamen Wirkstoffen\n\n<b>Studienlage</b>\nIn den USA ist Bremelanotid seit 2019 als verschreibungspflichtiges Medikament für eine eng definierte Indikation bei Frauen vor den Wechseljahren zugelassen. In der EU besteht keine Zulassung.\n\n<b>Gut zu wissen</b>\nGegenüber Melanotan 2 fehlt PT-141 die ausgeprägte Wirkung auf die Pigmentbildung weitgehend.\n\n<i>Alle Angaben zu Forschungszwecken. Nicht für den menschlichen oder veterinärmedizinischen Gebrauch.</i>"
  },
  {
   "key": "retatrutide",
@@ -669,16 +669,13 @@
   "aliases": [
    "semaglutide",
    "sema",
-   "ozempic",
-   "wegovy",
-   "rybelsus",
    "glp-1"
   ],
   "cat": "peptide",
   "shop_url": "",
   "question": "Was ist Semaglutide?",
   "skip": false,
-  "text": "<b>🧪 Semaglutid</b>\n<i>GLP-1-Rezeptor-Agonist · zugelassenes Arzneimittel</i>\n\n<b>Was ist es?</b>\nSemaglutid ist ein synthetisches Analogon des Darmhormons GLP-1, entwickelt von Novo Nordisk. Es ist in der EU und den USA als verschreibungspflichtiges Medikament zugelassen – unter den Handelsnamen Ozempic und Rybelsus (Typ-2-Diabetes) sowie Wegovy (Gewichtsmanagement).\n\n<b>Wie funktioniert es?</b>\nSemaglutid bindet an den GLP-1-Rezeptor. Das fördert die glukoseabhängige Insulinfreisetzung, senkt die Glukagonausschüttung, verlangsamt die Magenentleerung und verstärkt Sättigungssignale im Gehirn. Eine Fettsäurekette lässt es an Albumin binden, wodurch es sehr lange im Blut bleibt.\n\n<b>In Studien untersucht</b>\n• Blutzuckerkontrolle bei Typ-2-Diabetes (SUSTAIN-Studien)\n• Gewichtsmanagement bei Adipositas (STEP-Studien)\n• Herz-Kreislauf-Risiko (SELECT-Studie)\n• Nieren- und Lebererkrankungen\n\n<b>Studienlage</b>\nSehr gut untersucht: zahlreiche große Phase-3-Studien mit Zehntausenden Teilnehmenden. Die Anwendung erfolgt ausschließlich nach ärztlicher Verordnung.\n\n<b>Gut zu wissen</b>\nIm Vergleich zu Retatrutide spricht Semaglutid nur einen Rezeptor (GLP-1) an.\n\n<i>Alle Angaben zu Forschungszwecken. Nicht für den menschlichen oder veterinärmedizinischen Gebrauch.</i>"
+  "text": "<b>🧪 Semaglutid</b>\n<i>GLP-1-Rezeptor-Agonist · zugelassenes Arzneimittel</i>\n\n<b>Was ist es?</b>\nSemaglutid ist ein synthetisches Analogon des Darmhormons GLP-1, entwickelt von Novo Nordisk. Es ist in der EU und den USA als verschreibungspflichtiges Medikament zugelassen – für Typ-2-Diabetes und das Gewichtsmanagement.\n\n<b>Wie funktioniert es?</b>\nSemaglutid bindet an den GLP-1-Rezeptor. Das fördert die glukoseabhängige Insulinfreisetzung, senkt die Glukagonausschüttung, verlangsamt die Magenentleerung und verstärkt Sättigungssignale im Gehirn. Eine Fettsäurekette lässt es an Albumin binden, wodurch es sehr lange im Blut bleibt.\n\n<b>In Studien untersucht</b>\n• Blutzuckerkontrolle bei Typ-2-Diabetes (SUSTAIN-Studien)\n• Gewichtsmanagement bei Adipositas (STEP-Studien)\n• Herz-Kreislauf-Risiko (SELECT-Studie)\n• Nieren- und Lebererkrankungen\n\n<b>Studienlage</b>\nSehr gut untersucht: zahlreiche große Phase-3-Studien mit Zehntausenden Teilnehmenden.\n\n<b>Gut zu wissen</b>\nIm Vergleich zu Retatrutide spricht Semaglutid nur einen Rezeptor (GLP-1) an.\n\n<i>Alle Angaben zu Forschungszwecken. Nicht für den menschlichen oder veterinärmedizinischen Gebrauch.</i>"
  },
  {
   "key": "semax",
@@ -900,15 +897,13 @@
    "tirzepatide",
    "tirzepatid",
    "tirz",
-   "mounjaro",
-   "zepbound",
    "ly3298176"
   ],
   "cat": "peptide",
   "shop_url": "",
   "question": "Was ist Tirzepatide?",
   "skip": false,
-  "text": "<b>🧪 Tirzepatide</b>\n<i>Dualer GIP-/GLP-1-Rezeptoragonist · zugelassenes Arzneimittel</i>\n\n<b>Was ist es?</b>\nTirzepatide ist ein synthetisches Peptid aus 39 Aminosäuren, entwickelt von Eli Lilly. Eine angehängte Fettsäure-Kette bindet an Albumin im Blut und verlängert dadurch die Halbwertszeit deutlich.\n\n<b>Wie funktioniert es?</b>\nTirzepatide aktiviert zwei Rezeptoren für Darmhormone gleichzeitig: GIP und GLP-1. Beide sind an der blutzuckerabhängigen Insulinfreisetzung beteiligt; GLP-1 beeinflusst zusätzlich Sättigung und Magenentleerung.\n\n<b>In Studien untersucht</b>\n• Typ-2-Diabetes und Blutzuckerregulation\n• Adipositas und Körpergewicht\n• Schlafapnoe\n• Herz-Kreislauf- und Lebererkrankungen\n\n<b>Studienlage</b>\nTirzepatide ist ein zugelassenes, verschreibungspflichtiges Arzneimittel – in der EU und den USA für Typ-2-Diabetes und für das Gewichtsmanagement. Grundlage sind große Phase-3-Studien.\n\n<b>Gut zu wissen</b>\nSemaglutid wirkt nur am GLP-1-Rezeptor, Retatrutide zusätzlich am Glucagon-Rezeptor („Triple-Agonist“). Fragen zur Anwendung zugelassener Medikamente gehören in ärztliche Hände.\n\n<i>Alle Angaben zu Forschungszwecken. Nicht für den menschlichen oder veterinärmedizinischen Gebrauch.</i>"
+  "text": "<b>🧪 Tirzepatide</b>\n<i>Dualer GIP-/GLP-1-Rezeptoragonist · zugelassenes Arzneimittel</i>\n\n<b>Was ist es?</b>\nTirzepatide ist ein synthetisches Peptid aus 39 Aminosäuren, entwickelt von Eli Lilly. Eine angehängte Fettsäure-Kette bindet an Albumin im Blut und verlängert dadurch die Halbwertszeit deutlich.\n\n<b>Wie funktioniert es?</b>\nTirzepatide aktiviert zwei Rezeptoren für Darmhormone gleichzeitig: GIP und GLP-1. Beide sind an der blutzuckerabhängigen Insulinfreisetzung beteiligt; GLP-1 beeinflusst zusätzlich Sättigung und Magenentleerung.\n\n<b>In Studien untersucht</b>\n• Typ-2-Diabetes und Blutzuckerregulation\n• Adipositas und Körpergewicht\n• Schlafapnoe\n• Herz-Kreislauf- und Lebererkrankungen\n\n<b>Studienlage</b>\nTirzepatide ist ein zugelassenes, verschreibungspflichtiges Arzneimittel – in der EU und den USA für Typ-2-Diabetes und für das Gewichtsmanagement. Grundlage sind große Phase-3-Studien.\n\n<b>Gut zu wissen</b>\nSemaglutid wirkt nur am GLP-1-Rezeptor, Retatrutide zusätzlich am Glucagon-Rezeptor („Triple-Agonist“).\n\n<i>Alle Angaben zu Forschungszwecken. Nicht für den menschlichen oder veterinärmedizinischen Gebrauch.</i>"
  },
  {
   "key": "vesilute",
@@ -1153,7 +1148,7 @@
  },
  {
   "key": "bac-water-kaufen",
-  "title": "Wo kaufe ich Bac Water?",
+  "title": "🧰 Wo bekomme ich Bac Water?",
   "aliases": [
    "bac water kaufen",
    "bakteriostatisches wasser"
@@ -1162,21 +1157,23 @@
   "shop_url": "https://peptrium.com/produkt/bac-water/",
   "question": "Wo kann ich BAC Water (bakteriostatisches Wasser) kaufen?",
   "skip": false,
-  "text": "<b>🧰 Wo kann ich Bac Water kaufen?</b>\n\nDirekt bei uns: <a href=\"https://peptrium.com/produkt/bac-water/\">Bac Water 3 ml</a>. Du kannst es auf jeder Peptid-Produktseite mit einem Klick dazubestellen oder im Warenkorb hinzufügen.\n\n<b>Worauf du generell achten solltest</b>\n• Steril abgefüllt und originalverschlossen\n• Benzylalkohol-Anteil von 0,9 % klar angegeben\n• Verfallsdatum aufgedruckt\n• Klare, farblose Flüssigkeit ohne Partikel\n\n<b>Wie viel brauche ich?</b>\nDas hängt davon ab, wie viele Vials du rekonstituieren möchtest und welche Konzentration du anstrebst. Mit dem <a href=\"https://peptrium.com/peptid-rechner/\">Peptid-Rechner</a> kannst du das vorab durchrechnen. Denk daran, dass eine angebrochene Flasche nur etwa 28 Tage verwendet werden sollte – lieber kleinere Flaschen und dafür jeweils frisch.\n\n<b>Tipp</b>\nBestell Bac Water direkt zusammen mit deinen Peptiden, dann hast du beim Eintreffen alles für die Rekonstitution da.\n\nMehr zum Ablauf im <a href=\"https://peptrium.com/ratgeber/peptide-rekonstituieren/\">Ratgeber: Peptide rekonstituieren</a>."
+  "text": "<b>🧰 Wo bekomme ich Bac Water?</b>\n\nDirekt bei uns: <b>Bac Water 3 ml</b> – steril abgefüllt, mit 0,9 % Benzylalkohol und abgestimmt auf die Rekonstitution unserer Vials.\n\n<b>So bestellst du es am einfachsten</b>\n• Auf jeder Peptid-Produktseite mit einem Klick dazulegen\n• Oder im Warenkorb unter „Passt dazu“ hinzufügen\nSo kommt alles in einem Paket und du hast beim Auspacken direkt alles für die Rekonstitution da.\n\n<b>Warum 3 ml?</b>\nEine angebrochene Flasche sollte nach etwa 28 Tagen ersetzt werden. Mit der handlichen 3-ml-Größe arbeitest du immer mit frischem Bac Water statt mit einer großen, lange offenen Flasche.\n\n<b>Wie viel brauche ich?</b>\nDas hängt von der Anzahl der Vials und der gewünschten Konzentration ab – rechne es vorab mit dem <a href=\"https://peptrium.com/peptid-rechner/\">Peptid-Rechner</a> durch.\n\n<i>Alle Angaben beziehen sich auf den Laborgebrauch. Nicht für den menschlichen oder veterinärmedizinischen Gebrauch.</i>"
  },
  {
   "key": "spritzen-nadeln",
-  "title": "Welche Spritzen und Nadeln brauche ich?",
+  "title": "🧰 Welche Spritzen und Nadeln werden benötigt?",
   "aliases": [
    "spritzen",
    "nadeln",
-   "kanülen"
+   "kanülen",
+   "insulinspritze",
+   "insulinspritzen"
   ],
   "cat": "material",
   "shop_url": "https://peptrium.com/produkt/insulinspritze-10er-pack/",
   "question": "Welche Spritzen und Nadeln werden benötigt?",
   "skip": false,
-  "text": "<b>🧰 Welche Spritzen und Nadeln werden benötigt?</b>\n\nWas du brauchst, hängt davon ab, ob du mit Vials oder mit fertig gefüllten Pens arbeitest.\n\n<b>Bei Vials (Pulver)</b>\n• <b>Zum Rekonstituieren:</b> eine sterile Spritze, mit der du die gewünschte Menge Bac Water aufziehen und in das Vial geben kannst\n• <b>Zum genauen Abmessen kleiner Volumina:</b> 1-ml-Spritzen mit feiner Skala – damit lassen sich Mengen im Labor präzise abteilen\n\n<b>Bei Peptrium-Pens</b>\nKein Anmischen nötig. Du brauchst nur passende Pen-Nadeln, die auf den Pen aufgeschraubt werden.\n\n<b>Grundregeln</b>\n• Nur sterile, originalverpackte Einmalprodukte verwenden\n• Jede Nadel nur einmal benutzen\n• Gebrauchte Nadeln sicher entsorgen, z. B. in einem durchstichfesten Abwurfbehälter\n\n<b>Bei Peptrium</b>\n• <a href=\"https://peptrium.com/produkt/insulinspritze-10er-pack/\">Insulinspritzen im 10er Pack (1 ml)</a>\n• <a href=\"https://peptrium.com/produkt/pen-nadeln-32g-4mm/\">Pen Nadeln 32G x 4 mm (15er Pack)</a> – passend zu unseren <a href=\"https://peptrium.com/alle-peptrium-pens/\">Peptrium-Pens</a>"
+  "text": "<b>🧰 Welche Spritzen und Nadeln werden benötigt?</b>\n\nDas hängt davon ab, ob du mit Vials oder mit unseren fertig gefüllten Pens arbeitest – für beides haben wir das passende Zubehör.\n\n<b>Bei Vials (Pulver)</b>\n<b>Insulinspritzen im 10er Pack (1 ml)</b> – mit feiner Skala, damit lassen sich Bac Water und kleine Volumina im Labor genau abmessen. Dazu <b>Bac Water 3 ml</b> zum Rekonstituieren.\n\n<b>Bei Peptrium-Pens</b>\nKein Anmischen nötig. Du brauchst nur unsere <b>Pen Nadeln 32G x 4 mm (15er Pack)</b> – sie passen genau auf die Peptrium-Pens.\n\n<b>Grundregeln</b>\n• Jede Spritze und Nadel nur einmal verwenden\n• Erst kurz vor dem Gebrauch aus der Verpackung nehmen\n• Gebrauchte Nadeln sicher entsorgen, z. B. in einem durchstichfesten Behälter\n\n<b>Tipp</b>\nDas Zubehör kannst du auf jeder Produktseite mit einem Klick dazulegen – dann kommt alles zusammen in einem Paket.\n\n<i>Alle Angaben beziehen sich auf den Laborgebrauch. Nicht für den menschlichen oder veterinärmedizinischen Gebrauch.</i>"
  },
  {
   "key": "rekonstitution",
@@ -1208,17 +1205,18 @@
  },
  {
   "key": "materialkosten",
-  "title": "Was brauche ich insgesamt an Material?",
+  "title": "🧰 Was brauche ich insgesamt?",
   "aliases": [
-   "kosten",
    "material",
-   "grundausstattung"
+   "grundausstattung",
+   "was brauche ich",
+   "zubehör"
   ],
   "cat": "material",
   "shop_url": "",
   "question": "Was kostet das Material insgesamt?",
   "skip": false,
-  "text": "<b>🧰 Was kostet das Material insgesamt?</b>\n\nDie Grundausstattung ist überschaubar. Was du brauchst, hängt davon ab, ob du mit Vials oder mit fertigen Pens arbeitest.\n\n<b>Mit Vials (Pulver)</b>\n• Bac Water zum Rekonstituieren\n• Sterile Spritzen zum Aufziehen und Abmessen\n• Alkoholtupfer zum Desinfizieren der Gummistopfen\n• Etiketten oder ein wasserfester Stift für Datum und Konzentration\n• Abwurfbehälter für gebrauchte Nadeln\n\n<b>Mit Peptrium-Pens</b>\n• Nur Pen-Nadeln – Bac Water und Spritzen entfallen\n\n<b>Bei Peptrium</b>\n• <a href=\"https://peptrium.com/produkt/bac-water/\">Bac Water 3 ml</a>\n• <a href=\"https://peptrium.com/produkt/insulinspritze-10er-pack/\">Insulinspritzen im 10er Pack (1 ml)</a>\n• <a href=\"https://peptrium.com/produkt/pen-nadeln-32g-4mm/\">Pen Nadeln 32G x 4 mm (15er Pack)</a>\n• <a href=\"https://peptrium.com/alle-peptrium-pens/\">Peptrium-Pens</a> (fertig gefüllt)\n\nDie aktuellen Preise siehst du direkt auf den Produktseiten. Zubehör kannst du auf jeder Peptid-Seite mit einem Klick dazulegen – so landet alles in einer Bestellung.\n\n<b>Tipp</b>\nLieber kleinere Mengen Verbrauchsmaterial und dafür frisch: Angebrochenes Bac Water sollte nach etwa 28 Tagen ersetzt werden."
+  "text": "<b>🧰 Was brauche ich insgesamt?</b>\n\nAlles, was du brauchst, bekommst du bei uns – und zwar in einer Bestellung.\n\n<b>Mit Vials (Pulver)</b>\n• Das Peptid deiner Wahl\n• <b>Bac Water 3 ml</b> zum Rekonstituieren\n• <b>Insulinspritzen im 10er Pack (1 ml)</b> zum Aufziehen und Abmessen\n\n<b>Mit Peptrium-Pens</b>\n• Den fertig gefüllten Pen – kein Anmischen nötig\n• <b>Pen Nadeln 32G x 4 mm (15er Pack)</b>\n\n<b>So geht's am einfachsten</b>\nAuf jeder Produktseite kannst du das passende Zubehör mit einem Klick dazulegen. Für Retatrutide gibt es außerdem fertige Sets mit allem drin.\n\n<b>Tipp</b>\nBestell Zubehör immer frisch mit: Angebrochenes Bac Water sollte nach etwa 28 Tagen ersetzt werden, Spritzen und Nadeln sind Einmalprodukte.\n\nDie aktuellen Preise siehst du direkt auf den Produktseiten.\n\n<i>Alle Angaben beziehen sich auf den Laborgebrauch. Nicht für den menschlichen oder veterinärmedizinischen Gebrauch.</i>"
  },
  {
   "key": "bac-water-lagern",
@@ -1235,7 +1233,7 @@
  },
  {
   "key": "pen-nadeln",
-  "title": "Welche Pen-Nadeln passen?",
+  "title": "🧰 Welche Pen-Nadeln passen?",
   "aliases": [
    "pen nadeln",
    "gauge",
@@ -1245,11 +1243,11 @@
   "shop_url": "https://peptrium.com/produkt/pen-nadeln-32g-4mm/",
   "question": "Welche Pen-Nadeln werden empfohlen?",
   "skip": false,
-  "text": "<b>🧰 Welche Pen-Nadeln werden empfohlen?</b>\n\n<b>Kurz erklärt: G und mm</b>\n• <b>G (Gauge)</b> beschreibt den Durchmesser – je <b>höher</b> die Zahl, desto <b>dünner</b> die Nadel. 32G gehört zu den sehr feinen Größen\n• <b>mm</b> ist die Länge der Nadel. 4 mm zählt zu den kürzesten gängigen Längen\n\n<b>Worauf du achten solltest</b>\n• Steril und einzeln versiegelt\n• Passend zum Gewinde deines Pens\n• Jede Nadel nur einmal verwenden – sie wird schon nach einem Gebrauch stumpfer und ist danach nicht mehr steril\n• Nadel nach dem Gebrauch abschrauben, nicht auf dem Pen lassen\n• Sicher entsorgen, z. B. in einem durchstichfesten Behälter\n\n<b>Bei Peptrium</b>\n<a href=\"https://peptrium.com/produkt/pen-nadeln-32g-4mm/\">Pen Nadeln 32G x 4 mm (15er Pack)</a> – passend zu unseren <a href=\"https://peptrium.com/alle-peptrium-pens/\">Peptrium-Pens</a>. Auf den Pen-Produktseiten kannst du sie direkt mit in den Warenkorb legen."
+  "text": "<b>🧰 Welche Pen-Nadeln passen zu den Peptrium-Pens?</b>\n\nUnsere <b>Pen Nadeln 32G x 4 mm (15er Pack)</b> sind genau auf die Peptrium-Pens abgestimmt.\n\n<b>Kurz erklärt: 32G und 4 mm</b>\n• 32G (Gauge) steht für den Durchmesser – je höher die Zahl, desto feiner die Nadel\n• 4 mm ist die Länge – eine der kürzesten Größen\n\n<b>Richtig handhaben</b>\n• Für jeden Vorgang eine neue, sterile Nadel aufschrauben\n• Nadel danach abschrauben, nicht auf dem Pen lassen\n• Gebrauchte Nadeln sicher entsorgen, z. B. in einem durchstichfesten Behälter\n\n<b>Wie viele brauche ich?</b>\nPro Vorgang eine Nadel – ein 15er Pack reicht also für 15 Vorgänge. Am besten bestellst du die Nadeln direkt zusammen mit deinem Pen: Auf den Pen-Produktseiten kannst du sie mit einem Klick dazulegen.\n\n<i>Alle Angaben beziehen sich auf den Laborgebrauch. Nicht für den menschlichen oder veterinärmedizinischen Gebrauch.</i>"
  },
  {
   "key": "spritzen-rekonstitution",
-  "title": "Welche Spritzen zum Rekonstituieren?",
+  "title": "🧰 Welche Spritzen zum Rekonstituieren?",
   "aliases": [
    "rekonstitution spritze",
    "luer lock",
@@ -1259,7 +1257,7 @@
   "shop_url": "https://peptrium.com/produkt/insulinspritze-10er-pack/",
   "question": "Welche Spritzen und Kanülen brauche ich zum Rekonstituieren?",
   "skip": false,
-  "text": "<b>🧰 Welche Spritzen und Kanülen brauche ich zum Rekonstituieren?</b>\n\nBeim Rekonstituieren geht es darum, eine <b>genau abgemessene Menge Bac Water</b> steril in das Peptid-Vial zu bringen.\n\n<b>Was sich im Labor bewährt hat</b>\n• <b>Spritzengröße passend zur Menge:</b> Für bis zu 1 ml reicht eine 1-ml-Spritze mit feiner Skala – das ist besonders genau. Für größere Mengen kannst du mehrmals aufziehen oder eine größere Spritze nehmen\n• <b>Luer-Lock-Anschluss</b> (bei separaten Kanülen): Die Kanüle wird festgeschraubt und kann sich nicht lösen\n• <b>Etwas längere Kanüle</b> erleichtert das Aufziehen aus Flaschen und Vials\n\n<b>Grundregeln</b>\n• Nur sterile, originalverpackte Einmalprodukte\n• Für jedes Vial bzw. jeden Arbeitsschritt eine frische Nadel\n• Stopfen vorher mit Alkohol abwischen\n• Gebrauchte Nadeln in einen Abwurfbehälter\n\nDie benötigte Menge Bac Water berechnest du mit dem <a href=\"https://peptrium.com/peptid-rechner/\">Peptid-Rechner</a>. Den Ablauf erklärt der <a href=\"https://peptrium.com/ratgeber/peptide-rekonstituieren/\">Ratgeber: Peptide rekonstituieren</a>.\n\n<b>Bei Peptrium</b>\n<a href=\"https://peptrium.com/produkt/insulinspritze-10er-pack/\">Insulinspritzen im 10er Pack (1 ml)</a> und <a href=\"https://peptrium.com/produkt/bac-water/\">Bac Water 3 ml</a>.\n\n<i>Alle Angaben beziehen sich auf den Laborgebrauch. Nicht für den menschlichen oder veterinärmedizinischen Gebrauch.</i>"
+  "text": "<b>🧰 Welche Spritzen brauche ich zum Rekonstituieren?</b>\n\nBeim Rekonstituieren geht es darum, eine genau abgemessene Menge Bac Water steril in das Peptid-Vial zu bringen. Dafür reichen unsere <b>Insulinspritzen (1 ml, 10er Pack)</b>.\n\n<b>Warum 1 ml?</b>\nDie feine Skala macht das Abmessen besonders genau. Brauchst du mehr als 1 ml Bac Water, ziehst du einfach mehrmals auf.\n\n<b>So arbeitest du sauber</b>\n• Gummistopfen von Vial und Bac Water vorher mit Alkohol abwischen\n• Für jeden Arbeitsschritt eine frische Spritze verwenden\n• Bac Water langsam an der Glaswand entlang ins Vial geben\n• Gebrauchte Spritzen sicher entsorgen\n\nDie benötigte Menge berechnest du mit dem <a href=\"https://peptrium.com/peptid-rechner/\">Peptid-Rechner</a>, den Ablauf erklärt der Ratgeber <a href=\"https://peptrium.com/ratgeber/peptide-rekonstituieren/\">Peptide rekonstituieren</a>.\n\n<b>Bei Peptrium</b>\nInsulinspritzen im 10er Pack (1 ml) und Bac Water 3 ml – auf jeder Produktseite mit einem Klick dazulegen.\n\n<i>Alle Angaben beziehen sich auf den Laborgebrauch. Nicht für den menschlichen oder veterinärmedizinischen Gebrauch.</i>"
  },
  {
   "key": "sterilfilter",
@@ -1272,22 +1270,22 @@
   "cat": "material",
   "shop_url": "",
   "question": "Welche Filter eignen sich für das Filtern von Peptiden?",
-  "skip": false,
+  "skip": true,
   "text": "<b>🧰 Welche Filter eignen sich für das Filtern von Peptiden?</b>\n\nManche Labore filtern eine frisch rekonstituierte Lösung zusätzlich, um Partikel und Keime zu entfernen. Das ist ein optionaler Zusatzschritt.\n\n<b>Porengröße: 0,22 µm</b>\nNur Filter mit 0,22 µm (bzw. 0,2 µm) gelten als <b>Sterilfilter</b> – sie halten Bakterien zurück. Filter mit 0,45 µm entfernen nur gröbere Partikel und sind <b>keine</b> Sterilfilter.\n\n<b>Membranmaterial</b>\nPES (Polyethersulfon) ist verbreitet, weil es nur wenig Protein bzw. Peptid bindet. Dadurch bleibt weniger Substanz im Filter hängen.\n\n<b>Worauf du achten solltest</b>\n• Einzeln steril verpackt, mit klarer Angabe „steril“\n• Luer-Lock-Anschluss, damit der Filter fest auf der Spritze sitzt\n• Kleine Filter haben wenig Totvolumen, können aber schwerer durchzudrücken sein\n• Jeden Filter nur einmal verwenden\n\n<b>Gut zu wissen</b>\nEin Filter ersetzt kein steriles Arbeiten – Stopfen desinfizieren und sterile Nadeln verwenden bleibt die Grundlage.\n\nMehr zum Ablauf im <a href=\"https://peptrium.com/ratgeber/peptide-rekonstituieren/\">Ratgeber: Peptide rekonstituieren</a>.\n\n<i>Alle Angaben beziehen sich auf den Laborgebrauch. Nicht für den menschlichen oder veterinärmedizinischen Gebrauch.</i>"
  },
  {
   "key": "aufbewahrung-behaelter",
-  "title": "Welche Behälter eignen sich zur Lagerung?",
+  "title": "🧊 Wie lagere ich Vials übersichtlich?",
   "aliases": [
    "behälter",
    "box",
    "beschriften"
   ],
-  "cat": "material",
+  "cat": "lagerung",
   "shop_url": "",
   "question": "Wie lagere ich Peptide richtig und welche Behälter eignen sich?",
   "skip": false,
-  "text": "<b>🧰 Wie lagere ich Peptide richtig und welche Behälter eignen sich?</b>\n\n<b>Die Basis</b>\n• Pulver: Gefrierschrank (−18 °C) für lange, Kühlschrank (2–8 °C) für die nächsten Monate\n• Lösung: nur Kühlschrank (2–8 °C), Richtwert etwa 28–30 Tage\n\n<b>Gute Behälter</b>\n• <b>Lichtdichte Box mit Deckel:</b> schützt vor Licht und hält die Vials zusammen\n• <b>Einsatz oder Halter</b>, in dem die Vials aufrecht stehen – das schont den Stopfen und verhindert Umkippen\n• <b>Isolierte Box im Gefrierfach:</b> puffert Temperaturschwankungen, z. B. bei No-Frost-Geräten\n• Der Originalkarton ist ebenfalls eine gute Lösung\n\n<b>Ordnung halten</b>\n• Jedes Vial beschriften: Inhalt, Konzentration, Datum des Anmischens\n• Älteste Vials nach vorne\n• Pulver und angemischte Lösungen getrennt aufbewahren\n\n<b>Platz im Kühlschrank</b>\nMittleres oder hinteres Fach, nicht in der Tür und nicht direkt an der Rückwand.\n\nÜbersicht pro Peptid im <a href=\"https://peptrium.com/lagerungs-guide/\">Lagerungs-Guide</a>."
+  "text": "<b>🧊 Wie lagere ich meine Vials richtig und übersichtlich?</b>\n\n<b>Die Basis</b>\n• Pulver: Gefrierschrank (−18 °C) für lange, Kühlschrank (2–8 °C) für die nächsten Monate\n• Lösung: nur Kühlschrank (2–8 °C), Richtwert etwa 28–30 Tage\n\n<b>Am besten im Originalkarton</b>\nUnsere Vials kommen in einer Verpackung, die vor Licht schützt. Lass sie darin – so stehen sie geschützt und du siehst sofort, was drin ist.\n\n<b>Ordnung halten</b>\n• Angemischte Vials mit Inhalt, Konzentration und Datum beschriften\n• Älteste Vials nach vorne\n• Pulver und angemischte Lösungen getrennt aufbewahren\n• Vials aufrecht lagern – das schont den Gummistopfen\n\n<b>Platz im Kühlschrank</b>\nMittleres oder hinteres Fach, nicht in der Tür und nicht direkt an der Rückwand (Frostgefahr).\n\nÜbersicht pro Peptid im <a href=\"https://peptrium.com/lagerungs-guide/\">Lagerungs-Guide</a>."
  },
  {
   "key": "sonstiges-zubehoer",
@@ -1300,7 +1298,7 @@
   "cat": "material",
   "shop_url": "",
   "question": "Welches sonstige Zubehör ist nützlich?",
-  "skip": false,
+  "skip": true,
   "text": "<b>🧰 Welches sonstige Zubehör ist nützlich?</b>\n\nNeben Bac Water und Spritzen machen ein paar Kleinigkeiten das Arbeiten im Labor sauberer und übersichtlicher.\n\n<b>Hygiene</b>\n• <b>Alkoholtupfer</b>, einzeln verpackt – zum Abwischen der Gummistopfen vor jedem Einstich\n• <b>Flächendesinfektion</b> auf Alkoholbasis (z. B. 70 % Isopropanol)\n• <b>Glatte, abwischbare Arbeitsunterlage</b>, etwa aus Edelstahl\n• Einweghandschuhe\n\n<b>Organisation</b>\n• Etiketten oder wasserfester Stift für Inhalt, Konzentration und Datum\n• Box oder Halter, damit Vials aufrecht und lichtgeschützt stehen\n• Kühlschrankthermometer, um die 2–8 °C zu kontrollieren\n\n<b>Sicherheit</b>\n• Durchstichfester <b>Abwurfbehälter</b> für gebrauchte Nadeln\n\n<b>Unterwegs</b>\n• Kleine isolierte Kühltasche mit Kühlelement für angemischte Lösungen\n\n<b>Bei Peptrium</b>\n<a href=\"https://peptrium.com/produkt/bac-water/\">Bac Water 3 ml</a>, <a href=\"https://peptrium.com/produkt/insulinspritze-10er-pack/\">Insulinspritzen im 10er Pack (1 ml)</a> und <a href=\"https://peptrium.com/produkt/pen-nadeln-32g-4mm/\">Pen Nadeln 32G x 4 mm (15er Pack)</a>."
  }
 ]
