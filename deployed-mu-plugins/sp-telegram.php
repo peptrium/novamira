@@ -581,8 +581,13 @@ function sp_tg_norm($s) {
 }
 
 /** Findet den passenden Eintrag (exakter Name/Stichwort zuerst, sonst das längste enthaltene). */
-function sp_tg_faq_find($text) {
+function sp_tg_faq_find($text, $exact = false) {
     $text = preg_replace('~^/(peptid|faq|info)(@\w+)?\s*~i', '', trim((string) $text));
+    if ($exact) { // nur wenn die Nachricht praktisch NUR der Name ist ("GHK-Cu", "Was ist Reta?")
+        $text = preg_replace('~^(was\s+(ist|sind)(\s+(das|der|die|eigentlich))?|info(s)?\s+(zu|über)|erklär(e|ung)?\s+(mir\s+)?)\s*~iu', '', $text);
+        $text = trim($text, " \t\n?!.:");
+        if (mb_strlen($text) > 40) return '';
+    }
     $n = sp_tg_norm($text);
     if ($n === '' || mb_strlen($text) > 120) return '';
     $best = ''; $bestLen = 0;
@@ -592,6 +597,7 @@ function sp_tg_faq_find($text) {
             $an = sp_tg_norm($a);
             if ($an === '') continue;
             if ($an === $n) return $key;
+            if ($exact) continue;
             if (strlen($an) >= 3 && strpos($n, $an) !== false && strlen($an) > $bestLen) { $best = $key; $bestLen = strlen($an); }
         }
     }
@@ -600,14 +606,14 @@ function sp_tg_faq_find($text) {
 
 function sp_tg_faq_titles() {
     $t = [];
-    foreach (sp_tg_faq_entries() as $e) if (trim((string) ($e['text'] ?? '')) !== '') $t[] = $e['title'];
+    foreach (sp_tg_faq_entries() as $e) if (trim((string) ($e['text'] ?? '')) !== '' && ($e['cat'] ?? 'peptide') === 'peptide') $t[] = $e['title'];
     natcasesort($t);
     return array_values($t);
 }
 
 function sp_tg_faq_nomatch_html() {
     $t = sp_tg_faq_titles();
-    return "🔎 Dazu habe ich leider keinen Eintrag.\n\n" . ($t ? "Schreib einfach einen dieser Namen:\n<b>" . esc_html(implode(' · ', $t)) . "</b>" : 'Die Einträge folgen in Kürze.');
+    return "🔎 Dazu habe ich leider keinen Eintrag.\n\n" . ($t ? "Schreib einfach einen Peptid-Namen, z. B. <b>" . esc_html(implode('</b>, <b>', array_slice($t, 0, 6))) . "</b> – die vollständige Liste ist oben im Thema „FAQ“ angepinnt.\n\nAuch möglich: <b>Lagerung</b>, <b>Bac Water</b>, <b>Spritzen</b>, <b>Pen Nadeln</b>, <b>Transport</b>." : 'Die Einträge folgen in Kürze.');
 }
 
 /** Sendet einen Eintrag (Texte > 4000 Zeichen werden an Absätzen geteilt). */
@@ -625,7 +631,7 @@ function sp_tg_faq_send($chat, $key, $thread = 0, $reply_to = 0) {
         if ($thread) $m['message_thread_id'] = $thread;
         if ($reply_to && $i === 0) $m['reply_parameters'] = ['message_id' => $reply_to, 'allow_sending_without_reply' => true];
         if ($i === count($parts) - 1 && !empty($e['url'])) {
-            $m['reply_markup'] = ['inline_keyboard' => [[['text' => '🛍 ' . $e['title'] . ' im Shop', 'url' => add_query_arg(['utm_source' => 'telegram', 'utm_medium' => 'faq', 'utm_campaign' => sanitize_title($e['title'])], $e['url'])]]]];
+            $m['reply_markup'] = ['inline_keyboard' => [[['text' => '🛍 ' . (!empty($e['btn']) ? $e['btn'] : $e['title']) . ' im Shop', 'url' => add_query_arg(['utm_source' => 'telegram', 'utm_medium' => 'faq', 'utm_campaign' => sanitize_title($e['title'])], $e['url'])]]]];
         }
         $r = sp_tg_api('sendMessage', $m);
         if (empty($r['ok']) && stripos((string) ($r['description'] ?? ''), 'parse') !== false) { // HTML-Fehler → als reiner Text
@@ -639,11 +645,19 @@ function sp_tg_faq_send($chat, $key, $thread = 0, $reply_to = 0) {
     update_option('sp_tg_faq_stats', $st, false);
 }
 
-/** In der Gruppe: nur im Thema FAQ auf Peptid-Namen antworten. */
+/** In der Gruppe: im Thema FAQ auf jeden Namen/jedes Stichwort antworten, in allen anderen Themen nur,
+    wenn die Nachricht praktisch nur aus dem Namen besteht ("GHK-Cu", "Was ist Reta?"). */
 function sp_tg_maybe_faq($msg) {
     $topics = (array) get_option('sp_tg_topics', []);
     $thread = (int) ($msg['message_thread_id'] ?? 0);
-    if (empty($topics['faq']) || $thread !== (int) $topics['faq'] || empty($msg['text']) || !empty($msg['edit_date'])) return;
+    if (empty($msg['text']) || !empty($msg['edit_date']) || strpos($msg['text'], '/') === 0 && stripos($msg['text'], '/peptid') !== 0) return;
+    $in_faq = !empty($topics['faq']) && $thread === (int) $topics['faq'];
+    if (!$in_faq) {
+        if ($thread && in_array($thread, [(int) ($topics['start'] ?? 0), (int) ($topics['news'] ?? 0)], true)) return;
+        $key = sp_tg_faq_find($msg['text'], true);
+        if ($key) sp_tg_faq_send((int) $msg['chat']['id'], $key, $thread, (int) $msg['message_id']);
+        return;
+    }
     $key = sp_tg_faq_find($msg['text']);
     if ($key) { sp_tg_faq_send((int) $msg['chat']['id'], $key, $thread, (int) $msg['message_id']); return; }
     sp_tg_api('sendMessage', ['chat_id' => (int) $msg['chat']['id'], 'message_thread_id' => $thread, 'parse_mode' => 'HTML', 'text' => sp_tg_faq_nomatch_html(),
@@ -653,8 +667,9 @@ function sp_tg_maybe_faq($msg) {
 function sp_tg_faq_intro_html() {
     $t = sp_tg_faq_titles();
     return "<b>❓ FAQ – Peptid-Infos per Stichwort</b>\n\n"
-        . "Schreib hier einfach den <b>Namen eines Peptids</b> (z. B. <i>GHK-Cu</i>) – der Bot antwortet mit der Erklärung.\n\n"
-        . ($t ? "Verfügbar: <b>" . esc_html(implode(' · ', $t)) . "</b>\n\n" : "Die Einträge werden gerade befüllt.\n\n")
+        . "Schreib einfach den <b>Namen eines Peptids</b> (z. B. <i>GHK-Cu</i> oder <i>Reta</i>) – hier oder in jedem anderen Thema als eigene Nachricht. Der Bot antwortet automatisch mit der Erklärung.\n\n"
+        . ($t ? "<b>Peptide:</b> " . esc_html(implode(' · ', $t)) . "\n\n" : "Die Einträge werden gerade befüllt.\n\n")
+        . "<b>Lagerung &amp; Material:</b> z. B. <i>Lagerung</i>, <i>Haltbarkeit</i>, <i>Einfrieren</i>, <i>Transport</i>, <i>Bac Water</i>, <i>Spritzen</i>, <i>Pen Nadeln</i>, <i>Rekonstitution</i>\n\n"
         . "Das geht auch privat beim Bot: @" . esc_html(get_option('sp_tg_bot')['username'] ?? 'Peptriumhilfebot') . "\n\n"
         . "<i>Der Bot ist keine KI – die Antworten sind feste, von uns geprüfte Texte. Alle Produkte ausschließlich für Laborforschungszwecke.</i>";
 }
