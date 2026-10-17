@@ -161,10 +161,10 @@ add_filter('the_content', function ($html) {
    <div class="st-choose">
     <div class="st-opt"><div class="st-row"><img src="<?php echo esc_url($pen_img); ?>" alt="Peptrium-Pen Retatrutide" loading="lazy"><div><div class="st-who">Am einfachsten · ohne Vorkenntnisse</div><h3>Peptrium-Pen</h3><p>Fertig gemischt. Kein Anmischen, kein Abmessen.</p></div></div>
      <div class="st-inset"><b>Im Set:</b> Pen mit Retatrutide 20 mg · Pen Nadeln (15 Stück)</div>
-     <div class="st-ft"><b><?php echo esc_html(sp_st_price([547, 908])); ?><small>auch mit <a href="<?php echo $u('/produkt/peptrium-pen-retatrutide/'); ?>" data-ev="pen-groessen">30 oder 40 mg</a></small></b><a class="st-btn" data-ev="set-pen" href="<?php echo $u('/?sp_set=reta-pen'); ?>">Zum Pen-Set</a></div></div>
+     <div class="st-ft"><b><?php echo esc_html(sp_st_price([547, 908])); ?><small>auch mit <a href="<?php echo $u('/produkt/peptrium-pen-retatrutide/'); ?>" data-ev="pen-groessen">30 oder 40 mg</a></small></b><a class="st-btn" data-ev="set-pen" data-items="547,908" href="<?php echo $u('/?sp_set=reta-pen'); ?>">In den Warenkorb</a></div></div>
     <div class="st-opt"><div class="st-row"><img src="<?php echo esc_url($set_img); ?>" alt="Retatrutide Starter-Set" loading="lazy"><div><div class="st-who">Günstiger · mit Anmischen</div><h3>Starter-Set Fläschchen</h3><p>Wird vor der Verwendung mit Bac Water angemischt.</p></div></div>
      <div class="st-inset"><b>Im Set:</b> Retatrutide 10 mg (Pulver) · Bac Water · 10 Spritzen mit Skala</div>
-     <div class="st-ft"><b><?php echo esc_html(sp_st_price([555, 74, 80])); ?><small>komplett, alles dabei</small></b><a class="st-btn" data-ev="set-starter" href="<?php echo $u('/?sp_set=reta-starter'); ?>">Zum Starter-Set</a></div></div>
+     <div class="st-ft"><b><?php echo esc_html(sp_st_price([555, 74, 80])); ?><small>komplett, alles dabei</small></b><a class="st-btn" data-ev="set-starter" data-items="555,74,80" href="<?php echo $u('/?sp_set=reta-starter'); ?>">In den Warenkorb</a></div></div>
    </div>
    <a class="st-shop" data-ev="shop" href="<?php echo $u('/alle-produkte/'); ?>">Lieber erst stöbern? Alle Produkte ansehen →</a>
    <?php echo $ask; ?>
@@ -250,6 +250,7 @@ body.sp-start-page #sp-cart-fab{transform:translateY(-64px)}
 #sp-start .st-inset{margin:0 14px 12px;background:#F4F5F7;border-radius:12px;padding:10px 12px;font-size:13.5px;color:#3A4047;line-height:1.55}
 #sp-start .st-ft{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid var(--ln);padding:12px 14px}
 #sp-start .st-ft b{font-size:19px}#sp-start .st-ft small{display:block;color:var(--mu);font-size:12.5px;font-weight:400}
+#sp-start .st-btn.is-busy{opacity:.6;pointer-events:none}#sp-start .st-btn.is-done{background:#2FA36B!important}
 #sp-start .st-btn{background:#0D0F12!important;color:#fff!important;border-radius:12px;padding:12px 15px;font-weight:700;text-decoration:none!important;font-size:14.5px;white-space:nowrap}
 #sp-start .st-shop{display:block;text-align:center;margin:14px 0 0;font-weight:700;font-size:14.5px}
 #sp-start .ask{display:flex;align-items:center;justify-content:center;gap:8px;margin:10px 0 0;color:#2A7BC0!important;font-weight:700;font-size:14.5px;text-decoration:none!important}
@@ -292,6 +293,18 @@ add_action('wp_footer', function () {
  var url=<?php echo wp_json_encode(admin_url('admin-ajax.php')); ?>,sent={};
  function ev(t,v){var k=t+':'+v;if(sent[k])return;sent[k]=1;try{var f=new FormData();f.append('action','sp_st_ev');f.append('t',t);f.append('v',v);navigator.sendBeacon?navigator.sendBeacon(url,f):fetch(url,{method:'POST',body:f,keepalive:true});}catch(e){}}
  document.addEventListener('click',function(e){var a=e.target.closest('#sp-start [data-ev]');if(!a)return;if(a.tagName==='DETAILS'){if(e.target.closest('summary'))ev('click',a.getAttribute('data-ev'));return;}ev('click',a.getAttribute('data-ev'));});
+ /* Set-Buttons: alle Teile nacheinander in den Warenkorb legen, dann öffnet sich der Warenkorb (wie bei den Sets auf der Startseite).
+    Ohne JS bleibt der Link (/?sp_set=… → direkt zur Kasse). */
+ var wca=<?php echo wp_json_encode(home_url('/?wc-ajax=add_to_cart')); ?>;
+ document.querySelectorAll('#sp-start .st-btn[data-items]').forEach(function(b){b.addEventListener('click',function(e){
+  if(!window.fetch)return;e.preventDefault();if(b.classList.contains('is-busy'))return;
+  var ids=b.getAttribute('data-items').split(','),txt=b.textContent;b.classList.add('is-busy');b.textContent='Wird hinzugefügt …';
+  ids.reduce(function(p,id){return p.then(function(){var f=new FormData();f.append('product_id',id);f.append('quantity','1');return fetch(wca,{method:'POST',body:f,credentials:'same-origin'}).then(function(r){return r.json();}).then(function(j){if(j&&j.error)throw new Error('add');});});},Promise.resolve())
+  .then(function(){b.classList.remove('is-busy');b.classList.add('is-done');b.textContent='✓ Im Warenkorb';
+    if(window.jQuery){jQuery(document.body).trigger('wc_fragment_refresh');jQuery(document.body).trigger('added_to_cart',[{},'',jQuery(b)]);}
+    setTimeout(function(){b.classList.remove('is-done');b.textContent=txt;},4000);})
+  .catch(function(){location.href=b.href;});
+ });});
  if('IntersectionObserver' in window){var io=new IntersectionObserver(function(es){es.forEach(function(x){if(x.isIntersecting){ev('scroll',x.target.getAttribute('data-sec'));io.unobserve(x.target);}});},{threshold:.4});
   document.querySelectorAll('#sp-start [data-sec]').forEach(function(s){io.observe(s);});}
 })();
