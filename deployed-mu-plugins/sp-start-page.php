@@ -228,7 +228,8 @@ body.sp-start-page #sp-cart-fab{transform:translateY(-64px)}
 #sp-start a{color:var(--d)}
 #sp-start .st-hero{background:#0D0F12;color:#fff;padding:0 0 26px}
 #sp-start .st-hero .st-in{padding:0}
-#sp-start .st-hero-img{display:block;width:100%;height:190px;object-fit:cover}
+#sp-start .st-hero-img{display:block;width:100%;height:auto;aspect-ratio:1200/895;-webkit-mask-image:linear-gradient(#000 78%,transparent);mask-image:linear-gradient(#000 78%,transparent)}
+@media(min-width:700px){#sp-start .st-hero-img{border-radius:0 0 22px 22px;-webkit-mask-image:none;mask-image:none}}
 #sp-start .st-hero .st-eb,#sp-start .st-hero h1,#sp-start .st-hero p,#sp-start .st-facts{margin-left:16px;margin-right:16px}
 #sp-start .st-eb{font-size:11.5px;font-weight:800;letter-spacing:.16em;color:#9AA1A9;margin-top:18px}
 #sp-start .st-hero h1{color:#fff;font-family:Sora,sans-serif;font-size:clamp(26px,6.5vw,36px);line-height:1.15;margin-top:6px;margin-bottom:10px;font-weight:700;text-wrap:balance}
