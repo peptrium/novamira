@@ -49,9 +49,15 @@ add_action('template_redirect', function () {
     if (count($vars) < 2) return;
     usort($vars, function ($a, $b) { return (float) str_replace(',', '.', $a['q']) <=> (float) str_replace(',', '.', $b['q']); });
 
+    // ?attribute_volumen=20mg (z. B. Link aus einer Mail) wählt diese Größe vor
+    $want = isset($_GET['attribute_volumen']) ? sanitize_title(wp_unslash($_GET['attribute_volumen'])) : '';
+    $act = 0;
+    foreach ($vars as $i => $v) {
+        if ($want !== '' && sanitize_title($v['vol']) === $want) $act = $i;
+    }
     $tiles = '';
     foreach ($vars as $i => $v) {
-        $tiles .= '<button type="button" class="rx-tier' . ($i === 0 ? ' is-active' : '') . '" data-vol="' . esc_attr($v['vol']) . '">'
+        $tiles .= '<button type="button" class="rx-tier' . ($i === $act ? ' is-active' : '') . '" data-vol="' . esc_attr($v['vol']) . '">'
             . '<span class="rx-tier__disc">' . esc_html(number_format($v['price'], 2, ',', '.')) . '&nbsp;&euro;</span>'
             . '<span class="rx-tier__q">' . esc_html($v['q']) . '</span><span class="rx-tier__unit">' . esc_html($v['unit']) . '</span></button>';
     }
