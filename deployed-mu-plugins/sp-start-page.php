@@ -250,6 +250,7 @@ body.sp-start-page #sp-cart-fab{transform:translateY(-64px)}
 #sp-start .st-inset{margin:0 14px 12px;background:#F4F5F7;border-radius:12px;padding:10px 12px;font-size:13.5px;color:#3A4047;line-height:1.55}
 #sp-start .st-ft{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid var(--ln);padding:12px 14px}
 #sp-start .st-ft b{font-size:19px}#sp-start .st-ft small{display:block;color:var(--mu);font-size:12.5px;font-weight:400}
+#sp-start .added_to_cart{display:none!important}
 #sp-start .st-btn.is-busy{opacity:.6;pointer-events:none}#sp-start .st-btn.is-done{background:#2FA36B!important}
 #sp-start .st-btn{background:#0D0F12!important;color:#fff!important;border-radius:12px;padding:12px 15px;font-weight:700;text-decoration:none!important;font-size:14.5px;white-space:nowrap}
 #sp-start .st-shop{display:block;text-align:center;margin:14px 0 0;font-weight:700;font-size:14.5px}
@@ -301,7 +302,7 @@ add_action('wp_footer', function () {
   var ids=b.getAttribute('data-items').split(','),txt=b.textContent;b.classList.add('is-busy');b.textContent='Wird hinzugefügt …';
   ids.reduce(function(p,id){return p.then(function(){var f=new FormData();f.append('product_id',id);f.append('quantity','1');return fetch(wca,{method:'POST',body:f,credentials:'same-origin'}).then(function(r){return r.json();}).then(function(j){if(j&&j.error)throw new Error('add');});});},Promise.resolve())
   .then(function(){b.classList.remove('is-busy');b.classList.add('is-done');b.textContent='✓ Im Warenkorb';
-    if(window.jQuery){jQuery(document.body).trigger('wc_fragment_refresh');jQuery(document.body).trigger('added_to_cart',[{},'',jQuery(b)]);}
+    if(window.jQuery){jQuery(document.body).trigger('wc_fragment_refresh');jQuery(document.body).trigger('added_to_cart',[{},'',jQuery()]);}
     setTimeout(function(){b.classList.remove('is-done');b.textContent=txt;},4000);})
   .catch(function(){location.href=b.href;});
  });});
