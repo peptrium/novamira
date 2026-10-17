@@ -613,7 +613,7 @@ function sp_tg_faq_titles() {
 
 function sp_tg_faq_nomatch_html() {
     $t = sp_tg_faq_titles();
-    return "🔎 Dazu habe ich leider keinen Eintrag.\n\n" . ($t ? "Schreib einfach einen Peptid-Namen, z. B. <b>" . esc_html(implode('</b>, <b>', array_slice($t, 0, 6))) . "</b> – die vollständige Liste ist oben im Thema „FAQ“ angepinnt.\n\nAuch möglich: <b>Lagerung</b>, <b>Bac Water</b>, <b>Spritzen</b>, <b>Pen Nadeln</b>, <b>Transport</b>." : 'Die Einträge folgen in Kürze.');
+    return "🔎 Dazu habe ich leider keinen Eintrag.\n\n" . ($t ? "Schreib einfach einen Peptid-Namen, z. B. <b>" . esc_html(implode('</b>, <b>', array_slice($t, 0, 6))) . "</b>.\n\nAuch möglich: <b>Lagerung</b>, <b>Bac Water</b>, <b>Spritzen</b>, <b>Pen Nadeln</b>, <b>Transport</b>." : 'Die Einträge folgen in Kürze.');
 }
 
 /** Sendet einen Eintrag (Texte > 4000 Zeichen werden an Absätzen geteilt). */
@@ -665,12 +665,11 @@ function sp_tg_maybe_faq($msg) {
 }
 
 function sp_tg_faq_intro_html() {
-    $t = sp_tg_faq_titles();
-    return "<b>❓ FAQ – Peptid-Infos per Stichwort</b>\n\n"
-        . "Schreib einfach den <b>Namen eines Peptids</b> (z. B. <i>GHK-Cu</i> oder <i>Reta</i>) – hier oder in jedem anderen Thema als eigene Nachricht. Der Bot antwortet automatisch mit der Erklärung.\n\n"
-        . ($t ? "<b>Peptide:</b> " . esc_html(implode(' · ', $t)) . "\n\n" : "Die Einträge werden gerade befüllt.\n\n")
-        . "<b>Lagerung &amp; Material:</b> z. B. <i>Lagerung</i>, <i>Haltbarkeit</i>, <i>Einfrieren</i>, <i>Transport</i>, <i>Bac Water</i>, <i>Spritzen</i>, <i>Pen Nadeln</i>, <i>Rekonstitution</i>\n\n"
-        . "Das geht auch privat beim Bot: @" . esc_html(get_option('sp_tg_bot')['username'] ?? 'Peptriumhilfebot') . "\n\n"
+    return "<b>❓ So funktioniert das FAQ</b>\n\n"
+        . "Schreib einfach den <b>Namen eines Peptids</b> als Nachricht – z. B. <i>GHK-Cu</i>, <i>Reta</i> oder <i>Was ist Semax?</i>. Der Bot antwortet automatisch mit der Erklärung.\n\n"
+        . "Das klappt hier im Thema und in jedem anderen Thema der Gruppe, wenn die Nachricht nur den Namen enthält.\n\n"
+        . "Auch Fragen zu <b>Lagerung &amp; Material</b> gehen per Stichwort, z. B. <i>Lagerung</i>, <i>Haltbarkeit</i>, <i>Einfrieren</i>, <i>Transport</i>, <i>Bac Water</i>, <i>Spritzen</i>, <i>Pen Nadeln</i> oder <i>Rekonstitution</i>.\n\n"
+        . "Kennt der Bot einen Namen nicht, sagt er Bescheid – schreib dann gern ins Thema 🧪 Wunschliste.\n\n"
         . "<i>Der Bot ist keine KI – die Antworten sind feste, von uns geprüfte Texte. Alle Produkte ausschließlich für Laborforschungszwecke.</i>";
 }
 
