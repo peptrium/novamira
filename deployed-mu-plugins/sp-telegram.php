@@ -522,7 +522,7 @@ function sp_tg_moderate($msg) {
     $topics = (array) get_option('sp_tg_topics', []);
 
     // In "Start & Regeln" und "News" schreiben nur Admins
-    if ($thread && in_array($thread, [(int) ($topics['start'] ?? 0), (int) ($topics['news'] ?? 0)], true)) {
+    if ($thread && in_array($thread, sp_tg_readonly_threads(), true)) {
         sp_tg_api('deleteMessage', ['chat_id' => $gid, 'message_id' => $msg['message_id']]);
         return;
     }
@@ -613,7 +613,7 @@ function sp_tg_faq_titles() {
 
 function sp_tg_faq_nomatch_html() {
     $t = sp_tg_faq_titles();
-    return "🔎 Dazu habe ich leider keinen Eintrag.\n\n" . ($t ? "Schreib einfach einen Peptid-Namen, z. B. <b>" . esc_html(implode('</b>, <b>', array_slice($t, 0, 6))) . "</b>.\n\nAuch möglich: <b>Lagerung</b>, <b>Bac Water</b>, <b>Spritzen</b>, <b>Pen Nadeln</b>, <b>Transport</b>." : 'Die Einträge folgen in Kürze.');
+    return "🔎 Dazu habe ich leider keinen Eintrag.\n\n" . ($t ? "Schreib einfach einen Peptid-Namen, z. B. <b>" . esc_html(implode('</b>, <b>', array_slice($t, 0, 6))) . "</b>.\n\nLagerung und Material findest du komplett in den Themen 🔬 Lagerung &amp; Haltbarkeit und 📝 Material &amp; Zubehör." : 'Die Einträge folgen in Kürze.');
 }
 
 /** Sendet einen Eintrag (Texte > 4000 Zeichen werden an Absätzen geteilt). */
@@ -653,7 +653,7 @@ function sp_tg_maybe_faq($msg) {
     if (empty($msg['text']) || !empty($msg['edit_date']) || strpos($msg['text'], '/') === 0 && stripos($msg['text'], '/peptid') !== 0) return;
     $in_faq = !empty($topics['faq']) && $thread === (int) $topics['faq'];
     if (!$in_faq) {
-        if ($thread && in_array($thread, [(int) ($topics['start'] ?? 0), (int) ($topics['news'] ?? 0)], true)) return;
+        if ($thread && in_array($thread, sp_tg_readonly_threads(), true)) return;
         $key = sp_tg_faq_find($msg['text'], true);
         if ($key) sp_tg_faq_send((int) $msg['chat']['id'], $key, $thread, (int) $msg['message_id']);
         return;
@@ -668,7 +668,7 @@ function sp_tg_faq_intro_html() {
     return "<b>❓ So funktioniert das FAQ</b>\n\n"
         . "Schreib einfach den <b>Namen eines Peptids</b> als Nachricht – z. B. <i>GHK-Cu</i>, <i>Reta</i> oder <i>Was ist Semax?</i>. Der Bot antwortet automatisch mit der Erklärung.\n\n"
         . "Das klappt hier im Thema und in jedem anderen Thema der Gruppe, wenn die Nachricht nur den Namen enthält.\n\n"
-        . "Auch Fragen zu <b>Lagerung &amp; Material</b> gehen per Stichwort, z. B. <i>Lagerung</i>, <i>Haltbarkeit</i>, <i>Einfrieren</i>, <i>Transport</i>, <i>Bac Water</i>, <i>Spritzen</i>, <i>Pen Nadeln</i> oder <i>Rekonstitution</i>.\n\n"
+        . "Alles zu <b>Lagerung &amp; Haltbarkeit</b> und <b>Material &amp; Zubehör</b> findest du komplett zum Nachlesen in den gleichnamigen Themen – oben angepinnt ist jeweils eine Übersicht.\n\n"
         . "Kennt der Bot einen Namen nicht, sagt er Bescheid – schreib dann gern ins Thema 🧪 Wunschliste.\n\n"
         . "<i>Der Bot ist keine KI – die Antworten sind feste, von uns geprüfte Texte. Alle Produkte ausschließlich für Laborforschungszwecke.</i>";
 }
@@ -711,6 +711,81 @@ function sp_tg_faq_setup() {
 function sp_tg_faq_kses($html) {
     $html = str_replace(["\r\n", "\r"], "\n", (string) $html);
     return wp_kses($html, ['b' => [], 'strong' => [], 'i' => [], 'em' => [], 'u' => [], 's' => [], 'code' => [], 'pre' => [], 'blockquote' => [], 'tg-spoiler' => [], 'a' => ['href' => true]]);
+}
+
+/* ---------- Wissens-Themen: Lagerung & Material komplett zum Nachlesen ---------- */
+
+/** Themen, in denen nur Admins/der Bot schreiben (Mitglieder-Nachrichten werden gelöscht). */
+function sp_tg_readonly_threads() {
+    $t = (array) get_option('sp_tg_topics', []);
+    $ids = [];
+    foreach (['start', 'news', 'lagerung', 'material'] as $k) if (!empty($t[$k])) $ids[] = (int) $t[$k];
+    return $ids;
+}
+
+function sp_tg_kb_defs() {
+    return [
+        'lagerung' => ['name' => 'Lagerung & Haltbarkeit', 'icon' => '5377580546748588396', 'emoji' => '🔬'],
+        'material' => ['name' => 'Material & Zubehör', 'icon' => '5373251851074415873', 'emoji' => '📝'],
+    ];
+}
+
+/**
+ * Postet alle FAQ-Einträge einer Kategorie (lagerung/material) als Nachrichten in ihr eigenes Thema,
+ * darunter ein angepinntes Inhaltsverzeichnis mit Links auf jede Antwort. Erneuter Aufruf löscht die alten
+ * Nachrichten und postet neu (für Textänderungen). Telegram-Limit ~20 Nachrichten/Minute pro Gruppe → Pausen.
+ */
+function sp_tg_kb_post($cat) {
+    $defs = sp_tg_kb_defs();
+    if (empty($defs[$cat])) return ['unbekannte Kategorie'];
+    $gid = sp_tg_group_id();
+    if (!$gid) return ['keine Gruppe'];
+    $out = [];
+    $topics = (array) get_option('sp_tg_topics', []);
+    $posted = (array) get_option('sp_tg_posted', []);
+    $d = $defs[$cat];
+    if (empty($topics[$cat])) {
+        $r = sp_tg_api('createForumTopic', ['chat_id' => $gid, 'name' => $d['name'], 'icon_custom_emoji_id' => $d['icon']]);
+        if (empty($r['ok'])) return ['Thema: ' . ($r['description'] ?? '?')];
+        $topics[$cat] = (int) $r['result']['message_thread_id'];
+        update_option('sp_tg_topics', $topics, false);
+        $out[] = 'Thema angelegt';
+    } else {
+        $r = sp_tg_api('editForumTopic', ['chat_id' => $gid, 'message_thread_id' => $topics[$cat], 'name' => $d['name'], 'icon_custom_emoji_id' => $d['icon']]);
+        $out[] = 'Thema: ' . (!empty($r['ok']) ? 'umbenannt' : ($r['description'] ?? '?'));
+    }
+    $thread = (int) $topics[$cat];
+    // alte Nachrichten (früherer Einführungs-Post + frühere Einträge) entfernen
+    $kb = (array) get_option('sp_tg_kb', []);
+    $old = array_values((array) ($kb[$cat] ?? []));
+    if (!empty($posted[$cat])) { $old[] = (int) $posted[$cat]; unset($posted[$cat]); update_option('sp_tg_posted', $posted, false); }
+    foreach ($old as $mid) sp_tg_api('deleteMessage', ['chat_id' => $gid, 'message_id' => (int) $mid]);
+    $kb[$cat] = [];
+    $entries = array_filter(sp_tg_faq_entries(), function ($e) use ($cat) { return ($e['cat'] ?? '') === $cat && trim((string) $e['text']) !== ''; });
+    $toc = [];
+    foreach ($entries as $key => $e) {
+        sleep(3);
+        $m = ['chat_id' => $gid, 'message_thread_id' => $thread, 'text' => $e['text'], 'parse_mode' => 'HTML', 'link_preview_options' => ['is_disabled' => true], 'disable_notification' => true];
+        if (!empty($e['url'])) $m['reply_markup'] = ['inline_keyboard' => [[['text' => '🛍 ' . (!empty($e['btn']) ? $e['btn'] : $e['title']) . ' im Shop', 'url' => add_query_arg(['utm_source' => 'telegram', 'utm_medium' => 'faq', 'utm_campaign' => sanitize_title($e['title'])], $e['url'])]]]];
+        $r = sp_tg_api('sendMessage', $m);
+        if (empty($r['ok']) && stripos((string) ($r['description'] ?? ''), 'retry after') !== false) { sleep(45); $r = sp_tg_api('sendMessage', $m); }
+        if (!empty($r['ok'])) { $kb[$cat][$key] = (int) $r['result']['message_id']; $toc[] = [$e['title'], (int) $r['result']['message_id']]; }
+        else $out[] = $key . ': ' . ($r['description'] ?? '?');
+    }
+    // Inhaltsverzeichnis (unten, angepinnt)
+    $base = 'https://t.me/c/' . substr((string) $gid, 4) . '/';
+    $txt = "<b>{$d['emoji']} " . esc_html($d['name']) . " – Übersicht</b>\n\nTippe auf eine Frage, um direkt zur Antwort zu springen:\n\n";
+    foreach ($toc as $t) $txt .= '• <a href="' . esc_url($base . $t[1]) . '">' . esc_html($t[0]) . "</a>\n";
+    $txt .= "\nFragen dazu? Schreib gern ins Thema 💬 Allgemein.\n\n<i>Alle Angaben zu Forschungszwecken.</i>";
+    sleep(3);
+    $r = sp_tg_api('sendMessage', ['chat_id' => $gid, 'message_thread_id' => $thread, 'text' => $txt, 'parse_mode' => 'HTML', 'link_preview_options' => ['is_disabled' => true], 'disable_notification' => true]);
+    if (!empty($r['ok'])) {
+        $kb[$cat]['_index'] = (int) $r['result']['message_id'];
+        sp_tg_api('pinChatMessage', ['chat_id' => $gid, 'message_id' => $kb[$cat]['_index'], 'disable_notification' => true]);
+    }
+    update_option('sp_tg_kb', $kb, false);
+    $out[] = count($toc) . ' Einträge gepostet, Übersicht ' . (!empty($r['ok']) ? 'angepinnt' : ($r['description'] ?? '?'));
+    return $out;
 }
 
 /* ---------- Admin ---------- */
