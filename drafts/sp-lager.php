@@ -100,6 +100,24 @@ function sp_lager_sum_orders($args) {
     return $out;
 }
 
+/** Bezahlter Betrag einer Lieferung in € (eingetragen, sonst aus den EK-Preisen gerechnet). */
+function sp_lager_paid($d, $m = null) {
+    if (isset($d['paid']) && $d['paid'] !== null && $d['paid'] !== '') return (float) $d['paid'];
+    $m = $m ?: sp_lager_mats(); $sum = 0;
+    foreach ($d['items'] as $c => $n) $sum += sp_lager_unit_eur($m[$c] ?? []) * $n;
+    return round($sum, 2);
+}
+
+/** Einkäufe, die im Zeitraum bezahlt wurden (Bestelldatum = Zahlungsdatum): ['total' => €, 'list' => [...]]. */
+function sp_lager_purchases($start, $end) {
+    $m = sp_lager_mats(); $tot = 0; $list = [];
+    foreach ((array) get_option('sp_lager_in', []) as $d) {
+        if ($d['date'] < $start || $d['date'] > $end) continue;
+        $v = sp_lager_paid($d, $m); $tot += $v; $list[] = $d + ['paid_eur' => $v];
+    }
+    return ['total' => $tot, 'list' => $list];
+}
+
 function sp_lager_parse_lines($txt) {
     $items = [];
     foreach (preg_split('~[\r\n,;]+~', (string) $txt) as $l) {
@@ -140,10 +158,18 @@ function sp_lager_render_page() {
             if (!$items) $note = 'Keine Positionen erkannt (Format: CODE Menge, eine pro Zeile).';
             elseif ($unknown) $note = 'Unbekannte Codes: ' . implode(', ', $unknown);
             else {
-                $in[] = ['id' => uniqid(), 'date' => sanitize_text_field(wp_unslash($_POST['date'] ?? current_time('Y-m-d'))), 'label' => sanitize_text_field(wp_unslash($_POST['label'] ?? '')), 'items' => $items, 'done' => ''];
+                $pd = trim(str_replace(['.', ','], ['', '.'], (string) wp_unslash($_POST['paid'] ?? '')));
+                $new = ['id' => uniqid(), 'date' => sanitize_text_field(wp_unslash($_POST['date'] ?? current_time('Y-m-d'))), 'label' => sanitize_text_field(wp_unslash($_POST['label'] ?? '')), 'items' => $items, 'done' => ''];
+                $new['paid'] = $pd === '' ? sp_lager_paid($new, $m) : (float) $pd; // Betrag beim Bestellen festschreiben
+                $in[] = $new;
                 update_option('sp_lager_in', $in, false);
                 $note = 'Lieferung eingetragen ✓';
             }
+        } elseif ($act === 'bezahlt') {
+            $id = sanitize_text_field(wp_unslash($_POST['id'] ?? ''));
+            $pd = trim(str_replace(['.', ','], ['', '.'], (string) wp_unslash($_POST['paid'] ?? '')));
+            foreach ($in as $k => $d) if ($d['id'] === $id && $pd !== '') { $in[$k]['paid'] = (float) $pd; $note = 'Betrag gespeichert ✓'; sp_lager_log('Einkauf „' . $d['label'] . '“: bezahlt ' . $pd . ' €'); }
+            update_option('sp_lager_in', $in, false);
         } elseif ($act === 'eingang' || $act === 'loeschen') {
             $id = sanitize_text_field(wp_unslash($_POST['id'] ?? ''));
             foreach ($in as $k => $d) {
@@ -214,15 +240,21 @@ function sp_lager_render_page() {
     $open = array_filter($in, function ($d) { return !$d['done']; });
     if (!$open) echo '<p>Keine offenen Lieferungen.</p>';
     foreach ($open as $d) {
-        $sum = 0; foreach ($d['items'] as $c => $n) $sum += sp_lager_unit_eur($m[$c] ?? []) * $n;
-        echo '<div style="background:#fff;border:1px solid #dcdcde;border-radius:8px;padding:12px 14px;margin:8px 0;max-width:1120px"><strong>' . esc_html($d['label'] ?: 'Lieferung') . '</strong> <span style="color:#646970">bestellt ' . esc_html(date_i18n('d.m.Y', strtotime($d['date']))) . ' · Warenwert ca. ' . esc_html(number_format($sum, 2, ',', '.')) . ' €</span><br>'
+        echo '<div style="background:#fff;border:1px solid #dcdcde;border-radius:8px;padding:12px 14px;margin:8px 0;max-width:1120px"><strong>' . esc_html($d['label'] ?: 'Lieferung') . '</strong> <span style="color:#646970">bestellt &amp; bezahlt am ' . esc_html(date_i18n('d.m.Y', strtotime($d['date']))) . '</span><br>'
             . esc_html(implode(' · ', array_map(function ($c, $n) use ($m) { return $n . '× ' . ($m[$c]['name'] ?? $c); }, array_keys($d['items']), $d['items'])))
             . '<form method="post" style="margin-top:8px">' . wp_nonce_field('sp_lager', '_wpnonce', true, false) . '<input type="hidden" name="id" value="' . esc_attr($d['id']) . '">'
+            . '<span style="margin-right:14px">Bezahlt: <input name="paid" value="' . esc_attr(number_format(sp_lager_paid($d, $m), 2, ',', '')) . '" style="width:90px;text-align:right"> € <button class="button" name="sp_lager_act" value="bezahlt">Betrag speichern</button></span> '
             . '<button class="button button-primary" name="sp_lager_act" value="eingang" onclick="return confirm(\'Ware angekommen? Mengen werden zum Bestand addiert.\')">✓ Angekommen – einbuchen</button> '
             . '<button class="button-link" style="color:#b32d2e;margin-left:10px" name="sp_lager_act" value="loeschen" onclick="return confirm(\'Lieferung löschen?\')">Löschen</button></form></div>';
     }
+    $done = array_filter($in, function ($d) { return $d['done']; });
+    if ($done) {
+        echo '<details style="margin-top:10px"><summary style="cursor:pointer;font-weight:600">Angekommene Einkäufe (' . count($done) . ')</summary><table class="widefat striped" style="max-width:1120px;margin-top:8px"><thead><tr><th>Bezahlt</th><th>Lieferung</th><th>Inhalt</th><th style="text-align:right">Betrag</th><th>Angekommen</th></tr></thead><tbody>';
+        foreach (array_reverse($done) as $d) echo '<tr><td>' . esc_html(date_i18n('d.m.Y', strtotime($d['date']))) . '</td><td>' . esc_html($d['label']) . '</td><td>' . esc_html(implode(', ', array_map(function ($c, $n) { return "$n× $c"; }, array_keys($d['items']), $d['items']))) . '</td><td style="text-align:right">' . esc_html(number_format(sp_lager_paid($d, $m), 2, ',', '.')) . ' €</td><td>' . esc_html(date_i18n('d.m.Y', strtotime($d['done']))) . '</td></tr>';
+        echo '</tbody></table></details>';
+    }
     echo '<details style="margin-top:10px"><summary style="cursor:pointer;font-weight:600">+ Neue Lieferung eintragen</summary><form method="post" style="margin-top:8px">' . wp_nonce_field('sp_lager', '_wpnonce', true, false)
-        . '<input type="hidden" name="sp_lager_act" value="neu"><p><label>Bezeichnung <input name="label" style="width:260px" placeholder="z. B. Peptid-Lieferant"></label> <label>bestellt am <input type="date" name="date" value="' . esc_attr(current_time('Y-m-d')) . '"></label></p>'
+        . '<input type="hidden" name="sp_lager_act" value="neu"><p><label>Bezeichnung <input name="label" style="width:260px" placeholder="z. B. Peptid-Lieferant"></label> <label>bestellt &amp; bezahlt am <input type="date" name="date" value="' . esc_attr(current_time('Y-m-d')) . '"></label> <label>bezahlt <input name="paid" style="width:90px" placeholder="leer = berechnet"> €</label></p>'
         . '<p><textarea name="items" rows="6" style="width:360px" placeholder="RT10 40&#10;RT20 30&#10;BAC 20"></textarea><br><span style="color:#646970">Eine Zeile pro Position: Code + Menge (Codes siehe Tabelle oben).</span></p><p><button class="button">Lieferung speichern</button></p></form></details>';
 
     // Protokoll

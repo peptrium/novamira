@@ -183,6 +183,19 @@ function sp_ek_render_page() {
         . ($T['missing'] ? ' <strong style="color:#b32d2e">' . (int) $T['missing'] . ' verkaufte Artikel haben noch keinen EK – das Ergebnis ist deshalb zu hoch.</strong>' : '')
         . ($T['estimated'] ? ' ' . (int) $T['estimated'] . ' Artikel mit aktuellem EK gerechnet (Bestellungen von vor der Erfassung).' : '') . '</p>';
 
+    // Geldfluss: was wirklich rein- und rausging (Einkauf zählt beim Bezahlen, nicht erst beim Verkauf)
+    $buy = function_exists('sp_lager_purchases') ? sp_lager_purchases($range['start'], $range['end']) : ['total' => 0, 'list' => []];
+    $paidAff = 0;
+    foreach ((array) get_option('sp_aff_transfers', []) as $t) if ($t['date'] >= $range['start'] && $t['date'] <= $range['end']) $paidAff += (float) $t['amount'];
+    $cash = $T['revenue'] - $buy['total'] - $paidAff - $T['own'];
+    echo '<h2 style="margin-top:22px">Geldfluss im Zeitraum</h2><div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:6px">'
+        . $tile('Eingenommen', sp_ek_money($T['revenue']))
+        . $tile('− Einkäufe bezahlt', sp_ek_money($buy['total']), '#b32d2e', count($buy['list']) . ' Lieferung(en), auch wenn noch unterwegs')
+        . $tile('− An Partner überwiesen', sp_ek_money($paidAff), '#b32d2e')
+        . $tile('− Versand & Verpackung', sp_ek_money($T['own']), '#b32d2e')
+        . $tile('= Geld übrig', sp_ek_money($cash), $cash >= 0 ? '#00a32a' : '#b32d2e')
+        . '</div><p style="color:#646970;max-width:900px">Oben (Ergebnis) zählt die Ware erst, wenn sie verkauft ist – so siehst du, was jeder Verkauf wirklich verdient. Hier (Geldfluss) zählt jeder Einkauf an dem Tag, an dem du ihn bezahlt hast, und Provisionen erst, wenn du sie überwiesen hast. Einkäufe trägst du unter <a href="' . esc_url(admin_url('admin.php?page=sp-lager')) . '">Lager → Lieferungen</a> ein; „Angekommen“ bucht dort nur den Bestand ein.</p>';
+
     // Produkte
     echo '<h2>Nach Produkt</h2><table class="widefat striped" style="max-width:1100px"><thead><tr><th>Produkt</th><th style="text-align:right">Stück</th><th style="text-align:right">Umsatz</th><th style="text-align:right">Wareneinsatz</th><th style="text-align:right">Rohertrag</th><th style="text-align:right">Marge</th></tr></thead><tbody>';
     foreach ($P as $p) {
