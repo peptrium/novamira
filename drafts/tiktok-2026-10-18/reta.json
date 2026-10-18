@@ -1,0 +1,79 @@
+{
+"accent": "#5CE1E6",
+"speed": 0.92,
+"scenes": [
+{
+"type": "hook",
+"title": "Was ist<br><em>Retatrutide</em>?",
+"sub": "Was ist eigentlich Retatrutide?",
+"say": "Was ist eigentlich Retatrutide?",
+"tag": "Kurz erklärt"
+},
+{
+"type": "card",
+"eye": "Fakt 1",
+"h": "Ein synthetisches <em>Forschungs&shy;peptid</em>",
+"p": "Entwickelt von Eli Lilly · Code LY3437943",
+"say": "Retatrutide ist ein synthetisches Forschungspeptid, entwickelt von Eli Lilly."
+},
+{
+"type": "receptors",
+"eye": "Fakt 2",
+"h": "Drei Rezeptoren auf einmal",
+"labels": [
+"GIP",
+"GLP-1",
+"GCG"
+],
+"say": "Das Besondere: Es spricht gleich drei Hormonrezeptoren an. G I P, G L P eins und Glukagon.",
+"sub": "Das Besondere: Es spricht gleich drei Hormonrezeptoren an – GIP, GLP-1 und Glukagon."
+},
+{
+"type": "card",
+"eye": "Fakt 3",
+"h": "„GLP-3“? <em>Kein Fachbegriff</em>",
+"p": "Der Spitzname spielt nur auf die drei Angriffspunkte an.",
+"say": "Deshalb hört man oft den Namen G L P drei. Das ist aber kein Fachbegriff.",
+"sub": "Deshalb hört man oft den Namen „GLP-3“. Das ist aber kein Fachbegriff."
+},
+{
+"type": "chips",
+"eye": "In Studien untersucht",
+"h": "Woran geforscht wird",
+"chips": [
+"Blutzucker",
+"Leberfett",
+"Energiehaushalt"
+],
+"say": "Untersucht wird es unter anderem zu Blutzucker, Leberfett und Energiehaushalt."
+},
+{
+"type": "timeline",
+"eye": "Studienlage",
+"h": "Noch nicht zugelassen",
+"steps": [
+{
+"l": "Phase 1",
+"s": "ok"
+},
+{
+"l": "Phase 2",
+"n": "Ergebnisse 2023",
+"s": "ok"
+},
+{
+"l": "Phase 3",
+"n": "Programm TRIUMPH läuft",
+"s": "now"
+}
+],
+"say": "Die Phase-drei-Studien laufen noch. Zugelassen ist Retatrutide bisher nicht.",
+"sub": "Die Phase-3-Studien laufen noch. Zugelassen ist Retatrutide bisher nicht."
+},
+{
+"type": "end",
+"cta": "Mehr Wissen: Link in Bio",
+"say": "Mehr Wissen über Peptide gibt es bei Peptrium."
+}
+]
+}
