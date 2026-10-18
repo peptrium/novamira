@@ -130,6 +130,22 @@ function sp_lager_vk($code, $m = null) {
     return null;
 }
 
+/** Lagerwert und möglicher Umsatz (Listenpreis) für Bestand und offene Lieferungen. */
+function sp_lager_summary() {
+    $m = sp_lager_mats(); $coming = [];
+    foreach ((array) get_option('sp_lager_in', []) as $d) if (empty($d['done'])) foreach ($d['items'] as $c => $n) $coming[$c] = ($coming[$c] ?? 0) + $n;
+    $o = ['val' => 0, 'val_in' => 0, 'vk' => 0, 'vk_in' => 0, 'no_vk' => []];
+    foreach ($m as $c => $x) {
+        $u = sp_lager_unit_eur($x); $q = ($x['qty'] !== null && $x['qty'] > 0) ? $x['qty'] : 0; $qi = $coming[$c] ?? 0;
+        $o['val'] += $u * $q; $o['val_in'] += $u * $qi;
+        if (!$q && !$qi) continue;
+        $vk = sp_lager_vk($c, $m);
+        if ($vk === null) { $o['no_vk'][] = $c; continue; }
+        $o['vk'] += $vk * $q; $o['vk_in'] += $vk * $qi;
+    }
+    return $o;
+}
+
 function sp_lager_parse_lines($txt) {
     $items = [];
     foreach (preg_split('~[\r\n,;]+~', (string) $txt) as $l) {
@@ -223,15 +239,8 @@ function sp_lager_render_page() {
     if ($note) echo '<div class="notice notice-info"><p>' . esc_html($note) . '</p></div>';
     if ($warn) echo '<div class="notice notice-warning"><p><strong>Im Shop als lieferbar angezeigt, aber kein Bestand:</strong><br>' . implode('<br>', $warn) . '</p></div>';
 
-    $val = 0; $valIn = 0; $vkL = 0; $vkIn = 0; $noVk = [];
-    foreach ($m as $c => $x) {
-        $u = sp_lager_unit_eur($x); $q = ($x['qty'] !== null && $x['qty'] > 0) ? $x['qty'] : 0; $qi = $coming[$c] ?? 0;
-        $val += $u * $q; $valIn += $u * $qi;
-        if (!$q && !$qi) continue;
-        $vk = sp_lager_vk($c, $m);
-        if ($vk === null) { $noVk[] = $c; continue; }
-        $vkL += $vk * $q; $vkIn += $vk * $qi;
-    }
+    $S = sp_lager_summary();
+    $val = $S['val']; $valIn = $S['val_in']; $vkL = $S['vk']; $vkIn = $S['vk_in']; $noVk = $S['no_vk'];
     $eu = function ($v) { return esc_html(number_format($v, 2, ',', '.')) . ' €'; };
     $tile = function ($l, $v, $sub = '', $col = '#1d2327') { return '<div style="background:#fff;border:1px solid #dcdcde;border-radius:10px;padding:12px 16px;min-width:190px"><div style="font-size:12px;color:#646970;text-transform:uppercase;letter-spacing:.04em">' . $l . '</div><div style="font-size:21px;font-weight:700;color:' . $col . ';margin-top:3px">' . $v . '</div>' . ($sub ? '<div style="font-size:12px;color:#646970;margin-top:2px">' . $sub . '</div>' : '') . '</div>'; };
     echo '<div style="display:flex;flex-wrap:wrap;gap:12px;margin:10px 0 6px">'

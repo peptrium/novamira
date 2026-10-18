@@ -196,6 +196,29 @@ function sp_ek_render_page() {
         . $tile('= Geld übrig', sp_ek_money($cash), $cash >= 0 ? '#00a32a' : '#b32d2e')
         . '</div><p style="color:#646970;max-width:900px">Oben (Ergebnis) zählt die Ware erst, wenn sie verkauft ist – so siehst du, was jeder Verkauf wirklich verdient. Hier (Geldfluss) zählt jeder Einkauf an dem Tag, an dem du ihn bezahlt hast, und Provisionen erst, wenn du sie überwiesen hast. Einkäufe trägst du unter <a href="' . esc_url(admin_url('admin.php?page=sp-lager')) . '">Lager → Lieferungen</a> ein; „Angekommen“ bucht dort nur den Bestand ein.</p>';
 
+    // Lager: Wert und möglicher Umsatz, realistisch gerechnet mit den Erfahrungswerten der letzten 90 Tage
+    if (function_exists('sp_lager_summary')) {
+        $S = sp_lager_summary();
+        $lst = 0; $real = 0; $rev90 = 0; $com90 = 0;
+        foreach (wc_get_orders(['limit' => -1, 'status' => ['processing', 'completed'], 'date_paid' => '>' . (time() - 90 * DAY_IN_SECONDS)]) as $o) {
+            if ($o->get_meta('_sp_is_test')) continue;
+            $f = sp_ek_order_figures($o);
+            if (!$f['goods']) continue;
+            foreach ($f['lines'] as $l) { $pp = wc_get_product($l['vid'] ?: $l['pid']); if (!$pp) continue; $lst += (float) $pp->get_regular_price() * $l['qty']; $real += $l['rev']; }
+            $rev90 += $f['revenue']; $com90 += $f['comm'];
+        }
+        $q = $lst > 0 ? min(1, $real / $lst) : 1;              // Anteil vom Listenpreis, der wirklich ankommt (Rabatte, Geschenke)
+        $cq = $rev90 > 0 ? $com90 / $rev90 : 0;                // Provisionsanteil am Umsatz
+        $row = function ($vk, $ek) use ($q, $cq) { $u = $vk * $q; $c = $u * $cq; return [$u, $c, $u - $c - $ek]; };
+        [$u1, $c1, $e1] = $row($S['vk'], $S['val']);
+        [$u2, $c2, $e2] = $row($S['vk'] + $S['vk_in'], $S['val'] + $S['val_in']);
+        echo '<h2 style="margin-top:22px">Wenn das Lager komplett verkauft wird</h2><table class="widefat striped" style="max-width:1100px"><thead><tr><th></th><th style="text-align:right">Listenpreis</th><th style="text-align:right">realistischer Umsatz</th><th style="text-align:right">− Wareneinsatz</th><th style="text-align:right">− Provisionen</th><th style="text-align:right">= Ergebnis</th></tr></thead><tbody>'
+            . '<tr><td>Was im Lager liegt</td><td style="text-align:right">' . sp_ek_money($S['vk']) . '</td><td style="text-align:right"><strong>' . sp_ek_money($u1) . '</strong></td><td style="text-align:right">' . sp_ek_money($S['val']) . '</td><td style="text-align:right">' . sp_ek_money($c1) . '</td><td style="text-align:right"><strong>' . sp_ek_money($e1) . '</strong></td></tr>'
+            . '<tr><td>Lager + Lieferungen unterwegs</td><td style="text-align:right">' . sp_ek_money($S['vk'] + $S['vk_in']) . '</td><td style="text-align:right"><strong>' . sp_ek_money($u2) . '</strong></td><td style="text-align:right">' . sp_ek_money($S['val'] + $S['val_in']) . '</td><td style="text-align:right">' . sp_ek_money($c2) . '</td><td style="text-align:right"><strong>' . sp_ek_money($e2) . '</strong></td></tr>'
+            . '</tbody></table><p style="color:#646970;max-width:1000px">„Realistisch“ = Listenpreis × ' . number_format($q * 100, 0, ',', '.') . ' % (so viel vom Listenpreis kam in den letzten 90 Tagen nach Mengenrabatt, Partner-Rabatt, Codes und Gratis-Geschenken wirklich an); Provisionen mit ' . number_format($cq * 100, 1, ',', '.') . ' % vom Umsatz (ebenfalls 90 Tage). Versandkosten sind nicht abgezogen, weil die Zahl der Pakete offen ist (ca. 6,39 € je Paket). Reta 20 mg zählt als Flasche, nicht als Pen.'
+            . ($S['no_vk'] ? ' Ohne Verkaufspreis nicht mitgerechnet: ' . esc_html(implode(', ', $S['no_vk'])) . ' (Preis unter Lager → Spalte VK eintragen).' : '') . '</p>';
+    }
+
     // Produkte
     echo '<h2>Nach Produkt</h2><table class="widefat striped" style="max-width:1100px"><thead><tr><th>Produkt</th><th style="text-align:right">Stück</th><th style="text-align:right">Umsatz</th><th style="text-align:right">Wareneinsatz</th><th style="text-align:right">Rohertrag</th><th style="text-align:right">Marge</th></tr></thead><tbody>';
     foreach ($P as $p) {
