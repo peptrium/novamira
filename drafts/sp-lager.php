@@ -118,6 +118,18 @@ function sp_lager_purchases($start, $end) {
     return ['total' => $tot, 'list' => $list];
 }
 
+/** Verkaufspreis je Material: eingetragener VK, sonst Shop-Preis des Produkts, das genau dieses Material als Einzelstück verkauft. */
+function sp_lager_vk($code, $m = null) {
+    $m = $m ?: sp_lager_mats();
+    if (isset($m[$code]['vk']) && $m[$code]['vk'] !== null && $m[$code]['vk'] !== '') return (float) $m[$code]['vk'];
+    foreach (sp_lager_recipes() as $pid => $rec) {
+        if ($rec !== [$code => 1]) continue;
+        $p = wc_get_product($pid);
+        if ($p && get_post_status($pid) === 'publish' && (float) $p->get_price() > 0) return (float) $p->get_price();
+    }
+    return null;
+}
+
 function sp_lager_parse_lines($txt) {
     $items = [];
     foreach (preg_split('~[\r\n,;]+~', (string) $txt) as $l) {
@@ -148,6 +160,8 @@ function sp_lager_render_page() {
                 $eur = trim(str_replace(',', '.', (string) wp_unslash($_POST['eur'][$c] ?? '')));
                 $m[$c]['usd'] = $usd === '' ? null : (float) $usd;
                 $m[$c]['eur'] = $eur === '' ? null : (float) $eur;
+                $vk = trim(str_replace(',', '.', (string) wp_unslash($_POST['vk'][$c] ?? '')));
+                $m[$c]['vk'] = $vk === '' ? null : (float) $vk;
             }
             update_option('sp_lager_mats', $m, false);
             if ($ch) sp_lager_log('Inventur: ' . implode(', ', $ch));
@@ -209,12 +223,28 @@ function sp_lager_render_page() {
     if ($note) echo '<div class="notice notice-info"><p>' . esc_html($note) . '</p></div>';
     if ($warn) echo '<div class="notice notice-warning"><p><strong>Im Shop als lieferbar angezeigt, aber kein Bestand:</strong><br>' . implode('<br>', $warn) . '</p></div>';
 
-    $val = 0; $valIn = 0;
-    foreach ($m as $c => $x) { $u = sp_lager_unit_eur($x); if ($x['qty'] !== null && $x['qty'] > 0) $val += $u * $x['qty']; $valIn += $u * ($coming[$c] ?? 0); }
-    echo '<p style="font-size:14px">Lagerwert (EK): <strong>' . esc_html(number_format($val, 2, ',', '.')) . ' €</strong> · unterwegs: <strong>' . esc_html(number_format($valIn, 2, ',', '.')) . ' €</strong> · Bestand gezählt am ' . esc_html(date_i18n('d.m.Y H:i', (int) get_option('sp_lager_since'))) . '. Versendete Bestellungen werden automatisch abgebucht.</p>';
+    $val = 0; $valIn = 0; $vkL = 0; $vkIn = 0; $noVk = [];
+    foreach ($m as $c => $x) {
+        $u = sp_lager_unit_eur($x); $q = ($x['qty'] !== null && $x['qty'] > 0) ? $x['qty'] : 0; $qi = $coming[$c] ?? 0;
+        $val += $u * $q; $valIn += $u * $qi;
+        if (!$q && !$qi) continue;
+        $vk = sp_lager_vk($c, $m);
+        if ($vk === null) { $noVk[] = $c; continue; }
+        $vkL += $vk * $q; $vkIn += $vk * $qi;
+    }
+    $eu = function ($v) { return esc_html(number_format($v, 2, ',', '.')) . ' €'; };
+    $tile = function ($l, $v, $sub = '', $col = '#1d2327') { return '<div style="background:#fff;border:1px solid #dcdcde;border-radius:10px;padding:12px 16px;min-width:190px"><div style="font-size:12px;color:#646970;text-transform:uppercase;letter-spacing:.04em">' . $l . '</div><div style="font-size:21px;font-weight:700;color:' . $col . ';margin-top:3px">' . $v . '</div>' . ($sub ? '<div style="font-size:12px;color:#646970;margin-top:2px">' . $sub . '</div>' : '') . '</div>'; };
+    echo '<div style="display:flex;flex-wrap:wrap;gap:12px;margin:10px 0 6px">'
+        . $tile('Lagerwert (EK)', $eu($val), 'unterwegs: ' . $eu($valIn))
+        . $tile('Umsatz bei Abverkauf – Lager', $eu($vkL), 'Rohertrag ' . $eu($vkL - $val), '#00a32a')
+        . $tile('… inkl. unterwegs', $eu($vkL + $vkIn), 'Rohertrag ' . $eu($vkL + $vkIn - $val - $valIn), '#00a32a')
+        . '</div>';
+    echo '<p style="color:#646970;max-width:1000px">„Umsatz bei Abverkauf“ = jede Flasche zum normalen Shop-Preis verkauft (Spalte VK; Reta 20 mg als Flasche, nicht als Pen). Ohne Mengenrabatt, Partner-Rabatt, Codes und Geschenke – Bac Water geht teils gratis raus, der echte Umsatz liegt also darunter. Provisionen und Versand sind nicht abgezogen.'
+        . ($noVk ? ' <strong>Ohne VK (nicht mitgerechnet): ' . esc_html(implode(', ', $noVk)) . '</strong> – Preis in der Spalte VK eintragen.' : '')
+        . ' Bestand gezählt am ' . esc_html(date_i18n('d.m.Y H:i', (int) get_option('sp_lager_since'))) . '; versendete Bestellungen werden automatisch abgebucht.</p>';
 
     echo '<form method="post">'; wp_nonce_field('sp_lager');
-    echo '<input type="hidden" name="sp_lager_act" value="inventur"><table class="widefat striped" style="max-width:1150px"><thead><tr><th>Code</th><th>Material</th><th style="text-align:right">Bestand</th><th style="text-align:right">reserviert</th><th style="text-align:right">verfügbar</th><th style="text-align:right">unterwegs</th><th style="text-align:right">Verkauf 30 Tage</th><th style="text-align:right">reicht noch</th><th>EK $</th><th>EK €</th></tr></thead><tbody>';
+    echo '<input type="hidden" name="sp_lager_act" value="inventur"><table class="widefat striped" style="max-width:1150px"><thead><tr><th>Code</th><th>Material</th><th style="text-align:right">Bestand</th><th style="text-align:right">reserviert</th><th style="text-align:right">verfügbar</th><th style="text-align:right">unterwegs</th><th style="text-align:right">Verkauf 30 Tage</th><th style="text-align:right">reicht noch</th><th>EK $</th><th>EK €</th><th>VK €</th></tr></thead><tbody>';
     foreach ($m as $c => $x) {
         $tr = $x['qty'] !== null;
         $av = $tr ? $x['qty'] - ($reserved[$c] ?? 0) : null;
@@ -230,7 +260,8 @@ function sp_lager_render_page() {
             . '<td style="text-align:right">' . (int) ($sold30[$c] ?? 0) . '</td>'
             . '<td style="text-align:right;color:' . $col . '">' . esc_html($reach) . '</td>'
             . '<td><input name="usd[' . esc_attr($c) . ']" value="' . esc_attr($x['usd'] ?? '') . '" style="width:70px"></td>'
-            . '<td><input name="eur[' . esc_attr($c) . ']" value="' . esc_attr($x['eur'] ?? '') . '" style="width:70px"></td></tr>';
+            . '<td><input name="eur[' . esc_attr($c) . ']" value="' . esc_attr($x['eur'] ?? '') . '" style="width:70px"></td>'
+            . '<td><input name="vk[' . esc_attr($c) . ']" value="' . esc_attr($x['vk'] ?? '') . '" style="width:70px" placeholder="' . esc_attr(($v = sp_lager_vk($c, array_merge($m, [$c => array_merge($x, ['vk' => null])]))) !== null ? number_format($v, 2, ',', '') : '–') . '" title="leer = Shop-Preis"></td></tr>';
     }
     echo '</tbody></table><p style="color:#646970">Bestand leer lassen = nicht erfasst. „reserviert“ = bezahlt, noch nicht versendet. „reicht noch“ = verfügbar ÷ Verkauf der letzten 30 Tage (rot = leer, gelb = unter 3 Wochen). Pens verbrauchen je 1 Flasche + 1 Bac Water + Pen + Kartusche.</p>'
         . '<p><button class="button button-primary">Bestand speichern</button></p></form>';
