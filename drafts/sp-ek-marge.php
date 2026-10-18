@@ -18,7 +18,7 @@ function sp_ek_rate() {
     return $m > 0 ? $m : (float) get_option('sp_ek_rate', 0.89);
 }
 function sp_ek_costs() {
-    return wp_parse_args((array) get_option('sp_ek_costs', []), ['import_pct' => 0, 'ship_order' => 0, 'pack_order' => 0]);
+    return wp_parse_args((array) get_option('sp_ek_costs', []), ['import_pct' => 0, 'ship_order' => 0, 'ship_order_at' => 0, 'pack_order' => 0]);
 }
 
 /** EK in € je Stück für eine Produkt- oder Varianten-ID (inkl. Aufschlag für Versand/Zoll beim Einkauf), null = unbekannt. */
@@ -29,7 +29,8 @@ function sp_ek_unit_eur($id) {
     if (isset($e['eur']) && $e['eur'] !== null && $e['eur'] !== '') $v = (float) $e['eur'];
     elseif (isset($e['usd']) && $e['usd'] !== null && $e['usd'] !== '') $v = (float) $e['usd'] * sp_ek_rate();
     else return null;
-    return round($v * (1 + (float) sp_ek_costs()['import_pct'] / 100), 4);
+    // Aufschlag nur auf den Lieferantenpreis; 'add' = feste €-Teile (z. B. Pen + Kartusche)
+    return round($v * (1 + (float) sp_ek_costs()['import_pct'] / 100) + (float) ($e['add'] ?? 0), 4);
 }
 
 /** EK einer Bestellposition: gespeicherter Wert, sonst aktueller EK (Variante vor Produkt). */
@@ -101,7 +102,8 @@ function sp_ek_order_figures($order) {
     }
     $revenue = max(0.0, (float) $order->get_total() - (float) $order->get_total_refunded() - $topup);
     $comm = (float) $wpdb->get_var($wpdb->prepare("SELECT COALESCE(SUM(amount),0) FROM {$wpdb->prefix}slicewp_commissions WHERE reference=%s AND status<>'rejected'", (string) $order->get_id()));
-    $own = $goods > 0 && $order->get_items('shipping') ? (float) $c['ship_order'] + (float) $c['pack_order'] : ($goods > 0 ? (float) $c['pack_order'] : 0.0);
+    $ship = $order->get_shipping_country() === 'AT' && (float) $c['ship_order_at'] > 0 ? (float) $c['ship_order_at'] : (float) $c['ship_order'];
+    $own = $goods > 0 && $order->get_items('shipping') ? $ship + (float) $c['pack_order'] : ($goods > 0 ? (float) $c['pack_order'] : 0.0);
     return ['revenue' => $revenue, 'shipping_in' => (float) $order->get_shipping_total(), 'cogs' => $cogs, 'comm' => $comm, 'own' => $own,
             'result' => $revenue - $cogs - $comm - $own, 'missing' => $missing, 'estimated' => $estimated, 'goods' => $goods, 'lines' => $lines, 'topup' => $topup];
 }
@@ -121,11 +123,12 @@ function sp_ek_render_page() {
             $id = (int) $id;
             $usd = trim(str_replace(',', '.', (string) wp_unslash($row['usd'] ?? '')));
             $eur = trim(str_replace(',', '.', (string) wp_unslash($row['eur'] ?? '')));
-            $items[$id] = ['usd' => $usd === '' ? null : (float) $usd, 'eur' => $eur === '' ? null : (float) $eur, 'code' => sanitize_text_field(wp_unslash($row['code'] ?? ''))];
+            $add = trim(str_replace(',', '.', (string) wp_unslash($row['add'] ?? '')));
+            $items[$id] = ['usd' => $usd === '' ? null : (float) $usd, 'eur' => $eur === '' ? null : (float) $eur, 'add' => $add === '' ? 0 : (float) $add, 'code' => sanitize_text_field(wp_unslash($row['code'] ?? ''))];
         }
         update_option('sp_ek_items', $items, false);
         $c = [];
-        foreach (['import_pct', 'ship_order', 'pack_order'] as $k) $c[$k] = (float) str_replace(',', '.', (string) wp_unslash($_POST['costs'][$k] ?? 0));
+        foreach (['import_pct', 'ship_order', 'ship_order_at', 'pack_order'] as $k) $c[$k] = (float) str_replace(',', '.', (string) wp_unslash($_POST['costs'][$k] ?? 0));
         update_option('sp_ek_costs', $c, false);
         $m = trim(str_replace(',', '.', (string) wp_unslash($_POST['rate_manual'] ?? '')));
         update_option('sp_ek_rate_manual', $m === '' ? '' : (float) $m, false);
@@ -202,8 +205,8 @@ function sp_ek_render_page() {
     wp_nonce_field('sp_ek');
     echo '<p>Wechselkurs: 1 $ = <strong>' . esc_html(number_format(sp_ek_rate(), 4, ',', '.')) . ' €</strong> ' . (get_option('sp_ek_rate_manual') ? '(fest eingetragen)' : '(automatisch, Stand ' . esc_html(get_option('sp_ek_rate_date', '–')) . ')') . ' &nbsp; <label>Fester Kurs (leer = automatisch): <input name="rate_manual" value="' . esc_attr((string) get_option('sp_ek_rate_manual', '')) . '" style="width:90px"></label> <button class="button" name="sp_ek_rate_now" value="1">Kurs jetzt laden</button></p>';
     $c = sp_ek_costs();
-    echo '<p><label>Aufschlag auf EK für Versand/Zoll beim Einkauf: <input name="costs[import_pct]" value="' . esc_attr($c['import_pct']) . '" style="width:70px"> %</label> &nbsp; <label>Eigene Versandkosten je Paket: <input name="costs[ship_order]" value="' . esc_attr($c['ship_order']) . '" style="width:70px"> €</label> &nbsp; <label>Verpackung je Paket: <input name="costs[pack_order]" value="' . esc_attr($c['pack_order']) . '" style="width:70px"> €</label></p>';
-    echo '<table class="widefat striped" style="max-width:1100px"><thead><tr><th>Produkt</th><th>Code</th><th>EK $ / Stück</th><th>oder EK € / Stück</th><th style="text-align:right">EK € (gerechnet)</th><th style="text-align:right">Preis</th><th style="text-align:right">Marge</th></tr></thead><tbody>';
+    echo '<p><label>Aufschlag auf EK für Versand/Zoll beim Einkauf: <input name="costs[import_pct]" value="' . esc_attr($c['import_pct']) . '" style="width:70px"> %</label> &nbsp; <label>DHL je Paket Deutschland: <input name="costs[ship_order]" value="' . esc_attr($c['ship_order']) . '" style="width:70px"> €</label> &nbsp; <label>Österreich: <input name="costs[ship_order_at]" value="' . esc_attr($c['ship_order_at']) . '" style="width:70px"> €</label> &nbsp; <label>Verpackung je Paket: <input name="costs[pack_order]" value="' . esc_attr($c['pack_order']) . '" style="width:70px"> €</label></p>';
+    echo '<table class="widefat striped" style="max-width:1100px"><thead><tr><th>Produkt</th><th>Code</th><th>EK $ / Stück</th><th>oder EK € / Stück</th><th>+ € fest</th><th style="text-align:right">EK € (gerechnet)</th><th style="text-align:right">Preis</th><th style="text-align:right">Marge</th></tr></thead><tbody>';
     foreach (wc_get_products(['limit' => -1, 'status' => ['publish', 'private'], 'orderby' => 'title', 'order' => 'ASC']) as $p) {
         $list = $p->is_type('variable') ? array_map('wc_get_product', $p->get_children()) : [$p];
         foreach ($list as $v) {
@@ -215,6 +218,7 @@ function sp_ek_render_page() {
                 . '<td><input name="ek[' . $id . '][code]" value="' . esc_attr($e['code'] ?? '') . '" style="width:80px"></td>'
                 . '<td><input name="ek[' . $id . '][usd]" value="' . esc_attr($e['usd'] ?? '') . '" style="width:80px" placeholder="$"></td>'
                 . '<td><input name="ek[' . $id . '][eur]" value="' . esc_attr($e['eur'] ?? '') . '" style="width:80px" placeholder="€"></td>'
+                . '<td><input name="ek[' . $id . '][add]" value="' . esc_attr(!empty($e['add']) ? $e['add'] : '') . '" style="width:70px" placeholder="€" title="Feste Zusatzteile, z. B. Pen + Kartusche"></td>'
                 . '<td style="text-align:right">' . ($eu === null ? '<span style="color:#b32d2e">fehlt</span>' : sp_ek_money($eu)) . '</td>'
                 . '<td style="text-align:right">' . sp_ek_money($pr) . '</td>'
                 . '<td style="text-align:right">' . ($eu !== null && $pr > 0 ? number_format(($pr - $eu) / $pr * 100, 0, ',', '.') . ' %' : '—') . '</td></tr>';
