@@ -163,40 +163,89 @@ function sp_ek_render_page() {
     }
     uasort($P, function ($a, $b) { return ($b['rev'] - $b['cogs']) <=> ($a['rev'] - $a['cogs']); });
 
-    echo '<div class="wrap"><h1>Umsatz &amp; Marge</h1>' . $note;
-    echo '<form method="get" style="margin:8px 0 18px"><input type="hidden" name="page" value="sp-umsatz-marge">Von <input type="date" name="sp_start" value="' . esc_attr($range['start']) . '"> bis <input type="date" name="sp_end" value="' . esc_attr($range['end']) . '"> <button class="button">Anzeigen</button> ';
-    $m0 = current_time('Y-m-01');
-    foreach ([['Dieser Monat', $m0, current_time('Y-m-d')], ['Letzter Monat', date('Y-m-01', strtotime($m0 . ' -1 month')), date('Y-m-t', strtotime($m0 . ' -1 month'))], ['Seit Start', '2026-01-01', current_time('Y-m-d')]] as $q)
-        echo '<a class="button-link" style="margin-left:10px" href="' . esc_url(add_query_arg(['page' => 'sp-umsatz-marge', 'sp_start' => $q[1], 'sp_end' => $q[2]], admin_url('admin.php'))) . '">' . esc_html($q[0]) . '</a>';
-    echo '</form>';
-
-    $pct = $T['revenue'] > 0 ? $T['result'] / $T['revenue'] * 100 : 0;
-    $tile = function ($l, $v, $c = '#1d2327', $s = '') { return '<div style="background:#fff;border:1px solid #dcdcde;border-radius:10px;padding:14px 16px;min-width:170px"><div style="font-size:12px;color:#646970;text-transform:uppercase;letter-spacing:.04em">' . $l . '</div><div style="font-size:22px;font-weight:700;color:' . $c . ';margin-top:4px">' . $v . '</div>' . ($s ? '<div style="font-size:12px;color:#646970;margin-top:2px">' . $s . '</div>' : '') . '</div>'; };
-    echo '<div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:10px">'
-        . $tile('Umsatz (bezahlt)', sp_ek_money($T['revenue']), '#1d2327', (int) $T['n'] . ' Bestellungen · davon Versand ' . sp_ek_money($T['shipping_in']) . ($T['refunds'] ? ' · Erstattungen −' . sp_ek_money($T['refunds']) : ''))
-        . $tile('− Wareneinsatz (EK)', sp_ek_money($T['cogs']), '#b32d2e', 'inkl. Gratis-Geschenke')
-        . $tile('− Partner-Provisionen', sp_ek_money($T['comm']), '#b32d2e')
-        . $tile('− Versand & Verpackung', sp_ek_money($T['own']), '#b32d2e', 'eigene Kosten je Paket')
-        . $tile('= Ergebnis', sp_ek_money($T['result']), $T['result'] >= 0 ? '#00a32a' : '#b32d2e', number_format($pct, 1, ',', '.') . ' % vom Umsatz')
-        . '</div>';
-    echo '<p style="color:#646970;max-width:900px">Umsatz = bezahlte Bestellungen (auch mit Guthaben bezahlte Abo-Lieferungen) nach Rabatten, Partner-Rabatt und Erstattungen, ohne Guthaben-Aufladungen. Der Shop berechnet keine Umsatzsteuer, daher gibt es keinen Steuerabzug. Testbestellungen sind ausgenommen.'
-        . ($T['missing'] ? ' <strong style="color:#b32d2e">' . (int) $T['missing'] . ' verkaufte Artikel haben noch keinen EK – das Ergebnis ist deshalb zu hoch.</strong>' : '')
-        . ($T['estimated'] ? ' ' . (int) $T['estimated'] . ' Artikel mit aktuellem EK gerechnet (Bestellungen von vor der Erfassung).' : '') . '</p>';
-
-    // Geldfluss: was wirklich rein- und rausging (Einkauf zählt beim Bezahlen, nicht erst beim Verkauf)
+    // ---------- Übersicht: vom Umsatz Schritt für Schritt zum Gewinn ----------
     $buy = function_exists('sp_lager_purchases') ? sp_lager_purchases($range['start'], $range['end']) : ['total' => 0, 'list' => []];
     $paidAff = 0;
     foreach ((array) get_option('sp_aff_transfers', []) as $t) if ($t['date'] >= $range['start'] && $t['date'] <= $range['end']) $paidAff += (float) $t['amount'];
     $cash = $T['revenue'] - $buy['total'] - $paidAff - $T['own'];
-    echo '<h2 style="margin-top:22px">Geldfluss im Zeitraum</h2><div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:6px">'
-        . $tile('Eingenommen', sp_ek_money($T['revenue']))
-        . $tile('− Einkäufe bezahlt', sp_ek_money($buy['total']), '#b32d2e', count($buy['list']) . ' Lieferung(en), auch wenn noch unterwegs')
-        . $tile('− An Partner überwiesen', sp_ek_money($paidAff), '#b32d2e')
-        . $tile('− Versand & Verpackung', sp_ek_money($T['own']), '#b32d2e')
-        . $tile('= Geld übrig', sp_ek_money($cash), $cash >= 0 ? '#00a32a' : '#b32d2e')
-        . '</div><p style="color:#646970;max-width:900px">Oben (Ergebnis) zählt die Ware erst, wenn sie verkauft ist – so siehst du, was jeder Verkauf wirklich verdient. Hier (Geldfluss) zählt jeder Einkauf an dem Tag, an dem du ihn bezahlt hast, und Provisionen erst, wenn du sie überwiesen hast. Einkäufe trägst du unter <a href="' . esc_url(admin_url('admin.php?page=sp-lager')) . '">Lager → Lieferungen</a> ein; „Angekommen“ bucht dort nur den Bestand ein.</p>';
+    $rev = max(0.01, $T['revenue']);
+    $pct = $T['revenue'] > 0 ? $T['result'] / $T['revenue'] * 100 : 0;
+    $eu = function ($v) { return esc_html(number_format((float) $v, 2, ',', '.')) . ' €'; };
+    $pc = function ($v) use ($rev) { return number_format($v / $rev * 100, 0, ',', '.') . ' %'; };
+    // eine Zeile im Wasserfall: Vorzeichen, Titel, Erklärung, Betrag, Balken
+    $line = function ($sign, $title, $why, $amount, $kind) use ($eu, $pc, $rev) {
+        $w = max(0, min(100, abs($amount) / $rev * 100));
+        return '<div class="spm-row spm-' . $kind . '"><div class="spm-sign">' . $sign . '</div><div class="spm-txt"><div class="spm-t">' . $title . '</div><div class="spm-w">' . $why . '</div><div class="spm-bar"><i style="width:' . round($w, 1) . '%"></i></div></div><div class="spm-amt">' . $eu($amount) . '<small>' . ($kind === 'top' ? '100 %' : $pc(abs($amount))) . '</small></div></div>';
+    };
 
-    // Lager: Wert und möglicher Umsatz, realistisch gerechnet mit den Erfahrungswerten der letzten 90 Tage
+    echo '<style>
+.spm{max-width:980px;font-size:14px;color:#1d2327}
+.spm-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin:6px 0 18px}
+.spm-head h1{margin:0 8px 0 0;font-size:24px}
+.spm-chips a{display:inline-block;padding:6px 12px;border-radius:999px;background:#f0f0f1;color:#1d2327;text-decoration:none;font-weight:600;font-size:13px;margin-right:6px}
+.spm-chips a.on{background:#0d0f12;color:#fff}
+.spm-head form{display:flex;gap:6px;align-items:center;font-size:13px;color:#646970}
+.spm-card{background:#fff;border:1px solid #e3e5e8;border-radius:16px;padding:22px 24px;margin-bottom:18px;box-shadow:0 2px 10px rgba(13,15,18,.04)}
+.spm-card h2{margin:0 0 4px;font-size:18px}
+.spm-sub{color:#646970;margin:0 0 16px}
+.spm-row{display:grid;grid-template-columns:26px 1fr auto;gap:12px;align-items:center;padding:12px 0;border-top:1px solid #f0f0f1}
+.spm-row:first-of-type{border-top:0}
+.spm-sign{font-size:20px;font-weight:700;color:#8c8f94;text-align:center}
+.spm-t{font-weight:600;font-size:15px}
+.spm-w{color:#646970;font-size:12.5px;margin-top:2px}
+.spm-bar{height:6px;background:#f0f0f1;border-radius:6px;margin-top:8px;overflow:hidden}
+.spm-bar i{display:block;height:100%;border-radius:6px;background:#c3c4c7}
+.spm-amt{text-align:right;font-weight:700;font-size:16px;white-space:nowrap}
+.spm-amt small{display:block;font-weight:500;font-size:12px;color:#8c8f94}
+.spm-top .spm-bar i{background:#0d0f12}.spm-top .spm-amt{font-size:18px}
+.spm-minus .spm-amt{color:#b32d2e}.spm-minus .spm-bar i{background:#e8a3a3}
+.spm-total{background:#f2faf4;border:1px solid #cce8d4;border-radius:12px;padding:14px 12px;margin-top:10px}
+.spm-total .spm-t{font-size:17px}.spm-total .spm-amt{color:#00a32a;font-size:22px}.spm-total .spm-bar i{background:#00a32a}.spm-total .spm-sign{color:#00a32a}
+.spm-total.neg{background:#fcf0f1;border-color:#f0c2c4}.spm-total.neg .spm-amt,.spm-total.neg .spm-sign{color:#b32d2e}
+.spm-note{background:#f6f7f7;border-radius:10px;padding:12px 14px;color:#50575e;font-size:13px;margin-top:14px}
+.spm-note b{color:#1d2327}
+.spm-warn{background:#fcf0f1;color:#8a2424;border-radius:10px;padding:10px 14px;margin:0 0 14px;font-size:13px}
+.spm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.spm-box{background:#f6f7f7;border-radius:12px;padding:14px 16px}
+.spm-box .l{font-size:12px;color:#646970;text-transform:uppercase;letter-spacing:.04em}
+.spm-box .v{font-size:20px;font-weight:700;margin-top:4px}
+.spm-box .s{font-size:12px;color:#646970;margin-top:2px}
+.spm-box.hl{background:#0d0f12;color:#fff}.spm-box.hl .l,.spm-box.hl .s{color:#a7aaad}
+</style>';
+
+    echo '<div class="wrap spm">' . $note;
+    // Kopf: Titel, Zeitraum-Chips, eigener Zeitraum
+    $m0 = current_time('Y-m-01');
+    $chips = [['Dieser Monat', $m0, current_time('Y-m-d')], ['Letzter Monat', date('Y-m-01', strtotime($m0 . ' -1 month')), date('Y-m-t', strtotime($m0 . ' -1 month'))], ['Seit Start', '2026-01-01', current_time('Y-m-d')]];
+    echo '<div class="spm-head"><h1>Umsatz &amp; Gewinn</h1><div class="spm-chips">';
+    foreach ($chips as $q) echo '<a class="' . ($range['start'] === $q[1] && $range['end'] === $q[2] ? 'on' : '') . '" href="' . esc_url(add_query_arg(['page' => 'sp-umsatz-marge', 'sp_start' => $q[1], 'sp_end' => $q[2]], admin_url('admin.php'))) . '">' . esc_html($q[0]) . '</a>';
+    echo '</div><form method="get"><input type="hidden" name="page" value="sp-umsatz-marge"><input type="date" name="sp_start" value="' . esc_attr($range['start']) . '"> – <input type="date" name="sp_end" value="' . esc_attr($range['end']) . '"> <button class="button">Anzeigen</button></form></div>';
+
+    // 1) Gewinn
+    echo '<div class="spm-card"><h2>1. Was du verdient hast</h2><p class="spm-sub">' . esc_html(date_i18n('d.m.Y', strtotime($range['start'])) . ' – ' . date_i18n('d.m.Y', strtotime($range['end']))) . ' · ' . (int) $T['n'] . ' bezahlte Bestellungen</p>';
+    if ($T['missing']) echo '<div class="spm-warn">' . (int) $T['missing'] . ' verkaufte Artikel haben noch keinen Einkaufspreis – der Gewinn ist deshalb zu hoch. Einkaufspreise unten eintragen.</div>';
+    echo $line('', 'Umsatz', 'Was deine Kunden wirklich bezahlt haben – nach Rabatten, Codes und Partner-Rabatt' . ($T['shipping_in'] > 0 ? ', inkl. ' . $eu($T['shipping_in']) . ' Versandgebühren' : '') . ($T['refunds'] ? ', abzüglich ' . $eu($T['refunds']) . ' Erstattungen' : '') . '.', $T['revenue'], 'top')
+        . $line('−', 'Ware (Einkaufspreis)', 'Was dich die verkauften Flaschen, Pens und das Zubehör im Einkauf gekostet haben – auch die Gratis-Geschenke.', $T['cogs'], 'minus')
+        . $line('−', 'Partner-Provisionen', 'Anteil, den Partner an Bestellungen über ihren Link oder Code verdient haben (egal ob schon überwiesen).', $T['comm'], 'minus')
+        . $line('−', 'Versand &amp; Verpackung', 'DHL-Porto (DE 6,19 € / AT 14,90 €) und Karton je Paket.', $T['own'], 'minus')
+        . '<div class="spm-row spm-total' . ($T['result'] < 0 ? ' neg' : '') . '"><div class="spm-sign">=</div><div class="spm-txt"><div class="spm-t">Gewinn</div><div class="spm-w">Von jedem Euro Umsatz bleiben dir ' . number_format($pct / 100, 2, ',', '.') . ' € übrig.</div><div class="spm-bar"><i style="width:' . round(max(0, min(100, $pct)), 1) . '%"></i></div></div><div class="spm-amt">' . $eu($T['result']) . '<small>' . number_format($pct, 0, ',', '.') . ' %</small></div></div>'
+        . '</div>';
+
+    // 2) Geld auf dem Konto
+    $diffStock = $buy['total'] - $T['cogs'];   // mehr eingekauft als verkauft → liegt im Lager
+    $diffAff = $T['comm'] - $paidAff;           // Provision verdient, aber noch nicht überwiesen
+    echo '<div class="spm-card"><h2>2. Was davon wirklich auf dem Konto ist</h2><p class="spm-sub">Hier zählt jede Zahlung an dem Tag, an dem das Geld geflossen ist.</p>'
+        . $line('', 'Eingenommen', 'Bezahlte Bestellungen im Zeitraum (wie oben).', $T['revenue'], 'top')
+        . $line('−', 'Einkäufe bezahlt', count($buy['list']) . ' Lieferung(en) an Lieferanten, auch wenn die Ware noch unterwegs ist (eintragen unter Lager → Lieferungen).', $buy['total'], 'minus')
+        . $line('−', 'An Partner überwiesen', 'Provisionen, die du im Zeitraum wirklich überwiesen hast.', $paidAff, 'minus')
+        . $line('−', 'Versand &amp; Verpackung', 'DHL-Porto und Karton.', $T['own'], 'minus')
+        . '<div class="spm-row spm-total' . ($cash < 0 ? ' neg' : '') . '"><div class="spm-sign">=</div><div class="spm-txt"><div class="spm-t">Geld übrig</div><div class="spm-w">So viel mehr Geld hast du am Ende des Zeitraums als am Anfang.</div></div><div class="spm-amt">' . $eu($cash) . '</div></div>'
+        . '<div class="spm-note"><b>Warum ist das anders als der Gewinn?</b><br>'
+        . ($diffStock >= 0 ? '• Du hast <b>' . $eu($diffStock) . '</b> mehr Ware eingekauft als verkauft – die liegt jetzt im Lager und bringt später Umsatz.<br>' : '• Du hast Ware für <b>' . $eu(-$diffStock) . '</b> verkauft, die schon früher bezahlt war.<br>')
+        . ($diffAff >= 0 ? '• <b>' . $eu($diffAff) . '</b> Provision ist verdient, aber noch nicht überwiesen.' : '• Du hast <b>' . $eu(-$diffAff) . '</b> mehr an Partner überwiesen als im Zeitraum verdient wurde (alte Provisionen).')
+        . '</div></div>';
+
+    // 3) Lager
     if (function_exists('sp_lager_summary')) {
         $S = sp_lager_summary();
         $lst = 0; $real = 0; $rev90 = 0; $com90 = 0;
@@ -207,18 +256,16 @@ function sp_ek_render_page() {
             foreach ($f['lines'] as $l) { $pp = wc_get_product($l['vid'] ?: $l['pid']); if (!$pp) continue; $lst += (float) $pp->get_regular_price() * $l['qty']; $real += $l['rev']; }
             $rev90 += $f['revenue']; $com90 += $f['comm'];
         }
-        $q = $lst > 0 ? min(1, $real / $lst) : 1;              // Anteil vom Listenpreis, der wirklich ankommt (Rabatte, Geschenke)
-        $cq = $rev90 > 0 ? $com90 / $rev90 : 0;                // Provisionsanteil am Umsatz
-        // Ware ist schon bezahlt (Einkauf steht im Geldfluss) → hier nur noch, was beim Verkauf reinkommt
-        $row = function ($vk) use ($q, $cq) { $u = $vk * $q; $c = $u * $cq; return [$u, $c, $u - $c]; };
-        [$u1, $c1, $e1] = $row($S['vk']);
-        [$u2, $c2, $e2] = $row($S['vk'] + $S['vk_in']);
-        $td = function ($v, $b = false) { return '<td style="text-align:right">' . ($b ? '<strong>' : '') . sp_ek_money($v) . ($b ? '</strong>' : '') . '</td>'; };
-        echo '<h2 style="margin-top:22px">Wenn das Lager komplett verkauft wird</h2><table class="widefat striped" style="max-width:1100px"><thead><tr><th></th><th style="text-align:right">Listenpreis</th><th style="text-align:right">realistischer Umsatz</th><th style="text-align:right">− Provisionen</th><th style="text-align:right">= kommt noch rein</th><th style="text-align:right">Geld übrig danach*</th><th style="text-align:right;color:#646970">Einkaufswert (schon bezahlt)</th></tr></thead><tbody>'
-            . '<tr><td>Was im Lager liegt</td>' . $td($S['vk']) . $td($u1) . $td($c1) . $td($e1, true) . $td($cash + $e1, true) . '<td style="text-align:right;color:#646970">' . sp_ek_money($S['val']) . '</td></tr>'
-            . '<tr><td>Lager + Lieferungen unterwegs</td>' . $td($S['vk'] + $S['vk_in']) . $td($u2) . $td($c2) . $td($e2, true) . $td($cash + $e2, true) . '<td style="text-align:right;color:#646970">' . sp_ek_money($S['val'] + $S['val_in']) . '</td></tr>'
-            . '</tbody></table><p style="color:#646970;max-width:1000px">Der Einkauf ist schon bezahlt und steht oben im Geldfluss – er wird hier nicht noch einmal abgezogen. * „Geld übrig danach“ = „Geld übrig“ aus dem Geldfluss im gewählten Zeitraum + was beim Abverkauf noch reinkommt. „Realistisch“ = Listenpreis × ' . number_format($q * 100, 0, ',', '.') . ' % (so viel vom Listenpreis kam in den letzten 90 Tagen nach Mengenrabatt, Partner-Rabatt, Codes und Gratis-Geschenken wirklich an); Provisionen mit ' . number_format($cq * 100, 1, ',', '.') . ' % vom Umsatz (ebenfalls 90 Tage). Versandkosten sind nicht abgezogen, weil die Zahl der Pakete offen ist (ca. 6,39 € je Paket). Reta 20 mg zählt als Flasche, nicht als Pen.'
-            . ($S['no_vk'] ? ' Ohne Verkaufspreis nicht mitgerechnet: ' . esc_html(implode(', ', $S['no_vk'])) . ' (Preis unter Lager → Spalte VK eintragen).' : '') . '</p>';
+        $q = $lst > 0 ? min(1, $real / $lst) : 1;   // Anteil vom Listenpreis, der wirklich ankommt
+        $cq = $rev90 > 0 ? $com90 / $rev90 : 0;     // Provisionsanteil am Umsatz
+        $in1 = $S['vk'] * $q * (1 - $cq);
+        $in2 = ($S['vk'] + $S['vk_in']) * $q * (1 - $cq);
+        echo '<div class="spm-card"><h2>3. Wenn das Lager verkauft wird</h2><p class="spm-sub">Die Ware ist schon bezahlt – hier steht nur, was beim Verkauf noch reinkommt.</p><div class="spm-grid">'
+            . '<div class="spm-box"><div class="l">Im Lager</div><div class="v">' . $eu($in1) . '</div><div class="s">kommt noch rein · Einkaufswert ' . $eu($S['val']) . '</div></div>'
+            . '<div class="spm-box"><div class="l">+ Lieferungen unterwegs</div><div class="v">' . $eu($in2) . '</div><div class="s">kommt noch rein · Einkaufswert ' . $eu($S['val'] + $S['val_in']) . '</div></div>'
+            . '<div class="spm-box hl"><div class="l">Geld übrig danach</div><div class="v">' . $eu($cash + $in2) . '</div><div class="s">Geld übrig (Punkt 2) + alles verkauft</div></div>'
+            . '</div><div class="spm-note">Gerechnet mit deinen Erfahrungswerten der letzten 90 Tage: Von den Shop-Preisen kommen im Schnitt <b>' . number_format($q * 100, 0, ',', '.') . ' %</b> an (Mengenrabatt, Codes, Geschenke), davon gehen <b>' . number_format($cq * 100, 0, ',', '.') . ' %</b> als Provision weg. Versandkosten sind noch nicht abgezogen.'
+            . ($S['no_vk'] ? ' Ohne Verkaufspreis nicht mitgerechnet: ' . esc_html(implode(', ', $S['no_vk'])) . '.' : '') . '</div></div>';
     }
 
     // Produkte
