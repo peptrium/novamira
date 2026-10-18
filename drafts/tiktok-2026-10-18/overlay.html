@@ -1,0 +1,66 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:I;src:url(file:///usr/share/fonts/opentype/inter/Inter-Bold.otf);font-weight:700}
+@font-face{font-family:I;src:url(file:///usr/share/fonts/opentype/inter/Inter-Medium.otf);font-weight:500}
+@font-face{font-family:I;src:url(file:///usr/share/fonts/opentype/inter/Inter-ExtraBold.otf);font-weight:800}
+html,body{margin:0;width:1080px;height:1920px;background:transparent;overflow:hidden;font-family:I,sans-serif;color:#fff}
+.s{position:absolute;left:0;right:0;opacity:0}
+#logo{top:150px;text-align:center}
+#logo img{width:120px;height:120px}
+#logo div{font:600 30px I;letter-spacing:.32em;margin-top:6px;padding-left:.32em;color:#E6E8EB}
+.card{position:absolute;left:80px;right:80px;top:500px;background:rgba(6,10,8,.74);border:1px solid rgba(140,255,60,.28);border-radius:42px;padding:56px 54px;backdrop-filter:blur(6px)}
+.eye{font:700 30px I;letter-spacing:.2em;color:#8CFF3C;text-transform:uppercase;margin-bottom:22px}
+.h{font:800 76px/1.08 I;letter-spacing:-.01em}
+.p{font:500 42px/1.35 I;color:#D7DDD9;margin-top:26px}
+.big{font:800 220px/1 I;color:#8CFF3C;letter-spacing:-.03em}
+#hook{top:470px;text-align:center}#hook .q,#hook .sub{text-shadow:0 6px 40px rgba(0,0,0,.9),0 2px 8px rgba(0,0,0,.8)}#dim{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,rgba(0,0,0,.55),rgba(0,0,0,.85));opacity:0}
+#hook .q{font:800 112px/1.05 I;letter-spacing:-.02em}
+#hook .q span{color:#8CFF3C}
+#hook .sub{font:500 44px I;color:#C9D1CC;margin-top:30px}
+#end{top:640px;text-align:center}
+#end img{width:220px}
+#end .w{font:700 40px I;letter-spacing:.3em;margin-top:10px;padding-left:.3em}
+#end .cta{display:inline-block;margin-top:70px;font:700 52px I;background:#8CFF3C;color:#08100A;padding:30px 56px;border-radius:999px}
+#end .note{font:500 32px I;color:#D5DBD7;margin-top:46px}
+.fine{position:absolute;left:0;right:0;top:1440px;text-align:center;font:500 26px I;color:rgba(255,255,255,.7);text-shadow:0 2px 10px #000}
+.chips{display:flex;gap:18px;margin-top:34px;flex-wrap:wrap}
+.chip{font:700 34px I;padding:16px 26px;border-radius:999px;border:2px solid rgba(255,255,255,.25)}
+.chip.on{background:#8CFF3C;color:#08100A;border-color:#8CFF3C}
+.bar{height:10px;border-radius:9px;background:rgba(255,255,255,.12);margin-top:34px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#4FD12A,#8CFF3C);width:0}
+.prog{position:absolute;left:80px;right:80px;top:120px;display:flex;gap:10px;opacity:0}
+.prog b{flex:1;height:6px;border-radius:6px;background:rgba(255,255,255,.18);overflow:hidden}
+.prog b i{display:block;height:100%;width:0;background:#fff}
+</style></head><body>
+<div id="dim"></div>
+<div id="logo" class="s"><img src="logo.png"><div>PEPTRIUM</div></div>
+<div class="prog" id="prog"><b><i></i></b><b><i></i></b><b><i></i></b><b><i></i></b></div>
+<div id="hook" class="s"><div class="q">Was ist<br><span>MOTS-c</span>?</div><div class="sub">In 20 Sekunden erklärt</div></div>
+<div id="f1" class="s"><div class="card"><div class="eye">Fakt 1</div><div class="big" id="cnt">0</div><div class="h">Aminosäuren</div><div class="p">Ein winziges Peptid – nur 16 Bausteine lang.</div></div></div>
+<div id="f2" class="s"><div class="card"><div class="eye">Fakt 2</div><div class="h">Kodiert im Erbgut der Mitochondrien</div><div class="chips"><span class="chip">Zellkern</span><span class="chip on">Mitochondrien ✓</span></div><div class="p">Nicht im Zellkern, sondern im eigenen Erbgut der Mitochondrien – im 12S-rRNA-Gen.</div></div></div>
+<div id="f3" class="s"><div class="card"><div class="eye">Fakt 3</div><div class="h">Aktiviert in Versuchen AMPK</div><div class="p">AMPK gilt als „Energiesensor“ der Zelle.</div><div class="bar"><i id="amp"></i></div></div></div>
+<div id="f4" class="s"><div class="card"><div class="eye">Forschungsstand</div><div class="h">Noch am Anfang</div><div class="p">Entdeckt 2015. Bisher vor allem Zell- und Tierstudien – klinische Studien beginnen erst.</div></div></div>
+<div id="end" class="s"><img src="logo.png"><div class="w">PEPTRIUM</div><div class="cta">Mehr Wissen: Link in Bio</div><div class="note">Nur für Laborforschungszwecke.</div></div>
+<div class="fine s" id="fine">Alle Angaben zu Forschungszwecken · nicht für den menschlichen Gebrauch</div>
+<script>
+const $=id=>document.getElementById(id);
+const ease=x=>1-Math.pow(1-Math.max(0,Math.min(1,x)),3);
+function seg(el,t,a,b,dy=60){ // fade/slide in at a, out at b
+  const i=ease((t-a)/0.5), o=ease((t-(b-0.4))/0.4);
+  const v=t<a||t>b?0:Math.min(i,1-o);
+  el.style.opacity=v; el.style.transform=`translateY(${(1-i)*dy - o*30}px) scale(${0.98+0.02*i})`;
+}
+const S=[[0,2.6],[2.6,7.2],[7.2,11.8],[11.8,16.4],[16.4,20.4],[20.4,24]];
+window.render=function(t){
+  seg($('hook'),t,0.15,S[0][1]);
+  seg($('f1'),t,S[1][0],S[1][1]); seg($('f2'),t,S[2][0],S[2][1]); seg($('f3'),t,S[3][0],S[3][1]); seg($('f4'),t,S[4][0],S[4][1]);
+  seg($('end'),t,S[5][0],99,40);
+  const lg=$('logo'); lg.style.opacity=t<S[5][0]?ease(t/0.6):Math.max(0,1-ease((t-S[5][0])/0.4)); lg.style.transform='none';
+  $('dim').style.opacity=ease((t-S[5][0])/0.6);
+  $('fine').style.opacity=t>0.4?0.9:0;
+  $('cnt').textContent=Math.round(16*ease((t-S[1][0]-0.3)/1.4));
+  $('amp').style.width=(100*ease((t-S[3][0]-0.6)/2))+'%';
+  const p=$('prog'); p.style.opacity=(t>S[1][0]&&t<S[5][0])?1:0; p.style.top='350px';
+  [...p.querySelectorAll('i')].forEach((x,k)=>{const a=S[k+1][0],b=S[k+1][1];x.style.width=(100*Math.max(0,Math.min(1,(t-a)/(b-a))))+'%';});
+};
+render(0);
+</script></body></html>
