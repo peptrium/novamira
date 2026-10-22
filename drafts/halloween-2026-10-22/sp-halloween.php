@@ -59,11 +59,6 @@ function sp_hw_has_ea() {
     return !empty($_COOKIE['sp_hw_ea']) && hash_equals(sp_hw_cookie_val('ea'), (string) $_COOKIE['sp_hw_ea']);
 }
 
-/** Besucher kam ueber einen Partner-Link (SliceWP-Cookie) -> Early Access wie Newsletter. */
-function sp_hw_has_partner() {
-    return function_exists('slicewp_get_referrer_affiliate_id') && (int) slicewp_get_referrer_affiliate_id() > 0;
-}
-
 /** off | teaser | early | live | ended – Sicht des aktuellen Besuchers. */
 function sp_hw_state() {
     static $s = null;
@@ -74,7 +69,7 @@ function sp_hw_state() {
     $now = time();
     if ($now >= $o['end']) return $s = 'ended';
     if ($now >= $o['start']) return $s = 'live';
-    if ($now >= $o['early'] && (sp_hw_has_ea() || sp_hw_has_partner())) return $s = 'early';
+    if ($now >= $o['early'] && sp_hw_has_ea()) return $s = 'early';
     return $s = 'teaser';
 }
 
@@ -629,6 +624,6 @@ function sp_hw_render_page() {
     echo '<div style="background:#fff;border:1px solid #dcdcde;border-radius:10px;padding:18px 20px;margin:16px 0"><h2 style="margin-top:0">Links</h2>';
     echo '<p><b>Early-Access-Link für die Newsletter-Mail:</b><br><code style="user-select:all">' . esc_html($ea) . '</code></p>';
     echo '<p><b>Vorschau (nur für dich, 24 h, zeigt alles wie live – auch wenn der Schalter aus ist):</b><br><a href="' . esc_url($pv) . '" target="_blank">' . esc_html($pv) . '</a><br><a href="' . esc_url(home_url('/?sp_hw=aus')) . '" target="_blank">Vorschau beenden</a></p></div>';
-    echo '<div style="background:#fff;border:1px solid #dcdcde;border-radius:10px;padding:18px 20px;margin:16px 0"><h2 style="margin-top:0">Was zählt („jede 3. gratis“)</h2><p>' . ($names ? implode(' · ', $names) : '– keine vorrätigen Flaschen –') . '</p><p style="color:#646970">Nur vorrätige Peptid-Flaschen. Nicht: Pens, Zubehör, Vorbestellungen, Abo, Geschenke. Auf diese Flaschen während der Aktion: kein Rabattcode, kein 10-%-Partnerlink-Rabatt, kein Mengenrabatt – auf Pens/Zubehör gelten Codes und Partnerrabatt weiter. Partner-Codes ordnen immer zu. Early Access: Newsletter-Link oder Besucher über einen Partner-Link.</p></div>';
+    echo '<div style="background:#fff;border:1px solid #dcdcde;border-radius:10px;padding:18px 20px;margin:16px 0"><h2 style="margin-top:0">Was zählt („jede 3. gratis“)</h2><p>' . ($names ? implode(' · ', $names) : '– keine vorrätigen Flaschen –') . '</p><p style="color:#646970">Nur vorrätige Peptid-Flaschen. Nicht: Pens, Zubehör, Vorbestellungen, Abo, Geschenke. Auf diese Flaschen während der Aktion: kein Rabattcode, kein 10-%-Partnerlink-Rabatt, kein Mengenrabatt – auf Pens/Zubehör gelten Codes und Partnerrabatt weiter. Partner-Codes ordnen immer zu. Early Access: nur Newsletter (Link aus der Mail oder Anmeldung in der Teaser-Zeit).</p></div>';
     echo '<div style="background:#fff;border:1px solid #dcdcde;border-radius:10px;padding:18px 20px;margin:16px 0"><h2 style="margin-top:0">Ergebnis</h2><p>' . (int) $cnt . ' Bestellungen · ' . wc_price($sum) . ' · ' . (int) $free . ' Flaschen gratis</p></div></div>';
 }
