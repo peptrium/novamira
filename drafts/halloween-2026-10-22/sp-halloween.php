@@ -364,7 +364,7 @@ add_action('template_redirect', function () {
         $html = preg_replace_callback('/(data-q="(3|5|10)" data-disc=")[\d.]+(">\s*<span class="rx-tier__disc">)[^<]*(<\/span>)/', function ($m) use ($map) {
             return $m[1] . $map[$m[2]][0] . $m[3] . $map[$m[2]][1] . $m[4];
         }, $html);
-        return str_replace('rx-tier__flag-text">Beliebt<', 'rx-tier__flag-text">🎃 Halloween<', $html);
+        return $html;
     });
 }, 7);
 
@@ -419,6 +419,9 @@ add_action('wp_head', function () {
 #sp-hw-bb b{color:var(--hw-or2);display:block;font-size:13px;letter-spacing:.08em;margin-bottom:2px}
 #rx-tiers .rx-tier[data-q="3"] .rx-tier__disc,#rx-tiers .rx-tier[data-q="5"] .rx-tier__disc,#rx-tiers .rx-tier[data-q="10"] .rx-tier__disc{color:#B94A00!important}
 /* Warenkorb */
+#sp-hw-bb>b{font-size:14.5px!important;letter-spacing:.01em!important;color:#fff!important;margin:0!important}#sp-hw-bb .ex{margin-top:4px!important}
+#sp-hw-bt{display:flex;gap:10px;align-items:center;background:linear-gradient(135deg,#140A02,#2A1306);border:1px solid rgba(255,122,26,.45);border-radius:14px;padding:11px 14px;margin:0 0 14px;color:#FFE7CC!important;text-decoration:none!important;font:600 14px/1.35 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif}#sp-hw-bt>span{flex:1}#sp-hw-bt b{color:var(--hw-or2)}#sp-hw-bt small{font-size:12.5px;color:#E8C9A8}
+.sp-hw-btn.sm{padding:10px 14px;font-size:13.5px;margin-top:2px}
 #sp-hw-bb .ex{margin-top:8px;font-size:15px;color:#fff}#sp-hw-bb .ex s{color:#A89888;margin-right:4px}#sp-hw-bb .ex strong{color:var(--hw-or2);font-size:17px}
 #sp-hw-bb .cdl,#sp-hw-sum .cdl{margin-top:6px;font-size:12.5px;color:#E8C9A8;font-variant-numeric:tabular-nums}#sp-hw-bb .cdl span,#sp-hw-sum .cdl span{color:#fff;font-weight:700}
 #sp-hw-bb .t3{margin-top:10px;width:100%;border:0;border-radius:10px;padding:11px 12px;background:linear-gradient(90deg,var(--hw-or),var(--hw-or2))!important;color:#140A02!important;font:800 14.5px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;cursor:pointer;box-shadow:none!important}
@@ -512,9 +515,9 @@ if(tb){tb.classList.add('sp-hw');var a=document.createElement('a');a.id='sp-hw-t
 function strip(mini){var s=document.createElement('section');s.className='sp-hw-strip'+(mini?' mini':'');
  var web='<svg class="web" viewBox="0 0 100 100" fill="none" stroke="#fff" stroke-width=".8"><path d="M0 0L100 100M0 0L50 100M0 0L100 50M0 0L0 100M0 0L100 0"/><path d="M0 20Q14 14 20 0M0 40Q28 28 40 0M0 62Q44 44 62 0M0 84Q60 60 84 0"/></svg>';
  if(live){s.innerHTML=web+'<div class="in"><span class="ey">🎃 HALLOWEEN-SPECIAL'+(C.state==='early'?' · EARLY ACCESS':'')+'</span><h2>Jede 3. Flasche <span>gratis.</span></h2>'
-  +(mini?'<p>Leg 3 Flaschen in den Warenkorb – die günstigste zahlst du nicht. Bis '+C.endT+' Uhr, solange der Vorrat reicht.</p>':'<p>Leg 3 Flaschen in den Warenkorb – die günstigste zahlst du nicht. Gilt für alle vorrätigen Peptid-Flaschen, auch gemischt. Nur bis '+C.endT+' Uhr und solange der Vorrat reicht.</p><div class="sp-hw-cd" id="sp-hw-cd2"></div><a class="sp-hw-btn" href="/alle-produkte/">Flaschen wählen →</a>')+'</div><div class="pk">🎃</div>';}
- else{s.innerHTML=web+'<div class="in"><span class="ey">🎃 BALD: HALLOWEEN-SPECIAL</span><h2>Jede 3. Flasche <span>gratis.</span></h2><p>Ab '+C.startT+' für alle. Newsletter-Abonnenten bekommen es schon '+C.earlyT+'.</p>'
-  +(mini?'':'<a class="sp-hw-btn" href="#sp-nlh">Newsletter – früher dabei sein →</a>')+'</div><div class="pk">🎃</div>';}
+  +(mini?'<p>Die günstigste zahlst du nicht. Bis '+C.endT+' Uhr.</p>':'<p>Die günstigste zahlst du nicht – auch gemischt. Bis '+C.endT+' Uhr.</p><div class="sp-hw-cd" id="sp-hw-cd2"></div><a class="sp-hw-btn" href="/alle-produkte/">Flaschen wählen →</a>')+'</div><div class="pk">🎃</div>';}
+ else{s.innerHTML=web+'<div class="in"><span class="ey">🎃 BALD: HALLOWEEN-SPECIAL</span><h2>Jede 3. Flasche <span>gratis.</span></h2><p>Ab '+C.startT+' · Insider schon '+C.earlyT+'.</p>'
+  +'<a class="sp-hw-btn'+(mini?' sm':'')+'" href="#sp-nlh">Früher dabei sein →</a>'+'</div><div class="pk">🎃</div>';}
  return s;}
 if(C.home){var ht=0,hi=setInterval(function(){
  var m=document.querySelector('.sp-hero2'),mob=m&&m.offsetParent!==null;
@@ -545,11 +548,17 @@ var cd2=document.getElementById('sp-hw-cd2');if(cd2){var t2=function(){var l=lef
 /* Newsletter-Popup: Text passend zur Phase */
 (function(){var n=0,pi=setInterval(function(){var pp=document.getElementById('sp-nlp');if(!pp){if(++n>40)clearInterval(pi);return;}clearInterval(pi);
  var h=pp.querySelectorAll('.st[data-s="1"] h2,.st[data-s="2"] h2'),p1=pp.querySelector('.st[data-s="1"] p');
- if(live){h.forEach(function(e){e.innerHTML='Sichere dir <em>10 % Rabatt</em><br>für deine nächste Bestellung';});if(p1)p1.textContent='Halloween läuft gerade – dein persönlicher Code gilt danach noch 30 Tage. Dazu Neuheiten und Aktionen zuerst.';}
- else{h.forEach(function(e){e.innerHTML='🎃 Halloween <em>früher</em><br>für Insider';});if(p1)p1.textContent='Jede 3. Flasche gratis – als Newsletter-Abonnent bist du schon '+C.earlyT+' dabei, alle anderen erst ab '+C.startT+' Der Vorrat ist begrenzt – Insider haben die erste Wahl. Dazu dein 10-%-Code für später.';
+ if(live){h.forEach(function(e){e.innerHTML='Sichere dir <em>10 % Rabatt</em><br>für deine nächste Bestellung';});if(p1)p1.textContent='Dein Code gilt nach Halloween noch 30 Tage.';}
+ else{h.forEach(function(e){e.innerHTML='🎃 Halloween <em>früher</em><br>für Insider';});if(p1)p1.textContent='Jede 3. Flasche gratis – als Insider schon '+C.earlyT+', alle anderen ab '+C.startT+' Plus dein 10-%-Code.';
  var b1=pp.querySelector('.st[data-s="1"] button');if(b1&&!/nein/i.test(b1.textContent))b1.textContent='Ja, früher dabei sein';}
 },150);})();
-if(!live)return;
+if(!live){
+ var nn=0,ni=setInterval(function(){var nl=document.getElementById('sp-nlh');if(!nl){if(++nn>40)clearInterval(ni);return;}clearInterval(ni);
+  var ey=nl.querySelector('.ey'),h2=nl.querySelector('h2'),ld=nl.querySelector('.lead');
+  if(ey)ey.innerHTML='<i></i>🎃 Halloween-Early-Access';if(h2)h2.innerHTML='Halloween <span>früher</span>.';
+  if(ld)ld.textContent='Jede 3. Flasche gratis – als Insider schon '+C.earlyT+'. Plus dein 10-%-Code.';},150);
+ if(C.pp){var tb2=document.getElementById('rx-buybox');if(tb2)tb2.insertAdjacentHTML('afterbegin','<a id="sp-hw-bt" href="#sp-nlh">🎃 <span>Ab '+C.startT+': <b>Jede 3. Flasche gratis</b><br><small>Insider schon '+C.earlyT+' – jetzt eintragen →</small></span></a>');}
+ return;}
 /* Karten-Badges */
 var ids={};C.ids.forEach(function(i){ids[i]=1});
 function badges(){document.querySelectorAll('.sp-pc[data-id]').forEach(function(c){if(!ids[c.getAttribute('data-id')])return;
@@ -565,7 +574,7 @@ var own=0;function fix(){if(own||!tot||!qf||!pe)return;var q=parseInt(qf.value,1
  own=1;tot.textContent=fm(u*(q-fr)+add);if(sav){if(fr>0){sav.style.display='';sav.textContent='🎃 '+fr+'× gratis – du sparst '+fm(u*fr);}else{sav.style.display='none';}}setTimeout(function(){own=0},0);}
 if(C.pp&&tot){new MutationObserver(fix).observe(tot,{childList:true,characterData:true,subtree:true});fix();}
 /* Buybox-Hinweis */
-if(C.pp){var bb=document.getElementById('rx-buybox');if(bb&&!document.getElementById('sp-hw-bb')){bb.insertAdjacentHTML('afterbegin','<div id="sp-hw-bb"><b>🎃 HALLOWEEN-SPECIAL</b>Jede 3. Flasche gratis – die günstigste zahlst du nicht. Auch gemischt mit anderen Peptiden.<div class="ex"></div><div class="cdl">⏳ Endet in <span></span> · solange der Vorrat reicht</div><button type="button" class="t3">3 Flaschen wählen – 1 gratis</button></div>');
+if(C.pp){var bb=document.getElementById('rx-buybox');if(bb&&!document.getElementById('sp-hw-bb')){bb.insertAdjacentHTML('afterbegin','<div id="sp-hw-bb"><b>🎃 Jede 3. Flasche gratis</b><div class="ex"></div><div class="cdl">⏳ Noch <span></span></div><button type="button" class="t3">3 Flaschen wählen – 1 gratis</button></div>');
  var hb=document.getElementById('sp-hw-bb'),hx=hb.querySelector('.ex'),hc=hb.querySelector('.cdl span');
  var upd=function(){var pr=document.getElementById('rx-price');var u=pr?num(pr.textContent):0;hx.innerHTML=u>0?'3 Flaschen: <s>'+fm(u*3)+'</s> <strong>'+fm(u*2)+'</strong>':'';hc.textContent=cdt();};
  upd();setInterval(upd,1000);
