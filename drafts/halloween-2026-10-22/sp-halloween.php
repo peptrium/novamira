@@ -100,6 +100,7 @@ function sp_hw_parent_eligible($pid) {
     $ok = true;
     if (in_array($pid, sp_hw_excluded_ids(), true)) $ok = false;
     if ($ok && has_term(20, 'product_cat', $pid)) $ok = false; // Zubehoer
+    if ($ok && preg_match('/\bpen\b/i', (string) get_the_title($pid))) $ok = false; // auch neue Peptrium-Pens
     if ($ok && function_exists('sp_preorder_product_ids') && in_array($pid, array_map('intval', (array) sp_preorder_product_ids()), true)) $ok = false;
     if ($ok && get_post_status($pid) !== 'publish') $ok = false;
     return $cache[$pid] = $ok;
