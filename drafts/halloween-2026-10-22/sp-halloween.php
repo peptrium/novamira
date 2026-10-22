@@ -63,7 +63,7 @@ function sp_hw_state() {
     static $s = null;
     if ($s !== null) return $s;
     $o = sp_hw_opt();
-    if (sp_hw_is_preview()) return $s = 'live';
+    if (sp_hw_is_preview()) return $s = (($_COOKIE['sp_hw_pvs'] ?? '') === 'teaser' ? 'teaser' : 'live');
     if (empty($o['on'])) return $s = 'off';
     $now = time();
     if ($now >= $o['end']) return $s = 'ended';
@@ -264,6 +264,7 @@ add_action('init', function () {
     }
     if ($a === 'vorschau' && $k !== '' && hash_equals($o['pv'], $k)) {
         setcookie('sp_hw_pv', sp_hw_cookie_val('pv'), ['expires' => time() + DAY_IN_SECONDS, 'path' => '/', 'secure' => true, 'samesite' => 'Lax']);
+        setcookie('sp_hw_pvs', (isset($_GET['s']) && $_GET['s'] === 'teaser') ? 'teaser' : 'live', ['expires' => time() + DAY_IN_SECONDS, 'path' => '/', 'secure' => true, 'samesite' => 'Lax']);
         wp_safe_redirect(home_url('/'));
         exit;
     }
@@ -273,6 +274,34 @@ add_action('init', function () {
         exit;
     }
 }, 1);
+
+/* Newsletter bestaetigt (Danke-Seite) in der Teaser-/Early-Phase -> Early Access auf diesem Geraet. */
+add_action('init', function () {
+    if (($_GET['sp_nl'] ?? '') !== 'danke' || sp_hw_has_ea()) return;
+    $o = sp_hw_opt();
+    if (empty($o['on']) || time() >= $o['start']) return;
+    setcookie('sp_hw_ea', sp_hw_cookie_val('ea'), ['expires' => (int) $o['end'] + 86400, 'path' => '/', 'secure' => true, 'httponly' => false, 'samesite' => 'Lax']);
+}, 2);
+
+/* ---------------------------------------------------------------------
+ * Kasse: Zeile "Du sparst X € mit dem Halloween-Angebot"
+ * ------------------------------------------------------------------- */
+add_action('wp_footer', function () {
+    if (!sp_hw_active() || !function_exists('is_checkout') || !is_checkout() || is_order_received_page()) return;
+    ?>
+<style>#sp-hw-co{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:8px 16px;padding:11px 14px;border-radius:12px;background:linear-gradient(135deg,#140A02,#2A1306);border:1px solid rgba(255,122,26,.45);color:#FFE7CC;font:600 14px/1.35 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif}#sp-hw-co b{color:#FFB547;font-size:15px;white-space:nowrap}</style>
+<script>(function(){var t=0;function run(){if(t)return;t=setTimeout(function(){t=0;if(!window.wp||!wp.data)return;var st=wp.data.select('wc/store/cart');if(!st)return;var c=st.getCartData();if(!c||!c.items)return;
+ var save=0,free=0;c.items.forEach(function(it){var hw=(it.item_data||[]).filter(function(d){return /Halloween/.test(d.name||d.key||'')})[0];if(!hw)return;var tt=it.totals||{};save+=(parseInt(tt.line_subtotal,10)-parseInt(tt.line_total,10))||0;free+=parseInt(String(hw.value||'').replace(/[^0-9]/g,''),10)||0;});
+ var minor=(c.totals&&c.totals.currency_minor_unit)||2,box=document.getElementById('sp-hw-co');
+ var anchor=document.querySelector('.wc-block-components-totals-footer-item');
+ if(save<=0||!anchor){if(box)box.remove();return;}
+ if(!box){box=document.createElement('div');box.id='sp-hw-co';}
+ if(box.nextElementSibling!==anchor)anchor.parentNode.insertBefore(box,anchor);
+ var v=(save/Math.pow(10,minor)).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+'\u00a0€';
+ box.innerHTML='<span>🎃 Halloween: '+free+' Flasche'+(free>1?'n':'')+' gratis</span><b>−'+v+'</b>';},300);}
+var iv=setInterval(function(){if(window.wp&&wp.data){clearInterval(iv);wp.data.subscribe(run);run();}},300);})();</script>
+    <?php
+}, 130);
 
 /* ---------------------------------------------------------------------
  * Buybox: Mengen-Staffeln zeigen "1 gratis" statt −10/−15/−20 %
@@ -435,7 +464,7 @@ if(C.home){var ht=0,hi=setInterval(function(){
  title.insertAdjacentHTML('beforebegin','<div class="sp-hw-ey">🎃 HALLOWEEN-SPECIAL'+(C.state==='early'?' · EARLY ACCESS':'')+'</div>');
  title.innerHTML='Jede 3. Flasche<br><span class="sp-hw-g">gratis.</span>';
  if(mob){var tx=m.querySelector('.sp-hero2-text');if(tx)tx.classList.add('sp-hw-t');}
- if(sub)sub.innerHTML=live?(mob?'Die günstigste zahlst du nicht.':'Leg 3 Flaschen in den Warenkorb –<br>die günstigste zahlst du nicht.'):'Ab '+C.startT+' für alle.<br>Newsletter-Abonnenten schon '+C.earlyT+'.';
+ if(sub)sub.innerHTML=live?(mob?'Die günstigste zahlst du nicht.':'Leg 3 Flaschen in den Warenkorb –<br>die günstigste zahlst du nicht.'):(mob?'Ab '+C.startT+' · Insider schon '+C.earlyT:'Ab '+C.startT+' für alle.<br>Newsletter-Abonnenten schon '+C.earlyT+'.');
  if(cta){cta.classList.add('sp-hw-cta');if(live){cta.firstChild.nodeValue='3 für 2 sichern ';}else{cta.setAttribute('href','#sp-nlh');cta.firstChild.nodeValue='Früher dabei sein ';}
   var cw=cta.parentElement;if(mob&&cw)cw.classList.add('sp-hw-cw');
   if(live){var hc=document.createElement('div');hc.className='sp-hw-hcd';cta.insertAdjacentElement('beforebegin',hc);
@@ -447,6 +476,13 @@ if(C.home){var ht=0,hi=setInterval(function(){
 },120);}
 if(C.cat){var tries=0,ci=setInterval(function(){var sc=document.getElementById('sp-cat');if(sc&&sc.firstElementChild){clearInterval(ci);sc.firstElementChild.insertAdjacentElement('afterend',strip(1));}else if(++tries>40){clearInterval(ci);}},150);}
 var cd2=document.getElementById('sp-hw-cd2');if(cd2){var t2=function(){var l=left(C.end);cd2.innerHTML='<div><b>'+l.d+'</b><small>TAGE</small></div><div><b>'+pad(l.h)+'</b><small>STD</small></div><div><b>'+pad(l.m)+'</b><small>MIN</small></div><div><b>'+pad(l.s)+'</b><small>SEK</small></div>';};t2();setInterval(t2,1000);}
+/* Newsletter-Popup: Text passend zur Phase */
+(function(){var n=0,pi=setInterval(function(){var pp=document.getElementById('sp-nlp');if(!pp){if(++n>40)clearInterval(pi);return;}clearInterval(pi);
+ var h=pp.querySelectorAll('.st[data-s="1"] h2,.st[data-s="2"] h2'),p1=pp.querySelector('.st[data-s="1"] p');
+ if(live){h.forEach(function(e){e.innerHTML='Sichere dir <em>10 % Rabatt</em><br>für deine nächste Bestellung';});if(p1)p1.textContent='Halloween läuft gerade – dein persönlicher Code gilt danach noch 30 Tage. Dazu Neuheiten und Aktionen zuerst.';}
+ else{h.forEach(function(e){e.innerHTML='🎃 Halloween <em>früher</em><br>für Insider';});if(p1)p1.textContent='Jede 3. Flasche gratis – als Newsletter-Abonnent bist du schon '+C.earlyT+' dabei, alle anderen erst ab '+C.startT+' Dazu dein 10-%-Code für später.';
+ var b1=pp.querySelector('.st[data-s="1"] button');if(b1&&!/nein/i.test(b1.textContent))b1.textContent='Ja, früher dabei sein';}
+},150);})();
 if(!live)return;
 /* Karten-Badges */
 var ids={};C.ids.forEach(function(i){ids[i]=1});
