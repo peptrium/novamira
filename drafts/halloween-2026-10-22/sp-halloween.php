@@ -375,16 +375,18 @@ add_action('wp_head', function () {
     ?>
 <style id="sp-hw-css">
 :root{--hw-or:#FF7A1A;--hw-or2:#FFB547;--hw-bg:#0B0806}
-#sp-top-banner.sp-hw{background:linear-gradient(90deg,#1A0D04,#2A1306 50%,#1A0D04)!important;color:#FFD9B0!important;position:relative;overflow:hidden}
+#sp-top-banner.sp-hw{background:linear-gradient(90deg,#1A0D04,#2A1306 50%,#1A0D04)!important;color:#FFD9B0!important;overflow:hidden}
+#sp-top-banner img.emoji,[class*="sp-hw"] img.emoji,[id^="sp-hw"] img.emoji{position:static!important;display:inline-block!important;width:1.15em!important;height:1.15em!important;margin:0 .1em 0 0!important;vertical-align:-.2em!important;top:auto!important;left:auto!important;transform:none!important}
 #sp-top-banner.sp-hw .sp-tb-mask{display:none!important}
-#sp-hw-tb{display:flex;align-items:center;justify-content:center;gap:8px;height:100%;min-height:inherit;font:700 12.5px/1.2 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;letter-spacing:.02em;white-space:nowrap;text-decoration:none;color:#FFD9B0!important;padding:0 10px;position:relative;z-index:2}
+#sp-hw-tb{display:flex;align-items:center;justify-content:center;gap:8px;height:100%;min-height:inherit;font:700 12.5px/1.2 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-decoration:none;color:#FFD9B0!important;padding:0 12px;position:relative;z-index:2}
 #sp-hw-tb b{color:var(--hw-or2)}
 #sp-hw-tb .cd{font-variant-numeric:tabular-nums;background:rgba(255,122,26,.16);border:1px solid rgba(255,122,26,.35);border-radius:6px;padding:2px 6px;color:#FFE7CC}
-.sp-hw-bat{position:absolute;top:0;width:22px;height:11px;fill:#FFB547;opacity:.35;z-index:1;animation:sphwfly 14s linear infinite}
+.sp-hw-bat{position:absolute;top:0;width:22px;height:11px;fill:#FFB547;opacity:.22;z-index:1;animation:sphwfly 14s linear infinite}
 .sp-hw-bat.b2{width:16px;height:8px;animation-duration:19s;animation-delay:-7s;top:14px}
 .sp-hw-bat.b3{width:12px;height:6px;animation-duration:23s;animation-delay:-13s;top:4px}
 @keyframes sphwfly{0%{left:-30px;transform:translateY(6px)}25%{transform:translateY(0)}50%{transform:translateY(8px)}75%{transform:translateY(2px)}100%{left:calc(100% + 30px);transform:translateY(6px)}}
 @media (max-width:420px){#sp-hw-tb{font-size:11.5px;gap:6px}#sp-hw-tb .lg{display:none}}
+@media (max-width:359px){#sp-hw-tb{font-size:10.5px;letter-spacing:0}}
 /* Startseite / Kategorie-Streifen */
 .sp-hw-strip{position:relative;overflow:hidden;background:radial-gradient(120% 140% at 85% 0%,rgba(255,122,26,.30) 0%,rgba(255,122,26,0) 55%),radial-gradient(80% 120% at 0% 100%,rgba(120,40,160,.25) 0%,rgba(120,40,160,0) 60%),var(--hw-bg);color:#F4ECE4;padding:34px 20px 30px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif}
 .sp-hw-strip .in{max-width:1100px;margin:0 auto;position:relative;z-index:2}
@@ -404,8 +406,10 @@ add_action('wp_head', function () {
 .sp-hw-strip.mini h2{font-size:22px;margin:8px 0 4px}
 .sp-hw-strip.mini p{font-size:13.5px;margin:0}
 .sp-hw-strip.mini .pk{font-size:64px;bottom:-10px}
+@media (max-width:600px){.sp-hw-strip .pk,.sp-hw-strip.mini .pk{font-size:38px!important;top:18px!important;bottom:auto!important;right:10px!important;opacity:.9!important}.sp-hw-strip .ey{margin-right:50px}}
 /* Karten-Badge */
 .sp-pc{position:relative}
+@media (max-width:600px){.sp-hw-badge .t{display:none}.sp-hw-badge{padding:5px 6px!important;font-size:13px!important}}
 .sp-hw-badge{position:absolute;top:10px;right:10px;z-index:3;background:#140A02;color:var(--hw-or2);border:1px solid rgba(255,122,26,.5);font:800 11px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;border-radius:99px;padding:6px 9px;letter-spacing:.02em;pointer-events:none}
 /* Buybox */
 #sp-hw-bb{background:linear-gradient(135deg,#140A02,#2A1306);color:#FFE7CC;border:1px solid rgba(255,122,26,.45);border-radius:14px;padding:12px 14px;margin:0 0 14px;font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif}
@@ -444,6 +448,9 @@ add_action('wp_head', function () {
 @keyframes sphwpk{0%,100%{filter:drop-shadow(0 0 10px rgba(255,122,26,.5))}50%{filter:drop-shadow(0 0 24px rgba(255,122,26,.95))}}
 .sp-hero2-text,.sp-hero2-cta-wrap{z-index:2!important}
 .sp-hero2-text.sp-hw-t .sp-hw-ey{margin-bottom:10px}
+.sp-hero2.sp-hw-m .sp-hero2-img-wrap>img{margin-top:44px!important}
+.sp-hero2.sp-hw-m .sp-hero2-img-wrap{background:#000!important}
+.sp-hero2.sp-hw-m .sp-hero2-sub{text-shadow:0 1px 8px rgba(0,0,0,.9)}
 .sp-hero2-text.sp-hw-t .sp-hero2-sub{text-shadow:0 2px 10px rgba(0,0,0,.9);color:rgba(255,255,255,.88)}
 .sp-hero2-img-wrap .sp-hw-hov .pk{display:none}
 #sp-hero-banner .sp-hw-hov{z-index:0}#sp-hero-banner .sp-hw-hov .pk{bottom:40px}#sp-hero-banner .sp-hw-hov .pk.l{left:auto;right:42%}
@@ -488,9 +495,8 @@ var bat='<svg viewBox="0 0 24 12" class="sp-hw-bat XX"><path d="M0 4C3 1 6 1 8 3
 var tb=document.getElementById('sp-top-banner');
 if(tb){tb.classList.add('sp-hw');var a=document.createElement('a');a.id='sp-hw-tb';a.href='/alle-produkte/';
  tb.insertAdjacentHTML('beforeend',bat.replace('XX','b1')+bat.replace('XX','b2')+bat.replace('XX','b3'));tb.appendChild(a);
- var tick=function(){if(live){var l=left(C.end);a.innerHTML='🎃 <b>Halloween:</b> Jede 3. Flasche gratis <span class="lg">· solange Vorrat reicht ·</span> <span class="cd">'+(l.d?l.d+'T ':'')+pad(l.h)+':'+pad(l.m)+':'+pad(l.s)+'</span>';}
-  else{a.innerHTML='🎃 <b>Halloween-Special</b> ab '+C.startT+' <span class="lg">· Newsletter: schon '+C.earlyT+'</span>';}};
- tick();setInterval(tick,1000);}
+ if(live){a.innerHTML='🎃 <b>Halloween:</b> Jede 3. Flasche gratis<span class="lg"> · solange der Vorrat reicht</span>';}
+ else{a.href='/#sp-nlh';a.addEventListener('click',function(e){var n=document.getElementById('sp-nlh');if(n){e.preventDefault();n.scrollIntoView({behavior:'smooth'});}});a.innerHTML='🎃 <b>Halloween</b> ab '+C.startT+' · Newsletter früher dabei';}}
 /* Streifen Startseite / Kategorie */
 function strip(mini){var s=document.createElement('section');s.className='sp-hw-strip'+(mini?' mini':'');
  var web='<svg class="web" viewBox="0 0 100 100" fill="none" stroke="#fff" stroke-width=".8"><path d="M0 0L100 100M0 0L50 100M0 0L100 50M0 0L0 100M0 0L100 0"/><path d="M0 20Q14 14 20 0M0 40Q28 28 40 0M0 62Q44 44 62 0M0 84Q60 60 84 0"/></svg>';
@@ -501,6 +507,7 @@ function strip(mini){var s=document.createElement('section');s.className='sp-hw-
  return s;}
 if(C.home){var ht=0,hi=setInterval(function(){
  var m=document.querySelector('.sp-hero2'),mob=m&&m.offsetParent!==null;
+ if(!mob&&window.matchMedia('(max-width:767px)').matches&&ht<40){ht++;return;}
  var title=mob?m.querySelector('.sp-hero2-title'):document.querySelector('#sp-hero-banner .sp-hb-hero-title');
  if(!title){if(++ht>40){clearInterval(hi);var hero=document.querySelector('.elementor-211>[data-id="shbn001"]');if(hero){var s0=strip(0);s0.style.order='1';hero.insertAdjacentElement('afterend',s0);}}return;}
  clearInterval(hi);
@@ -509,9 +516,9 @@ if(C.home){var ht=0,hi=setInterval(function(){
  var wrap=mob?m.querySelector('.sp-hero2-img-wrap'):document.querySelector('#sp-hero-banner .sp-hb-image-wrap');
  title.insertAdjacentHTML('beforebegin','<div class="sp-hw-ey">🎃 HALLOWEEN-SPECIAL'+(C.state==='early'?' · EARLY ACCESS':'')+'</div>');
  title.innerHTML='Jede 3. Flasche<br><span class="sp-hw-g">gratis.</span>';
- if(mob){var tx=m.querySelector('.sp-hero2-text');if(tx)tx.classList.add('sp-hw-t');}
+ if(mob){m.classList.add('sp-hw-m');var tx=m.querySelector('.sp-hero2-text');if(tx)tx.classList.add('sp-hw-t');}
  if(sub)sub.innerHTML=live?(mob?'Die günstigste zahlst du nicht.':'Leg 3 Flaschen in den Warenkorb –<br>die günstigste zahlst du nicht.'):(mob?'Ab '+C.startT+' · Insider schon '+C.earlyT:'Ab '+C.startT+' für alle.<br>Newsletter-Abonnenten schon '+C.earlyT+'.');
- if(cta){cta.classList.add('sp-hw-cta');if(live){cta.firstChild.nodeValue='3 für 2 sichern ';}else{cta.setAttribute('href','#sp-nlh');cta.firstChild.nodeValue='Früher dabei sein ';}
+ if(cta){cta.classList.add('sp-hw-cta');if(live){cta.firstChild.nodeValue='Jetzt sichern ';}else{cta.setAttribute('href','#sp-nlh');cta.firstChild.nodeValue='Eintragen & früher dabei ';}
   var cw=cta.parentElement;if(mob&&cw)cw.classList.add('sp-hw-cw');
   var vr='<div class="sp-hw-vr"><i></i>'+(live?'Nur solange der Vorrat reicht':'Begrenzter Vorrat – Insider kaufen zuerst')+'</div>';
   if(mob&&cw)cw.insertAdjacentHTML('afterbegin',vr);else if(sub)sub.insertAdjacentHTML('afterend',vr);
@@ -535,7 +542,7 @@ if(!live)return;
 /* Karten-Badges */
 var ids={};C.ids.forEach(function(i){ids[i]=1});
 function badges(){document.querySelectorAll('.sp-pc[data-id]').forEach(function(c){if(!ids[c.getAttribute('data-id')])return;
- if(!c.querySelector('.sp-hw-badge'))c.insertAdjacentHTML('beforeend','<span class="sp-hw-badge">🎃 3 für 2</span>');
+ if(!c.querySelector('.sp-hw-badge'))c.insertAdjacentHTML('beforeend','<span class="sp-hw-badge">🎃<span class="t"> 3. gratis</span></span>');
  c.querySelectorAll('*').forEach(function(e){if(e.children.length===0&&/^ab 3 St(ü|u)ck/.test(e.textContent.trim())&&!e.getAttribute('data-hw')){e.setAttribute('data-hw',1);e.textContent='🎃 Jede 3. Flasche gratis';e.style.color='#C2410C';}});});
  var cd=document.getElementById('sp-cd-items');if(cd)cd.querySelectorAll('*').forEach(function(e){if(e.children.length===0&&/^Bundle\s/.test(e.textContent.trim()))e.textContent='🎃 Halloween';});}
 badges();new MutationObserver(function(){badges();}).observe(document.body,{childList:true,subtree:true});
