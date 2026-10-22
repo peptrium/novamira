@@ -59,6 +59,11 @@ function sp_hw_has_ea() {
     return !empty($_COOKIE['sp_hw_ea']) && hash_equals(sp_hw_cookie_val('ea'), (string) $_COOKIE['sp_hw_ea']);
 }
 
+/** Besucher kam ueber einen Partner-Link (SliceWP-Cookie) -> Early Access wie Newsletter. */
+function sp_hw_has_partner() {
+    return function_exists('slicewp_get_referrer_affiliate_id') && (int) slicewp_get_referrer_affiliate_id() > 0;
+}
+
 /** off | teaser | early | live | ended – Sicht des aktuellen Besuchers. */
 function sp_hw_state() {
     static $s = null;
@@ -69,7 +74,7 @@ function sp_hw_state() {
     $now = time();
     if ($now >= $o['end']) return $s = 'ended';
     if ($now >= $o['start']) return $s = 'live';
-    if ($now >= $o['early'] && sp_hw_has_ea()) return $s = 'early';
+    if ($now >= $o['early'] && (sp_hw_has_ea() || sp_hw_has_partner())) return $s = 'early';
     return $s = 'teaser';
 }
 
@@ -202,42 +207,67 @@ add_action('woocommerce_checkout_create_order', function ($order) {
 }, 20);
 
 /* ---------------------------------------------------------------------
- * Codes & Empfehlungs-Rabatt waehrend der Aktion
+ * Codes & Empfehlungs-Rabatt waehrend der Aktion (User 2026-10-22):
+ * gelten NICHT auf Aktionsflaschen (dort gibt es die Gratis-Flasche), aber weiter
+ * auf Pens, Zubehoer usw. Partner-Codes bleiben immer gueltig (Zuordnung).
  * ------------------------------------------------------------------- */
 function sp_hw_is_partner_coupon($coupon) {
     $id = is_object($coupon) ? $coupon->get_id() : wc_get_coupon_id_by_code((string) $coupon);
     return $id && get_post_meta($id, '_sp_affiliate_id', true);
 }
 
+/** Cart-Zeile zaehlt zur Aktion (keine Geschenk-/Abo-Zeile, Produkt geeignet). */
+function sp_hw_item_in_action($item) {
+    if (defined('SP_GIFT_ITEM_META') && !empty($item[SP_GIFT_ITEM_META])) return false;
+    if (!empty($item['sp_abo_interval_days'])) return false;
+    return !empty($item['data']) && sp_hw_product_eligible($item['data']);
+}
+
+/** Summe der Positionen, auf die Codes/Partnerrabatt weiter wirken. */
+function sp_hw_other_subtotal($cart) {
+    $sum = 0.0;
+    foreach ($cart->get_cart() as $item) {
+        if (defined('SP_GIFT_ITEM_META') && !empty($item[SP_GIFT_ITEM_META])) continue;
+        if (sp_hw_item_in_action($item)) continue;
+        $sum += (float) $item['data']->get_price() * (int) $item['quantity'];
+    }
+    return $sum;
+}
+
 add_filter('woocommerce_coupon_is_valid', function ($valid, $coupon) {
-    if (!$valid || !sp_hw_active() || sp_hw_is_partner_coupon($coupon)) return $valid;
-    return false;
+    if (!$valid || !sp_hw_active() || sp_hw_is_partner_coupon($coupon) || !WC()->cart) return $valid;
+    return sp_hw_other_subtotal(WC()->cart) > 0 ? $valid : false;
 }, 50, 2);
 
 add_filter('woocommerce_coupon_error', function ($err, $err_code, $coupon) {
     if ((int) $err_code === WC_Coupon::E_WC_COUPON_INVALID_FILTERED && sp_hw_active() && $coupon && !sp_hw_is_partner_coupon($coupon)) {
-        return 'Während des Halloween-Angebots gelten keine Rabattcodes – jede 3. Flasche ist schon gratis. 🎃';
+        return 'Auf die Halloween-Flaschen gibt es schon die Gratis-Flasche – Rabattcodes gelten in der Zeit nur für Pens und Zubehör. 🎃';
     }
     return $err;
 }, 50, 3);
 
 add_filter('woocommerce_coupon_get_discount_amount', function ($amount, $discounting, $cart_item, $single, $coupon) {
-    return (sp_hw_active() && sp_hw_is_partner_coupon($coupon)) ? 0 : $amount;
+    return (sp_hw_active() && is_array($cart_item) && sp_hw_item_in_action($cart_item)) ? 0 : $amount;
 }, 50, 5);
 
 add_filter('woocommerce_coupon_message', function ($msg, $code, $coupon) {
-    if ($code === WC_Coupon::WC_COUPON_SUCCESS && sp_hw_active() && sp_hw_is_partner_coupon($coupon)) {
-        return 'Partner-Code erkannt ✓ – das Halloween-Angebot gilt bereits, der Code gibt keinen zusätzlichen Rabatt.';
+    if ($code === WC_Coupon::WC_COUPON_SUCCESS && sp_hw_active() && $coupon && sp_hw_is_partner_coupon($coupon)) {
+        return 'Partner-Code erkannt ✓ – auf die Halloween-Flaschen gilt die Gratis-Flasche, auf Pens & Zubehör dein Rabatt.';
     }
     return $msg;
 }, 50, 3);
 
+/* Empfehlungs-Rabatt (sp-affiliate-program.php, Prio 20) nur noch auf die Nicht-Aktions-Positionen. */
 add_action('woocommerce_cart_calculate_fees', function ($cart) {
     if (!sp_hw_active()) return;
     $fees = $cart->fees_api()->get_fees();
     $changed = false;
     foreach ($fees as $k => $fee) {
-        if ((float) $fee->amount < 0 && strpos((string) $fee->name, 'Empfehlungs-Rabatt') === 0) { unset($fees[$k]); $changed = true; }
+        if ((float) $fee->amount >= 0 || strpos((string) $fee->name, 'Empfehlungs-Rabatt') !== 0) continue;
+        $pct = defined('SP_AFF_REFERRAL_DISCOUNT_PCT') ? (float) SP_AFF_REFERRAL_DISCOUNT_PCT : 10;
+        $new = round(sp_hw_other_subtotal($cart) * $pct / 100, 2);
+        if ($new <= 0) { unset($fees[$k]); } else { $fees[$k]->amount = -$new; $fees[$k]->total = -$new; }
+        $changed = true;
     }
     if ($changed) $cart->fees_api()->set_fees($fees);
 }, 98);
@@ -599,6 +629,6 @@ function sp_hw_render_page() {
     echo '<div style="background:#fff;border:1px solid #dcdcde;border-radius:10px;padding:18px 20px;margin:16px 0"><h2 style="margin-top:0">Links</h2>';
     echo '<p><b>Early-Access-Link für die Newsletter-Mail:</b><br><code style="user-select:all">' . esc_html($ea) . '</code></p>';
     echo '<p><b>Vorschau (nur für dich, 24 h, zeigt alles wie live – auch wenn der Schalter aus ist):</b><br><a href="' . esc_url($pv) . '" target="_blank">' . esc_html($pv) . '</a><br><a href="' . esc_url(home_url('/?sp_hw=aus')) . '" target="_blank">Vorschau beenden</a></p></div>';
-    echo '<div style="background:#fff;border:1px solid #dcdcde;border-radius:10px;padding:18px 20px;margin:16px 0"><h2 style="margin-top:0">Was zählt („jede 3. gratis“)</h2><p>' . ($names ? implode(' · ', $names) : '– keine vorrätigen Flaschen –') . '</p><p style="color:#646970">Nur vorrätige Peptid-Flaschen. Nicht: Pens, Zubehör, Vorbestellungen, Abo, Geschenke. Während der Aktion: keine Rabattcodes, kein 10-%-Partnerlink-Rabatt, kein Mengenrabatt auf diese Flaschen. Partner-Codes ordnen weiter zu (0 € Rabatt).</p></div>';
+    echo '<div style="background:#fff;border:1px solid #dcdcde;border-radius:10px;padding:18px 20px;margin:16px 0"><h2 style="margin-top:0">Was zählt („jede 3. gratis“)</h2><p>' . ($names ? implode(' · ', $names) : '– keine vorrätigen Flaschen –') . '</p><p style="color:#646970">Nur vorrätige Peptid-Flaschen. Nicht: Pens, Zubehör, Vorbestellungen, Abo, Geschenke. Auf diese Flaschen während der Aktion: kein Rabattcode, kein 10-%-Partnerlink-Rabatt, kein Mengenrabatt – auf Pens/Zubehör gelten Codes und Partnerrabatt weiter. Partner-Codes ordnen immer zu. Early Access: Newsletter-Link oder Besucher über einen Partner-Link.</p></div>';
     echo '<div style="background:#fff;border:1px solid #dcdcde;border-radius:10px;padding:18px 20px;margin:16px 0"><h2 style="margin-top:0">Ergebnis</h2><p>' . (int) $cnt . ' Bestellungen · ' . wc_price($sum) . ' · ' . (int) $free . ' Flaschen gratis</p></div></div>';
 }
