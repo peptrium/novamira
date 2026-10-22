@@ -1,0 +1,94 @@
+# Halloween-Newsletter (Entwurf 2026-10-22): teaser (Mi 28.10.), early (Do 29.10. 18 Uhr), letzte (Sa 31.10.)
+# python3 gen.py <ea-token> -> <name>.body (Omnisend htmlCode, [[unsubscribe_link]]) + vorschau-<name>.html
+import sys
+F = "-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Helvetica,Arial,sans-serif"
+U = 'https://peptrium.com/wp-content/uploads/'
+E = U + 'sp-email/'
+BG = '#050607'; CARD = '#0E1114'; BD = '#22272E'; MU = '#9AA0A8'; LT = '#C9CDD2'; OR = '#FF7A1A'; OR2 = '#FFB547'
+EA = sys.argv[1] if len(sys.argv) > 1 else 'TOKEN'
+def utm(path, c): return f'https://peptrium.com{path}{"&" if "?" in path else "?"}utm_source=newsletter&utm_medium=email&utm_campaign={c}'
+def row(inner, pad, bg=BG, align='left'): return f'<tr><td style="padding:{pad};background:{bg};text-align:{align};font-family:{F};">{inner}</td></tr>'
+def btn(t, u): return (f'<a href="{u}" style="display:block;background:{OR};background-image:linear-gradient(90deg,{OR},{OR2});color:#140A02;text-align:center;'
+                       f'text-decoration:none;font-weight:800;font-size:16px;line-height:1.2;padding:17px 12px;border-radius:12px;font-family:{F};">{t} &rarr;</a>')
+def pill(t): return (f'<span style="display:inline-block;font-size:11px;font-weight:800;letter-spacing:.18em;color:{OR2};border:1px solid #7A3A10;border-radius:99px;padding:7px 12px;">{t}</span>')
+def h1(a, b, sub): return (f'<div style="font-size:36px;line-height:1.08;font-weight:800;color:#FFFFFF;letter-spacing:-.02em;margin-top:14px;">{a}<br><span style="color:{OR};">{b}</span></div>'
+                           f'<div style="font-size:15px;line-height:1.55;color:#B4BAC2;margin-top:12px;">{sub}</div>')
+def logo(): return (f'<img src="{U}2026/08/IMG_2644-cropped-300x300.png" width="54" height="54" alt="Peptrium" style="display:block;margin:0 auto;width:54px;height:54px;border:0;">'
+                    f'<div style="font-size:12px;font-weight:800;letter-spacing:.34em;padding-left:.34em;color:#E6E8EB;margin-top:6px;">PEPTRIUM</div>')
+def hero(link): return (f'<tr><td style="padding:0;line-height:0;background:{BG};"><a href="{link}" style="display:block;line-height:0;"><img src="{E}nl-hw-hero.jpg" width="600" alt="Halloween bei Peptrium" '
+                        f'style="display:block;width:100%;max-width:600px;height:auto;border:0;"></a></td></tr>')
+def box(inner, bd='#5A2A0C', bg='#140A02'): return f'<div style="background:{bg};border:1px solid {bd};border-radius:16px;padding:18px 18px;">{inner}</div>'
+def steps():
+    s = lambda n, t, d: (f'<tr><td width="40" valign="top" style="width:40px;padding:8px 0;"><div style="width:30px;height:30px;line-height:30px;border-radius:50%;background:{OR};color:#140A02;text-align:center;font-weight:800;font-size:14px;">{n}</div></td>'
+                         f'<td style="padding:8px 0;font-family:{F};"><div style="font-size:15px;font-weight:800;color:#fff;">{t}</div><div style="font-size:13px;color:{MU};margin-top:2px;line-height:1.45;">{d}</div></td></tr>')
+    return ('<table role="presentation" width="100%" cellpadding="0" cellspacing="0">' + s(1, 'Leg 3 Flaschen in den Warenkorb', 'Auch gemischt – z. B. 2× Retatrutide + 1× GHK-Cu.')
+            + s(2, 'Die günstigste ist gratis', 'Wird automatisch abgezogen, kein Code nötig.') + s(3, 'Bei 6 Flaschen sind 2 gratis', 'Jede dritte Flasche zählt – so oft du willst.') + '</table>')
+def prods(c):
+    p = lambda img, n, was, now, u: (f'<tr><td style="padding:6px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;background:{CARD};border:1px solid {BD};border-radius:14px;overflow:hidden;"><tr>'
+        f'<td width="92" style="width:92px;padding:0;line-height:0;"><a href="{u}"><img src="{img}" width="92" alt="" style="display:block;width:92px;height:92px;border:0;"></a></td>'
+        f'<td style="padding:10px 12px;font-family:{F};"><div style="font-size:15px;font-weight:800;color:#fff;">{n}</div>'
+        f'<div style="font-size:13px;color:{MU};margin-top:3px;">3 Flaschen: <s style="white-space:nowrap;">{was}</s> <b style="color:{OR2};font-size:15px;white-space:nowrap;">{now}</b></div></td>'
+        f'<td width="44" style="width:44px;padding-right:12px;"><a href="{u}" style="display:block;width:36px;height:36px;line-height:36px;border-radius:50%;background:#fff;color:#0D0F12;text-align:center;font-weight:800;text-decoration:none;font-size:18px;">&rarr;</a></td>'
+        '</tr></table></td></tr>')
+    return ('<table role="presentation" width="100%" cellpadding="0" cellspacing="0">'
+            + p(E + 'nl-p-reta.jpg', 'Retatrutide 10 mg', '224,70 €', '149,80 €', utm('/produkt/retatrutide/?attribute_volumen=10mg', c))
+            + p(E + 'nl-p-reta20.jpg', 'Retatrutide 20 mg', '434,70 €', '289,80 €', utm('/produkt/retatrutide/?attribute_volumen=20mg', c))
+            + p(E + 'nl-p-ghk100.jpg', 'GHK-Cu 100 mg', '224,70 €', '149,80 €', utm('/produkt/ghk-cu/?attribute_volumen=100mg', c)) + '</table>')
+def foot():
+    return (f'<div style="height:1px;background:#2C3138;margin:0 0 22px;"></div>' + logo()
+            + f'<div style="font-size:11px;color:#7D848D;margin-top:12px;line-height:1.6;">Alle Produkte ausschließlich für Laborforschungszwecke.<br>Nicht für den menschlichen oder veterinärmedizinischen Gebrauch.</div>'
+            + f'<div style="font-size:11px;color:#7D848D;margin-top:12px;line-height:1.6;">Angebot gilt solange der Vorrat reicht, nicht für Pens, Zubehör und Vorbestellungen.<br>Du bekommst diese Mail, weil du den Peptrium-Newsletter abonniert hast. <a href="[[unsubscribe_link]]" style="color:#7D848D;">Abmelden</a></div>')
+def wrap(rows):
+    return (f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:{BG};"><tr><td align="center" style="padding:0;">'
+            f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:{BG};">' + rows
+            + row(foot(), '8px 22px 30px', bg='#12151A', align='center') + '</table></td></tr></table>')
+def timeline(active):
+    items = [('Do 29.10. · 18 Uhr', 'Early Access – nur für dich'), ('Fr 30.10. · 0 Uhr', 'Start für alle'), ('So 1.11. · 23:59', 'Ende – solange der Vorrat reicht')]
+    out = '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">'
+    for i, (d, t) in enumerate(items):
+        on = i == active
+        out += (f'<tr><td width="18" valign="top" style="width:18px;padding:10px 0;"><div style="width:10px;height:10px;border-radius:50%;margin-top:4px;background:{OR if on else "#3A3F45"};"></div></td>'
+                f'<td style="padding:8px 0;font-family:{F};{"" if i == len(items)-1 else f"border-bottom:1px solid {BD};"}"><div style="font-size:14px;font-weight:800;color:{OR2 if on else "#fff"};">{d}</div><div style="font-size:13px;color:{MU};margin-top:2px;">{t}</div></td></tr>')
+    return out + '</table>'
+
+def teaser():
+    c = 'halloween-teaser'
+    return wrap(row(logo(), '26px 20px 6px', align='center') + hero(utm('/alle-produkte/', c))
+        + row(pill('🎃 INSIDER-VORSCHAU') + h1('Jede 3. Flasche', 'gratis.', 'Am Freitag startet unser Halloween-Special. <b style="color:#fff;">Du bist schon morgen ab 18 Uhr dabei</b> – sechs Stunden vor allen anderen.'), '22px 22px 6px')
+        + row(box(f'<div style="font-size:11px;font-weight:800;letter-spacing:.18em;color:{OR2};margin-bottom:6px;">DER ABLAUF</div>' + timeline(0)), '18px 16px 4px')
+        + row(f'<div style="font-size:11px;font-weight:800;letter-spacing:.18em;color:{LT};margin-bottom:4px;">SO FUNKTIONIERT’S</div>' + steps(), '18px 22px 4px')
+        + row(box(f'<div style="font-size:15px;font-weight:800;color:#fff;">📩 Morgen um 18 Uhr kommt dein Zugang</div><div style="font-size:13.5px;color:{MU};margin-top:6px;line-height:1.5;">Wir schicken dir den Early-Access-Link per Mail. Der Vorrat ist begrenzt – Insider haben die erste Wahl.</div>', bd=BD, bg=CARD), '14px 16px 4px')
+        + row(btn('Schon mal stöbern', utm('/alle-produkte/', c)), '18px 22px 26px'))
+
+def early():
+    c = 'halloween-early'
+    link = f'https://peptrium.com/?sp_hw=frueh&k={EA}&utm_source=newsletter&utm_medium=email&utm_campaign={c}'
+    return wrap(row(logo(), '26px 20px 6px', align='center') + hero(link)
+        + row(pill('🎃 EARLY ACCESS · JETZT FREIGESCHALTET') + h1('Du bist drin.', 'Jede 3. Flasche gratis.', 'Für alle anderen startet es erst um Mitternacht. Tippe auf den Button – damit wird das Angebot auf deinem Gerät freigeschaltet.'), '22px 22px 6px')
+        + row(btn('Early Access öffnen', link), '18px 22px 6px')
+        + row(f'<div style="font-size:12px;color:{MU};text-align:center;line-height:1.5;">Öffne den Link auf dem Gerät, mit dem du bestellst.</div>', '4px 22px 6px', align='center')
+        + row(f'<div style="font-size:11px;font-weight:800;letter-spacing:.18em;color:{LT};margin-bottom:6px;">SO VIEL SPARST DU</div>' + prods(c), '18px 16px 4px')
+        + row(f'<div style="font-size:11px;font-weight:800;letter-spacing:.18em;color:{LT};margin-bottom:4px;">SO FUNKTIONIERT’S</div>' + steps(), '18px 22px 4px')
+        + row(box(f'<div style="font-size:14px;color:#FFE7CC;line-height:1.5;">⏳ <b>Nur solange der Vorrat reicht.</b> Ab Freitag kaufen alle anderen mit – sicher dir deine Flaschen jetzt.</div>'), '14px 16px 4px')
+        + row(btn('Jetzt Flaschen wählen', link), '18px 22px 26px'))
+
+def letzte():
+    c = 'halloween-letzte'
+    return wrap(row(logo(), '26px 20px 6px', align='center') + hero(utm('/alle-produkte/', c))
+        + row(pill('🎃 LETZTE CHANCE') + h1('Nur noch bis', 'Sonntag, 23:59.', 'Danach ist das Halloween-Special vorbei – und jede Flasche kostet wieder den normalen Preis.'), '22px 22px 6px')
+        + row(box(f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="font-family:{F};text-align:center;padding:4px 0;">'
+                  f'<div style="font-size:11px;font-weight:800;letter-spacing:.18em;color:{OR2};">ENDET IN</div>'
+                  f'<div style="font-size:40px;font-weight:800;color:#fff;margin-top:6px;letter-spacing:-.02em;">ca. 1 Tag</div>'
+                  f'<div style="font-size:13px;color:{MU};margin-top:4px;">So 1.11. um 23:59 Uhr · solange der Vorrat reicht</div></td></tr></table>'), '18px 16px 4px')
+        + row(btn('Jetzt Flaschen wählen', utm('/alle-produkte/', c)), '18px 22px 6px')
+        + row(f'<div style="font-size:11px;font-weight:800;letter-spacing:.18em;color:{LT};margin-bottom:6px;">DIE BELIEBTESTEN</div>' + prods(c), '18px 16px 4px')
+        + row(f'<div style="font-size:14px;color:{MU};line-height:1.55;">Jede 3. Flasche ist gratis – die günstigste im Warenkorb, auch gemischt. Kein Code nötig.</div>', '14px 22px 4px')
+        + row(btn('Zum Shop', utm('/alle-produkte/', c)), '18px 22px 26px'))
+
+if __name__ == '__main__':
+    for name, fn in [('teaser', teaser), ('early', early), ('letzte', letzte)]:
+        b = fn()
+        open(name + '.body', 'w').write(b)
+        v = b.replace(E + 'nl-hw-hero.jpg', 'nl-hw-hero.jpg').replace('[[unsubscribe_link]]', '#')
+        open('vorschau-' + name + '.html', 'w').write('<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;background:#050607;">' + v + '</body></html>')
+        print(name, len(b))
