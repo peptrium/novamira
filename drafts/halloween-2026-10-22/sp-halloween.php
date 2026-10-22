@@ -33,7 +33,7 @@ function sp_hw_opt() {
         'start' => (new DateTime('2026-10-30 00:00:00', $tz))->getTimestamp(),
         'end'   => (new DateTime('2026-11-01 23:59:59', $tz))->getTimestamp(),
         'bonus' => 5,
-        'wenig' => 30,
+        'wenig' => 1,
         'ea'    => '',
         'pv'    => '',
     ];
@@ -285,45 +285,17 @@ add_action('init', function () {
 }, 2);
 
 /* ---------------------------------------------------------------------
- * "Nur noch wenige verfügbar" – NUR aus dem echten Lagerbestand (sp-lager.php):
- * verfuegbar = min(Bestand je Material / Bedarf laut Rezept); nicht gezaehlte
- * Materialien (qty null) werden ignoriert. Hinweis nur wenn 1..Schwelle.
+ * "Nur noch wenige verfügbar" in der Kaufbox – auf allen Produktseiten,
+ * solange die Aktion laeuft (User 2026-10-22: ohne Lagerabgleich, Schalter 'wenig').
  * ------------------------------------------------------------------- */
-function sp_hw_low_map($product) {
-    if (!function_exists('sp_lager_recipes') || !function_exists('sp_lager_mats')) return [];
-    $o = sp_hw_opt();
-    $lim = (int) $o['wenig'];
-    if ($lim <= 0) return [];
-    $mats = sp_lager_mats();
-    $rec = sp_lager_recipes();
-    $ids = $product->is_type('variable') ? $product->get_children() : [$product->get_id()];
-    $map = [];
-    foreach ($ids as $id) {
-        if (empty($rec[$id])) continue;
-        $avail = null;
-        foreach ($rec[$id] as $code => $need) {
-            if (!isset($mats[$code]) || $mats[$code]['qty'] === null || $need <= 0) continue;
-            $n = (int) floor(max(0, (float) $mats[$code]['qty']) / $need);
-            $avail = $avail === null ? $n : min($avail, $n);
-        }
-        if ($avail !== null && $avail >= 1 && $avail <= $lim) $map[(int) $id] = 1;
-    }
-    return $map;
-}
-
 add_action('wp_footer', function () {
     if (!sp_hw_active() || !function_exists('is_product') || !is_product()) return;
-    $p = wc_get_product(get_queried_object_id());
-    if (!$p) return;
-    $map = sp_hw_low_map($p);
-    if (!$map) return;
+    $o = sp_hw_opt();
+    if (empty($o['wenig'])) return;
+    if (in_array((int) get_queried_object_id(), [729, 745, 817], true)) return;
     ?>
-<style>.rx-stock.sp-hw-low{color:#B45309!important;font-weight:700!important}.rx-stock.sp-hw-low .rx-stock-dot{background:#F59E0B!important;box-shadow:0 0 0 3px rgba(245,158,11,.25)!important;animation:sphwvr 1.6s infinite}</style>
-<script>(function(){var M=<?php echo wp_json_encode($map); ?>,P=<?php echo (int) $p->get_id(); ?>;var st=document.querySelector('#rx-buybox .rx-stock');if(!st)return;var dot=st.querySelector('.rx-stock-dot'),orig=st.innerHTML;
-function set(id){var low=!!M[id];st.classList.toggle('sp-hw-low',low);st.innerHTML=low?(dot?dot.outerHTML:'')+' Nur noch wenige verfügbar':orig;}
-function cur(){var v=document.querySelector('form.variations_form input[name="variation_id"]');return v&&parseInt(v.value,10)?parseInt(v.value,10):P;}
-set(cur());if(window.jQuery){jQuery(document).on('found_variation','form.variations_form',function(e,v){set(v&&v.variation_id||P)});jQuery(document).on('reset_data','form.variations_form',function(){set(cur())});}
-document.addEventListener('click',function(e){if(e.target.closest('#rx-vol-tiers'))setTimeout(function(){set(cur())},250);});})();</script>
+<style>.rx-stock.sp-hw-low{color:#B45309!important;font-weight:700!important}.rx-stock.sp-hw-low .rx-stock-dot{background:#F59E0B!important;box-shadow:0 0 0 3px rgba(245,158,11,.25)!important}</style>
+<script>(function(){var st=document.querySelector('#rx-buybox .rx-stock');if(!st)return;var dot=st.querySelector('.rx-stock-dot');st.classList.add('sp-hw-low');st.innerHTML=(dot?dot.outerHTML:'')+' Nur noch wenige verfügbar';})();</script>
     <?php
 }, 125);
 
@@ -586,7 +558,7 @@ function sp_hw_render_page() {
             try { if ($v !== '') $o[$k] = (new DateTime(str_replace('T', ' ', $v), $tz))->getTimestamp(); } catch (Exception $e) {}
         }
         $o['bonus'] = max(0, min(20, (float) str_replace(',', '.', (string) ($_POST['bonus'] ?? 5))));
-        $o['wenig'] = max(0, min(500, (int) ($_POST['wenig'] ?? 30)));
+        $o['wenig'] = empty($_POST['wenig']) ? 0 : 1;
         update_option('sp_hw', $o, false);
         delete_transient('sp_hw_ids_v1');
         $log = (array) get_option('sp_hw_log', []);
@@ -620,7 +592,7 @@ function sp_hw_render_page() {
     echo '<table class="form-table"><tr><th>Early Access (Newsletter)</th><td><input type="datetime-local" name="early" value="' . esc_attr($f($o['early'])) . '"></td></tr>';
     echo '<tr><th>Start für alle</th><td><input type="datetime-local" name="start" value="' . esc_attr($f($o['start'])) . '"></td></tr>';
     echo '<tr><th>Ende</th><td><input type="datetime-local" name="end" value="' . esc_attr($f($o['end'])) . '"></td></tr>';
-    echo '<tr><th>„Nur noch wenige verfügbar“</th><td>ab <input type="text" name="wenig" value="' . esc_attr($o['wenig']) . '" style="width:60px"> Flaschen oder weniger im Lager (0 = nie). Nur echter Bestand aus „Lager“.</td></tr>';
+    echo '<tr><th>„Nur noch wenige verfügbar“</th><td><label><input type="checkbox" name="wenig" value="1" ' . checked(!empty($o['wenig']), true, false) . '> auf allen Produktseiten zeigen, solange die Aktion läuft</label></td></tr>';
     echo '<tr><th>Partner-Bonus</th><td><input type="text" name="bonus" value="' . esc_attr($o['bonus']) . '" style="width:60px"> Prozentpunkte zusätzlich (z. B. 20 % → 25 %)</td></tr></table>';
     echo '<p><button class="button button-primary button-hero" name="sp_hw_save" value="1">Speichern</button></p></form>';
     echo '<div style="background:#fff;border:1px solid #dcdcde;border-radius:10px;padding:18px 20px;margin:16px 0"><h2 style="margin-top:0">Links</h2>';
