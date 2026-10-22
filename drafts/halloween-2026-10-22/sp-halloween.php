@@ -331,7 +331,7 @@ add_action('wp_footer', function () {
 add_action('wp_footer', function () {
     if (!sp_hw_active() || !function_exists('is_checkout') || !is_checkout() || is_order_received_page()) return;
     ?>
-<style>#sp-hw-co{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:8px 16px;padding:11px 14px;border-radius:12px;background:linear-gradient(135deg,#140A02,#2A1306);border:1px solid rgba(255,122,26,.45);color:#FFE7CC;font:600 14px/1.35 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif}#sp-hw-co b{color:#FFB547;font-size:15px;white-space:nowrap}</style>
+<style>#sp-hw-co{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:8px 16px;padding:11px 14px;border-radius:12px;background:linear-gradient(135deg,#140A02,#2A1306);border:1px solid rgba(255,122,26,.45);color:#FFE7CC;font:600 14px/1.35 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif}#sp-hw-co b{color:#FFB547;font-size:15px;white-space:nowrap}#sp-hw-co .cdl{font-size:12px;color:#E8C9A8;margin-top:3px;font-variant-numeric:tabular-nums}#sp-hw-co .cdl span{color:#fff;font-weight:700}</style>
 <script>(function(){var t=0;function run(){if(t)return;t=setTimeout(function(){t=0;if(!window.wp||!wp.data)return;var st=wp.data.select('wc/store/cart');if(!st)return;var c=st.getCartData();if(!c||!c.items)return;
  var save=0,free=0;c.items.forEach(function(it){var hw=(it.item_data||[]).filter(function(d){return /Halloween/.test(d.name||d.key||'')})[0];if(!hw)return;var tt=it.totals||{};save+=(parseInt(tt.line_subtotal,10)-parseInt(tt.line_total,10))||0;free+=parseInt(String(hw.value||'').replace(/[^0-9]/g,''),10)||0;});
  var minor=(c.totals&&c.totals.currency_minor_unit)||2,box=document.getElementById('sp-hw-co');
@@ -340,7 +340,10 @@ add_action('wp_footer', function () {
  if(!box){box=document.createElement('div');box.id='sp-hw-co';}
  if(box.nextElementSibling!==anchor)anchor.parentNode.insertBefore(box,anchor);
  var v=(save/Math.pow(10,minor)).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+'\u00a0€';
- box.innerHTML='<span>🎃 Halloween: '+free+' Flasche'+(free>1?'n':'')+' gratis</span><b>−'+v+'</b>';},300);}
+ box.innerHTML='<div><span>🎃 Halloween: '+free+' Flasche'+(free>1?'n':'')+' gratis</span><div class="cdl">⏳ Endet in <span id="sp-hw-co-cd">'+cdt()+'</span></div></div><b>−'+v+'</b>';},300);}
+var E=<?php echo (int) sp_hw_opt()['end'] * 1000; ?>;function p2(n){return (n<10?'0':'')+n}
+function cdt(){var s=Math.max(0,Math.floor((E-Date.now())/1000)),d=Math.floor(s/86400);return (d?d+' T · ':'')+p2(Math.floor(s%86400/3600))+':'+p2(Math.floor(s%3600/60))+':'+p2(s%60);}
+setInterval(function(){var x=document.getElementById('sp-hw-co-cd');if(x)x.textContent=cdt();},1000);
 var iv=setInterval(function(){if(window.wp&&wp.data){clearInterval(iv);wp.data.subscribe(run);run();}},300);})();</script>
     <?php
 }, 130);
@@ -416,6 +419,13 @@ add_action('wp_head', function () {
 #sp-hw-bb b{color:var(--hw-or2);display:block;font-size:13px;letter-spacing:.08em;margin-bottom:2px}
 #rx-tiers .rx-tier[data-q="3"] .rx-tier__disc,#rx-tiers .rx-tier[data-q="5"] .rx-tier__disc,#rx-tiers .rx-tier[data-q="10"] .rx-tier__disc{color:#B94A00!important}
 /* Warenkorb */
+#sp-hw-bb .ex{margin-top:8px;font-size:15px;color:#fff}#sp-hw-bb .ex s{color:#A89888;margin-right:4px}#sp-hw-bb .ex strong{color:var(--hw-or2);font-size:17px}
+#sp-hw-bb .cdl,#sp-hw-sum .cdl{margin-top:6px;font-size:12.5px;color:#E8C9A8;font-variant-numeric:tabular-nums}#sp-hw-bb .cdl span,#sp-hw-sum .cdl span{color:#fff;font-weight:700}
+#sp-hw-bb .t3{margin-top:10px;width:100%;border:0;border-radius:10px;padding:11px 12px;background:linear-gradient(90deg,var(--hw-or),var(--hw-or2))!important;color:#140A02!important;font:800 14.5px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;cursor:pointer;box-shadow:none!important}
+#sp-hw-cd .add{display:block;margin-top:8px;width:100%;border:0;border-radius:9px;padding:9px 10px;background:linear-gradient(90deg,var(--hw-or),var(--hw-or2))!important;color:#140A02!important;font:800 13.5px/1.2 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;cursor:pointer;box-shadow:none!important;text-align:center}
+#sp-hw-cd .add[disabled]{opacity:.6}
+#sp-hw-sum{margin:6px 0 10px;background:linear-gradient(135deg,#140A02,#2A1306);color:#FFE7CC;border:1px solid rgba(255,122,26,.45);border-radius:12px;padding:10px 12px;font:600 13.5px/1.35 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif}
+#sp-hw-sum .row{display:flex;justify-content:space-between;gap:8px;align-items:center}#sp-hw-sum .row b{color:var(--hw-or2);font-size:16px;white-space:nowrap}
 #sp-hw-cd{margin:10px 14px 4px;background:#140A02;color:#FFE7CC;border:1px solid rgba(255,122,26,.45);border-radius:12px;padding:10px 12px;font:600 13.5px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;display:flex;gap:10px;align-items:center}
 #sp-hw-cd .bar{flex:1;height:6px;border-radius:6px;background:rgba(255,255,255,.12);overflow:hidden;margin-top:6px}
 #sp-hw-cd .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--hw-or),var(--hw-or2));border-radius:6px;transition:width .3s}
@@ -489,6 +499,7 @@ add_action('wp_footer', function () {
 (function(){var C=<?php echo wp_json_encode($cfg); ?>;var live=C.state==='live'||C.state==='early';
 var DE=['So','Mo','Di','Mi','Do','Fr','Sa'];
 function pad(n){return (n<10?'0':'')+n}
+function cdt(){var l=left(C.end);return (l.d?l.d+(l.d>1?' Tagen ':' Tag ')+'· ':'')+pad(l.h)+':'+pad(l.m)+':'+pad(l.s);}
 function left(t){var s=Math.max(0,Math.floor((t-Date.now())/1000));return {d:Math.floor(s/86400),h:Math.floor(s%86400/3600),m:Math.floor(s%3600/60),s:s%60,t:s}}
 var bat='<svg viewBox="0 0 24 12" class="sp-hw-bat XX"><path d="M0 4C3 1 6 1 8 3.5 9 1.5 10.5 1 12 2.6 13.5 1 15 1.5 16 3.5 18 1 21 1 24 4 21.5 4 19.6 5 18.6 7 16.8 6 14.6 6.4 12 9 9.4 6.4 7.2 6 5.4 7 4.4 5 2.5 4 0 4Z"/></svg>';
 /* Top-Banner */
@@ -518,7 +529,7 @@ if(C.home){var ht=0,hi=setInterval(function(){
  title.innerHTML='Jede 3. Flasche<br><span class="sp-hw-g">gratis.</span>';
  if(mob){m.classList.add('sp-hw-m');var tx=m.querySelector('.sp-hero2-text');if(tx)tx.classList.add('sp-hw-t');}
  if(sub)sub.innerHTML=live?(mob?'Die günstigste zahlst du nicht.':'Leg 3 Flaschen in den Warenkorb –<br>die günstigste zahlst du nicht.'):(mob?'Ab '+C.startT+' · Insider schon '+C.earlyT:'Ab '+C.startT+' für alle.<br>Newsletter-Abonnenten schon '+C.earlyT+'.');
- if(cta){cta.classList.add('sp-hw-cta');if(live){cta.firstChild.nodeValue='Jetzt sichern ';}else{cta.setAttribute('href','#sp-nlh');cta.firstChild.nodeValue='Eintragen & früher dabei ';}
+ if(cta){cta.classList.add('sp-hw-cta');if(live){cta.firstChild.nodeValue='3 für 2 sichern ';}else{cta.setAttribute('href','#sp-nlh');cta.firstChild.nodeValue='Eintragen & früher dabei ';}
   var cw=cta.parentElement;if(mob&&cw)cw.classList.add('sp-hw-cw');
   var vr='<div class="sp-hw-vr"><i></i>'+(live?'Nur solange der Vorrat reicht':'Begrenzter Vorrat – Insider kaufen zuerst')+'</div>';
   if(mob&&cw)cw.insertAdjacentHTML('afterbegin',vr);else if(sub)sub.insertAdjacentHTML('afterend',vr);
@@ -554,7 +565,11 @@ var own=0;function fix(){if(own||!tot||!qf||!pe)return;var q=parseInt(qf.value,1
  own=1;tot.textContent=fm(u*(q-fr)+add);if(sav){if(fr>0){sav.style.display='';sav.textContent='🎃 '+fr+'× gratis – du sparst '+fm(u*fr);}else{sav.style.display='none';}}setTimeout(function(){own=0},0);}
 if(C.pp&&tot){new MutationObserver(fix).observe(tot,{childList:true,characterData:true,subtree:true});fix();}
 /* Buybox-Hinweis */
-if(C.pp){var bb=document.getElementById('rx-buybox');if(bb&&!document.getElementById('sp-hw-bb')){bb.insertAdjacentHTML('afterbegin','<div id="sp-hw-bb"><b>🎃 HALLOWEEN-SPECIAL</b>Jede 3. Flasche gratis – leg 3 Flaschen in den Warenkorb, die günstigste zahlst du nicht. Auch gemischt mit anderen Peptiden. Nur solange der Vorrat reicht.</div>');}}
+if(C.pp){var bb=document.getElementById('rx-buybox');if(bb&&!document.getElementById('sp-hw-bb')){bb.insertAdjacentHTML('afterbegin','<div id="sp-hw-bb"><b>🎃 HALLOWEEN-SPECIAL</b>Jede 3. Flasche gratis – die günstigste zahlst du nicht. Auch gemischt mit anderen Peptiden.<div class="ex"></div><div class="cdl">⏳ Endet in <span></span> · solange der Vorrat reicht</div><button type="button" class="t3">3 Flaschen wählen – 1 gratis</button></div>');
+ var hb=document.getElementById('sp-hw-bb'),hx=hb.querySelector('.ex'),hc=hb.querySelector('.cdl span');
+ var upd=function(){var pr=document.getElementById('rx-price');var u=pr?num(pr.textContent):0;hx.innerHTML=u>0?'3 Flaschen: <s>'+fm(u*3)+'</s> <strong>'+fm(u*2)+'</strong>':'';hc.textContent=cdt();};
+ upd();setInterval(upd,1000);
+ hb.querySelector('.t3').addEventListener('click',function(){var t=document.querySelector('#rx-tiers .rx-tier[data-q="3"],.rx-tier[data-q="3"]');if(t)t.click();var a=document.querySelector('.single_add_to_cart_button');if(a){setTimeout(function(){a.scrollIntoView({behavior:'smooth',block:'center'});},150);}});}}
 /* Warenkorb-Hinweis */
 var busy=0;function cart(){if(busy)return;busy=setTimeout(function(){busy=0;fetch('/wp-json/wc/store/v1/cart',{credentials:'same-origin'}).then(function(r){return r.json()}).then(function(c){
  var n=0;(c.items||[]).forEach(function(it){if(ids[it.id]&&parseInt(it.prices&&it.prices.regular_price||0,10)>0&&!(it.item_data||[]).some(function(d){return /Geschenk/i.test(d.name||d.key||'')}))n+=it.quantity;});
@@ -562,8 +577,20 @@ var busy=0;function cart(){if(busy)return;busy=setTimeout(function(){busy=0;fetc
  if(!box){box=document.createElement('div');box.id='sp-hw-cd';sc.insertAdjacentElement('afterbegin',box);}
  var r=n%3,f=Math.floor(n/3),need=3-r;
  var txt=n===0?'Jede 3. Flasche ist gratis – leg 3 in den Warenkorb.':(r===0?'✓ '+f+' Flasche'+(f>1?'n':'')+' gratis! Noch 3 für die nächste.':'Noch '+need+' Flasche'+(need>1?'n':'')+', dann ist eine gratis.'+(f?' ('+f+' schon gratis)':''));
- box.innerHTML='<span style="font-size:22px">🎃</span><div style="flex:1">'+txt+'<div class="bar"><i style="width:'+(r/3*100)+'%"></i></div></div>';
+ var ch=null;(c.items||[]).forEach(function(it){if(!ids[it.id]||(it.item_data||[]).some(function(d){return /Geschenk/i.test(d.name||d.key||'')}))return;var rp=parseInt(it.prices&&it.prices.regular_price||0,10);if(rp>0&&(!ch||rp<ch.rp))ch={id:it.id,rp:rp,name:it.name+((it.variation||[]).length?' '+it.variation.map(function(v){return v.value}).join(' '):'')};});
+ var btn=(r===2&&ch)?'<button type="button" class="add" data-id="'+ch.id+'">+ 1× '+ch.name+' dazu – gratis 🎃</button>':'';
+ box.innerHTML='<span style="font-size:22px">🎃</span><div style="flex:1">'+txt+'<div class="bar"><i style="width:'+(r/3*100)+'%"></i></div>'+btn+'</div>';
+ var save=0;(c.items||[]).forEach(function(it){if(!(it.item_data||[]).some(function(d){return /Halloween/.test(d.name||d.key||'')}))return;var tt=it.totals||{};save+=(parseInt(tt.line_subtotal,10)-parseInt(tt.line_total,10))||0;});
+ var minor=(c.totals&&c.totals.currency_minor_unit)||2,anc=document.getElementById('sp-cd-dhl'),sm=document.getElementById('sp-hw-sum');
+ if(anc&&n>0){if(!sm){sm=document.createElement('div');sm.id='sp-hw-sum';}if(sm.nextElementSibling!==anc)anc.parentNode.insertBefore(sm,anc);
+  sm.innerHTML=(save>0?'<div class="row"><span>🎃 Halloween-Angebot: du sparst</span><b>−'+fm(save/Math.pow(10,minor))+'</b></div>':'<div class="row"><span>🎃 Noch '+need+' Flasche'+(need>1?'n':'')+' bis zur Gratis-Flasche</span></div>')+'<div class="cdl">⏳ Angebot endet in <span>'+cdt()+'</span></div>';}
+ else if(sm){sm.remove();}
+ var sr=document.getElementById('sp-cd-total-savings-row'),sv=document.getElementById('sp-cd-total-savings-val');if(sr&&sv){sr.style.visibility=(save>0&&Math.abs(num(sv.textContent)-save/Math.pow(10,minor))<0.02)?'hidden':'';if(sr.style.visibility==='hidden')sr.style.height='0',sr.style.margin='0',sr.style.overflow='hidden';else sr.style.height=sr.style.margin='';}
  });},400);}
+setInterval(function(){var s=document.querySelector('#sp-hw-sum .cdl span');if(s)s.textContent=cdt();},1000);
+document.addEventListener('click',function(e){var b=e.target.closest('#sp-hw-cd .add');if(!b)return;b.disabled=true;b.textContent='Wird hinzugefügt …';
+ var fd=new FormData();fd.append('product_id',b.getAttribute('data-id'));fd.append('quantity','1');
+ fetch('/?wc-ajax=add_to_cart',{method:'POST',body:fd,credentials:'same-origin'}).then(function(r){return r.json()}).then(function(d){if(window.jQuery&&d&&d.fragments)jQuery(document.body).trigger('added_to_cart',[d.fragments,d.cart_hash]);else if(window.jQuery)jQuery(document.body).trigger('added_to_cart');}).catch(function(){b.disabled=false;});});
 var items=document.getElementById('sp-cd-items');if(items){new MutationObserver(cart).observe(items,{childList:true,subtree:true});}
 if(window.jQuery)jQuery(document.body).on('added_to_cart removed_from_cart',cart);
 document.addEventListener('click',function(e){if(e.target.closest('#sp-cart-fab'))cart();});
