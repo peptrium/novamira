@@ -1,4 +1,5 @@
-# Halloween-Newsletter (Entwurf 2026-10-22): teaser (Mi 28.10.), early (Do 29.10. 18 Uhr), letzte (Sa 31.10.)
+# Halloween-Newsletter (v2 2026-10-23): teaser (Mi 28.10.), early (Do 29.10. 18 Uhr), letzte (So 1.11. ~11 Uhr)
+# v2: keine Streichpreise (PAngV), 'Heute 23:59', Vorkasse-Hinweis, Impressum-Link, Geraete-Hinweis deutlicher, Betreffzeilen in SUBJ
 # python3 gen.py <ea-token> -> <name>.body (Omnisend htmlCode, [[unsubscribe_link]]) + vorschau-<name>.html
 import sys
 F = "-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Helvetica,Arial,sans-serif"
@@ -27,7 +28,7 @@ def prods(c):
     p = lambda img, n, was, now, u: (f'<tr><td style="padding:6px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;background:{CARD};border:1px solid {BD};border-radius:14px;overflow:hidden;"><tr>'
         f'<td width="92" style="width:92px;padding:0;line-height:0;"><a href="{u}"><img src="{img}" width="92" alt="" style="display:block;width:92px;height:92px;border:0;"></a></td>'
         f'<td style="padding:10px 12px;font-family:{F};"><div style="font-size:15px;font-weight:800;color:#fff;">{n}</div>'
-        f'<div style="font-size:13px;color:{MU};margin-top:3px;">3 Flaschen: <s style="white-space:nowrap;">{was}</s> <b style="color:{OR2};font-size:15px;white-space:nowrap;">{now}</b></div></td>'
+        f'<div style="font-size:13px;color:{MU};margin-top:3px;">3 Flaschen – du zahlst nur 2</div><div style="font-size:16px;font-weight:800;color:{OR2};margin-top:2px;white-space:nowrap;">{now}</div></td>'
         f'<td width="44" style="width:44px;padding-right:12px;"><a href="{u}" style="display:block;width:36px;height:36px;line-height:36px;border-radius:50%;background:#fff;color:#0D0F12;text-align:center;font-weight:800;text-decoration:none;font-size:18px;">&rarr;</a></td>'
         '</tr></table></td></tr>')
     return ('<table role="presentation" width="100%" cellpadding="0" cellspacing="0">'
@@ -37,11 +38,12 @@ def prods(c):
 def foot():
     return (f'<div style="height:1px;background:#2C3138;margin:0 0 22px;"></div>' + logo()
             + f'<div style="font-size:11px;color:#7D848D;margin-top:12px;line-height:1.6;">Alle Produkte ausschließlich für Laborforschungszwecke.<br>Nicht für den menschlichen oder veterinärmedizinischen Gebrauch.</div>'
-            + f'<div style="font-size:11px;color:#7D848D;margin-top:12px;line-height:1.6;">Angebot gilt solange der Vorrat reicht, nicht für Pens, Zubehör und Vorbestellungen.<br>Du bekommst diese Mail, weil du den Peptrium-Newsletter abonniert hast. <a href="[[unsubscribe_link]]" style="color:#7D848D;">Abmelden</a></div>')
+            + f'<div style="font-size:11px;color:#7D848D;margin-top:12px;line-height:1.6;">Angebot gilt solange der Vorrat reicht, nicht für Pens, Zubehör und Vorbestellungen.<br>Du bekommst diese Mail, weil du den Peptrium-Newsletter abonniert hast. <br><a href="https://peptrium.com/impressum/" style="color:#7D848D;">Impressum</a> · <a href="[[unsubscribe_link]]" style="color:#7D848D;">Abmelden</a></div>')
 def wrap(rows):
     return (f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:{BG};"><tr><td align="center" style="padding:0;">'
             f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:{BG};">' + rows
             + row(foot(), '8px 22px 30px', bg='#12151A', align='center') + '</table></td></tr></table>')
+def vk(): return box(f'<div style="font-size:14px;color:#E6E8EB;line-height:1.5;">💳 <b>Per Vorkasse?</b> <span style="color:{MU};">Kein Stress – es zählt deine Bestellung, nicht der Zahlungseingang. Der Aktionspreis bleibt dir.</span></div>', bd=BD, bg=CARD)
 def timeline(active):
     items = [('Do 29.10. · 18 Uhr', 'Early Access – nur für dich'), ('Fr 30.10. · 0 Uhr', 'Start für alle'), ('So 1.11. · 23:59', 'Ende – solange der Vorrat reicht')]
     out = '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">'
@@ -66,24 +68,32 @@ def early():
     return wrap(row(logo(), '26px 20px 6px', align='center') + hero(link)
         + row(pill('🎃 EARLY ACCESS · JETZT FREIGESCHALTET') + h1('Du bist drin.', 'Jede 3. Flasche gratis.', 'Für alle anderen startet es erst um Mitternacht. Tippe auf den Button – damit wird das Angebot auf deinem Gerät freigeschaltet.'), '22px 22px 6px')
         + row(btn('Early Access öffnen', link), '18px 22px 6px')
-        + row(f'<div style="font-size:12px;color:{MU};text-align:center;line-height:1.5;">Öffne den Link auf dem Gerät, mit dem du bestellst.</div>', '4px 22px 6px', align='center')
-        + row(f'<div style="font-size:11px;font-weight:800;letter-spacing:.18em;color:{LT};margin-bottom:6px;">SO VIEL SPARST DU</div>' + prods(c), '18px 16px 4px')
+        + row(box(f'<div style="font-size:14px;color:#FFE7CC;line-height:1.5;">📱 <b>Wichtig:</b> Öffne den Link auf dem Gerät, mit dem du bestellst – nur dort ist das Angebot freigeschaltet.</div>'), '12px 16px 6px')
+        + row(f'<div style="font-size:11px;font-weight:800;letter-spacing:.18em;color:{LT};margin-bottom:6px;">DEIN PREIS FÜR 3 FLASCHEN</div>' + prods(c), '18px 16px 4px')
         + row(f'<div style="font-size:11px;font-weight:800;letter-spacing:.18em;color:{LT};margin-bottom:4px;">SO FUNKTIONIERT’S</div>' + steps(), '18px 22px 4px')
         + row(box(f'<div style="font-size:14px;color:#FFE7CC;line-height:1.5;">⏳ <b>Nur solange der Vorrat reicht.</b> Ab Freitag kaufen alle anderen mit – sicher dir deine Flaschen jetzt.</div>'), '14px 16px 4px')
+        + row(vk(), '10px 16px 4px')
         + row(btn('Jetzt Flaschen wählen', link), '18px 22px 26px'))
 
 def letzte():
     c = 'halloween-letzte'
     return wrap(row(logo(), '26px 20px 6px', align='center') + hero(utm('/alle-produkte/', c))
-        + row(pill('🎃 LETZTE CHANCE') + h1('Nur noch bis', 'Sonntag, 23:59.', 'Danach ist das Halloween-Special vorbei – und jede Flasche kostet wieder den normalen Preis.'), '22px 22px 6px')
+        + row(pill('🎃 LETZTE CHANCE') + h1('Heute um 23:59', 'ist Schluss.', 'Danach ist das Halloween-Special vorbei – und jede Flasche kostet wieder den normalen Preis.'), '22px 22px 6px')
         + row(box(f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="font-family:{F};text-align:center;padding:4px 0;">'
-                  f'<div style="font-size:11px;font-weight:800;letter-spacing:.18em;color:{OR2};">ENDET IN</div>'
-                  f'<div style="font-size:40px;font-weight:800;color:#fff;margin-top:6px;letter-spacing:-.02em;">ca. 1 Tag</div>'
-                  f'<div style="font-size:13px;color:{MU};margin-top:4px;">So 1.11. um 23:59 Uhr · solange der Vorrat reicht</div></td></tr></table>'), '18px 16px 4px')
+                  f'<div style="font-size:11px;font-weight:800;letter-spacing:.18em;color:{OR2};">ENDET HEUTE</div>'
+                  f'<div style="font-size:40px;font-weight:800;color:#fff;margin-top:6px;letter-spacing:-.02em;">23:59 Uhr</div>'
+                  f'<div style="font-size:13px;color:{MU};margin-top:4px;">Sonntag, 1.11. · solange der Vorrat reicht</div></td></tr></table>'), '18px 16px 4px')
         + row(btn('Jetzt Flaschen wählen', utm('/alle-produkte/', c)), '18px 22px 6px')
         + row(f'<div style="font-size:11px;font-weight:800;letter-spacing:.18em;color:{LT};margin-bottom:6px;">DIE BELIEBTESTEN</div>' + prods(c), '18px 16px 4px')
         + row(f'<div style="font-size:14px;color:{MU};line-height:1.55;">Jede 3. Flasche ist gratis – die günstigste im Warenkorb, auch gemischt. Kein Code nötig.</div>', '14px 22px 4px')
+        + row(vk(), '12px 16px 4px')
         + row(btn('Zum Shop', utm('/alle-produkte/', c)), '18px 22px 26px'))
+
+SUBJ = {
+    'teaser': ('Morgen 18 Uhr: du bist früher dran 🎃', 'Jede 3. Flasche geht aufs Haus.'),
+    'early': ('Du bist drin 🎃', 'Für alle anderen erst ab Mitternacht.'),
+    'letzte': ('Heute um Mitternacht ist Schluss', 'Danach wieder volle Preise.'),
+}
 
 if __name__ == '__main__':
     for name, fn in [('teaser', teaser), ('early', early), ('letzte', letzte)]:
