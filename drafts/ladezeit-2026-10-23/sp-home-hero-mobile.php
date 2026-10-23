@@ -57,7 +57,7 @@ add_action('wp_head', function () {
       @media(prefers-reduced-motion:reduce){.sp-hero2-cta::after{display:none}}
     </style>
     <?php
-}, 3);
+}, 999); // nach Astra/Elementor, sonst überschreibt deren h1-Farbe den Chrom-Verlauf
 add_action('template_redirect', function () {
     if (!is_front_page() || is_admin() || wp_doing_ajax() || ($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET' || isset($_GET['elementor-preview'])) return;
     $GLOBALS['sp_hero2_html'] = sp_hero2_html();
