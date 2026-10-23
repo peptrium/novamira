@@ -24,7 +24,11 @@ html:not(.sp-hp-ready) body.home .elementor-211>*:not([data-id="shbn001"]){visib
 @keyframes sp-hp-show{to{visibility:visible}}
 /* Produktseite: pp.js gibt dem Bild-Container erst spät .pp-img (padding 0) → das Produktbild
    wuchs nachträglich (LCP erst bei ~7,7 s). Gleiches Padding schon vorab per CSS. */
-body.single-product .e-con:has(#rx-buybox) .e-con:has(> .elementor-widget-image){padding:0!important}
+/* Struktur-Selektor statt :has(#rx-buybox): die Kaufbox steht im HTML NACH dem Bild, beim ersten Zeichnen griff die Regel noch nicht. */
+body.single-product [data-elementor-type="product"]>.e-con:first-child>.e-con-inner>.e-con:first-child:has(>.elementor-widget-image){padding:0!important}
+/* pp.js setzt .pp-main (14 px Abstand oben, Hintergrund, gap 0) erst nach ~4 s → Produktbild rutschte
+   nach unten und wurde als LCP neu gewertet. Gleiche Werte vorab (Handy). */
+@media (max-width:900px){body.single-product [data-elementor-type="product"]>.e-con:first-child{padding-top:14px!important;background:linear-gradient(180deg,#F4F5F6 0,#FFFFFF 520px)!important}body.single-product [data-elementor-type="product"]>.e-con:first-child>.e-con-inner{gap:0!important}}
 body.tax-product_cat #content,body.post-type-archive-product #content,body.page-id-325 #content,body.page-id-397 #content,body.page-id-529 #content{min-height:100vh}
 </style>
     <?php
