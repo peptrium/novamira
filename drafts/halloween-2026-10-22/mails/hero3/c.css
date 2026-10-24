@@ -1,0 +1,10 @@
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:1080px;height:1260px;overflow:hidden;background:#040404;position:relative;font-family:Inter,"Segoe UI",Arial,sans-serif;color:#fff}
+.cap{font:700 30px/1 Inter;letter-spacing:.3em;color:#D4A574;white-space:nowrap}
+.chrome{background:linear-gradient(180deg,#FFFFFF 0%,#E3E6E9 35%,#8F959C 56%,#F1F3F5 74%,#A3A9B0 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.orange{background:linear-gradient(180deg,#FFD9A6 0%,#FF9D45 45%,#FF6A10 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.vial{position:absolute;-webkit-box-reflect:below 0 linear-gradient(transparent 62%,rgba(255,255,255,.22))}
+.floor{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(255,170,90,.5),transparent)}
+.fog{position:absolute;pointer-events:none}
+.ember{position:absolute;border-radius:50%;background:#FFB547;box-shadow:0 0 14px 4px rgba(255,122,26,.7)}
+.center{position:absolute;left:0;right:0;text-align:center}
