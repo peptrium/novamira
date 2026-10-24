@@ -454,21 +454,28 @@ add_action('wp_head', function () {
 @keyframes sphwbg{from{opacity:0}to{opacity:1}}@keyframes sphwout{to{opacity:0}}
 #sp-hw-party .cd{position:relative;width:min(300px,84%);padding:26px 20px 22px;border-radius:22px;text-align:center;color:#fff;background:radial-gradient(90% 60% at 50% 18%,rgba(255,122,26,.35),transparent 70%),linear-gradient(160deg,#1E0F05,#0C0704);border:1px solid rgba(255,140,40,.45);box-shadow:0 30px 80px rgba(0,0,0,.55);animation:sphwcd .55s cubic-bezier(.2,1.4,.4,1) both}
 @keyframes sphwcd{from{opacity:0;transform:translateY(24px) scale(.85)}to{opacity:1;transform:none}}
-#sp-hw-party .vs{display:flex;justify-content:center;align-items:flex-end;gap:12px;height:96px;margin-bottom:14px}
+#sp-hw-party .vs{display:flex;justify-content:center;align-items:flex-end;gap:8px;height:150px;margin-bottom:14px}
 #sp-hw-party .v{position:relative;width:40px;display:block;opacity:0}
 #sp-hw-party .v svg{width:40px;height:72px;display:block;overflow:visible}
 #sp-hw-party .cp{fill:#C9CDD2}#sp-hw-party .nk{fill:#8B9097}#sp-hw-party .bd{fill:rgba(255,255,255,.14);stroke:rgba(255,255,255,.45);stroke-width:1.5}#sp-hw-party .lb{fill:#E9ECEF}
 #sp-hw-party .v1{animation:sphwv .35s .15s cubic-bezier(.2,1.4,.4,1) forwards}
 #sp-hw-party .v2{animation:sphwv .35s .32s cubic-bezier(.2,1.4,.4,1) forwards}
 #sp-hw-party .v3{width:50px;animation:sphwv3 .6s .6s cubic-bezier(.3,1.5,.5,1) forwards}
-#sp-hw-party .v3 svg{width:50px;height:90px;animation:sphwgl 1.6s .95s ease-out forwards}
+#sp-hw-party .v3 svg,#sp-hw-party .v3 img{width:50px;height:90px;animation:sphwgl 1.6s .95s ease-out forwards}
+#sp-hw-party .v img{height:100px;width:auto;display:block;margin:0 auto;-webkit-user-drag:none}
+#sp-hw-party .v1 img,#sp-hw-party .v2 img{filter:brightness(.74) saturate(.85)}
+#sp-hw-party .v3 img{width:auto;height:146px;position:relative;z-index:1}
+#sp-hw-party .v3 .gl{position:absolute;left:50%;bottom:0;width:150px;height:150px;transform:translateX(-50%) scale(.3);border-radius:50%;background:radial-gradient(circle,rgba(255,140,40,.75) 0%,rgba(255,110,20,.25) 45%,transparent 70%);opacity:0;animation:sphwglo 1.4s .9s ease-out forwards;z-index:0}
+@keyframes sphwglo{0%{opacity:0;transform:translateX(-50%) scale(.3)}35%{opacity:1;transform:translateX(-50%) scale(1.15)}100%{opacity:.8;transform:translateX(-50%) scale(1)}}
+#sp-hw-party .v1,#sp-hw-party .v2{width:auto}
+#sp-hw-party .v3{width:auto}
 #sp-hw-party .v3 .lb{fill:#FF8A2A}#sp-hw-party .v3 .bd{stroke:#FFB547;fill:rgba(255,140,40,.22)}#sp-hw-party .v3 .cp{fill:#FFB547}
 @keyframes sphwv{from{opacity:0;transform:translateY(10px) scale(.7)}to{opacity:.75;transform:none}}
 @keyframes sphwv3{0%{opacity:0;transform:translateY(-70px) rotate(-14deg)}60%{opacity:1;transform:translateY(4px) rotate(3deg)}80%{transform:translateY(-3px) rotate(-1deg)}100%{opacity:1;transform:none}}
 @keyframes sphwgl{0%{filter:drop-shadow(0 0 0 rgba(255,122,26,0))}30%{filter:drop-shadow(0 0 18px rgba(255,122,26,.95))}100%{filter:drop-shadow(0 0 10px rgba(255,122,26,.6))}}
-#sp-hw-party .v3 em{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%) rotate(-12deg) scale(2.4);opacity:0;font:900 10.5px/1 Sora,-apple-system,sans-serif;font-style:normal;letter-spacing:.06em;color:#140A02;background:#fff;border-radius:5px;padding:4px 5px;box-shadow:0 4px 12px rgba(0,0,0,.4);animation:sphwstp .35s 1.05s cubic-bezier(.3,1.6,.5,1) forwards}
-@keyframes sphwstp{to{opacity:1;transform:translate(-50%,-50%) rotate(-12deg) scale(1)}}
-#sp-hw-party .sk{position:absolute;left:50%;top:45%;width:0;height:0}
+#sp-hw-party .v3 em{position:absolute;z-index:2;left:88%;top:16%;transform:translate(-50%,-50%) rotate(14deg) scale(2.4);opacity:0;font:900 10.5px/1 Sora,-apple-system,sans-serif;font-style:normal;letter-spacing:.06em;color:#140A02;background:#fff;border-radius:5px;padding:4px 5px;box-shadow:0 4px 12px rgba(0,0,0,.4);animation:sphwstp .35s 1.05s cubic-bezier(.3,1.6,.5,1) forwards}
+@keyframes sphwstp{to{opacity:1;transform:translate(-50%,-50%) rotate(14deg) scale(1)}}
+#sp-hw-party .sk{position:absolute;z-index:2;left:50%;top:40%;width:0;height:0}
 #sp-hw-party .sk i{position:absolute;left:-3px;top:-3px;width:6px;height:6px;border-radius:50%;background:#FFB547;box-shadow:0 0 8px 2px rgba(255,122,26,.9);opacity:0;animation:sphwsp .7s ease-out forwards}
 #sp-hw-party .sk i:nth-child(3n){background:#fff;width:4px;height:4px}
 @keyframes sphwsp{0%{opacity:1;transform:rotate(var(--a)) translateX(0) scale(1)}100%{opacity:0;transform:rotate(var(--a)) translateX(var(--d)) scale(.3)}}
@@ -532,6 +539,27 @@ add_action('wp_head', function () {
     <?php
 }, 50);
 
+/* Echte Flaschenfotos fuer die Gratis-Animation im Warenkorb (freigestellt, uploads/sp-hw/v-<key>.webp). */
+function sp_hw_vial_map($ids) {
+    $m = get_transient('sp_hw_vimg_v1');
+    if (is_array($m)) return $m;
+    $up = wp_upload_dir();
+    $over = [556 => 'r20', 1012 => 'g100'];
+    $m = [];
+    foreach ($ids as $id) {
+        $key = $over[$id] ?? 0;
+        if (!$key) {
+            $p = wc_get_product($id);
+            if (!$p) continue;
+            $key = $p->get_image_id();
+            if (!$key && $p->get_parent_id()) { $pp = wc_get_product($p->get_parent_id()); $key = $pp ? $pp->get_image_id() : 0; }
+        }
+        if ($key && file_exists($up['basedir'] . '/sp-hw/v-' . $key . '.webp')) $m[$id] = $up['baseurl'] . '/sp-hw/v-' . $key . '.webp';
+    }
+    set_transient('sp_hw_vimg_v1', $m, 10 * MINUTE_IN_SECONDS);
+    return $m;
+}
+
 add_action('wp_footer', function () {
     if (is_admin() || !sp_hw_deko()) return;
     $o = sp_hw_opt();
@@ -555,6 +583,7 @@ add_action('wp_footer', function () {
         'pp'     => $pp,
         'home'   => is_front_page() ? 1 : 0,
         'cat'    => (is_product_category() || is_shop() || is_page(325)) ? 1 : 0,
+        'vimg'   => sp_hw_vial_map($ids),
     ];
     ?>
 <script id="sp-hw-js">
@@ -641,12 +670,13 @@ if(C.pp){var bb=document.getElementById('rx-buybox');if(bb&&!document.getElement
  hb.querySelector('.t3').addEventListener('click',function(){var t=document.querySelector('#rx-tiers .rx-tier[data-q="3"],.rx-tier[data-q="3"]');if(t)t.click();var a=document.querySelector('.single_add_to_cart_button');if(a){setTimeout(function(){a.scrollIntoView({behavior:'smooth',block:'center'});},150);}});}}
 /* Warenkorb-Hinweis */
 var addT=0;
-function party(sv,f){var dr=document.getElementById('sp-cart-drawer')||document.body;var o=dr.querySelector('#sp-hw-party');if(o)o.remove();
+function party(sv,f,vs){vs=vs||[];var dr=document.getElementById('sp-cart-drawer')||document.body;var o=dr.querySelector('#sp-hw-party');if(o)o.remove();
  var V='<svg viewBox="0 0 40 72"><rect x="11" y="2" width="18" height="9" rx="2" class="cp"/><rect x="14" y="11" width="12" height="6" class="nk"/><rect x="5" y="17" width="30" height="52" rx="7" class="bd"/><rect x="5" y="34" width="30" height="20" class="lb"/></svg>',sp='';
  for(var k=0;k<18;k++){sp+='<i style="--a:'+(k*20)+'deg;--d:'+(38+Math.random()*34).toFixed(0)+'px;animation-delay:'+(.95+Math.random()*.12).toFixed(2)+'s"></i>';}
  var d=document.createElement('div');d.id='sp-hw-party';d.setAttribute('role','status');
- d.innerHTML='<div class="cd"><div class="vs"><span class="v v1">'+V+'</span><span class="v v2">'+V+'</span><span class="v v3">'+V+'<em>GRATIS</em><b class="sk">'+sp+'</b></span></div>'
-  +'<div class="ey">🎃 HALLOWEEN</div><div class="h">Die 3. Flasche<br>geht aufs Haus.</div>'+(sv>0?'<div class="sv">Du sparst <strong>0,00 €</strong></div>':'')
+ var vi=function(k){var u=C.vimg&&C.vimg[vs[k]];return u?'<img src="'+u+'" alt="" draggable="false">':V;};
+ d.innerHTML='<div class="cd"><div class="vs"><span class="v v1">'+vi(0)+'</span><span class="v v2">'+vi(1)+'</span><span class="v v3"><i class="gl"></i>'+vi(2)+'<em>GRATIS</em><b class="sk">'+sp+'</b></span></div>'
+  +'<div class="ey">🎃 HALLOWEEN'+(f>1?' · '+f+'× GRATIS':'')+'</div><div class="h">'+(f>1?'Noch eine Flasche':'Die 3. Flasche')+'<br>geht aufs Haus.</div>'+(sv>0?'<div class="sv">Du sparst <strong>0,00 €</strong></div>':'')
   +bat.replace('sp-hw-bat XX','bt b1')+bat.replace('sp-hw-bat XX','bt b2')+bat.replace('sp-hw-bat XX','bt b3')+'</div>';
  dr.appendChild(d);try{if(navigator.vibrate)navigator.vibrate([20,60,30]);}catch(x){}
  var st=d.querySelector('.sv strong');if(st){var t0=0;setTimeout(function(){var go=function(ts){if(!t0)t0=ts;var q=Math.min(1,(ts-t0)/700);q=1-Math.pow(1-q,3);st.textContent=fm(sv*q);if(q<1)requestAnimationFrame(go);};requestAnimationFrame(go);},1150);}
@@ -661,7 +691,7 @@ var busy=0;function cart(){if(busy)return;busy=setTimeout(function(){busy=0;fetc
  var btn=(r===2&&ch)?'<button type="button" class="add" data-id="'+ch.id+'">+ 1× '+ch.name+' dazu – gratis 🎃</button>':'';
  box.innerHTML='<span style="font-size:22px">🎃</span><div style="flex:1">'+txt+'<div class="bar"><i style="width:'+(r/3*100)+'%"></i></div>'+btn+'</div>';
  var save=0;(c.items||[]).forEach(function(it){if(!(it.item_data||[]).some(function(d){return /Halloween/.test(d.name||d.key||'')}))return;var tt=it.totals||{};save+=(parseInt(tt.line_subtotal,10)-parseInt(tt.line_total,10))||0;});
- var minor=(c.totals&&c.totals.currency_minor_unit)||2;if(doParty)party(save/Math.pow(10,minor),f);var anc=document.getElementById('sp-cd-dhl'),sm=document.getElementById('sp-hw-sum');
+ var minor=(c.totals&&c.totals.currency_minor_unit)||2;if(doParty){var un=[];(c.items||[]).forEach(function(it){if(!ids[it.id]||(it.item_data||[]).some(function(d){return /Geschenk/i.test(d.name||d.key||'')}))return;var rp=parseInt(it.prices&&it.prices.regular_price||0,10);for(var q=0;q<it.quantity;q++)un.push({id:it.id,rp:rp});});un.sort(function(x,y){return y.rp-x.rp;});var fr=ch?ch.id:(un.length?un[un.length-1].id:0);party(save/Math.pow(10,minor),f,[un[0]?un[0].id:fr,un[1]?un[1].id:fr,fr]);}var anc=document.getElementById('sp-cd-dhl'),sm=document.getElementById('sp-hw-sum');
  if(anc&&n>0){if(!sm){sm=document.createElement('div');sm.id='sp-hw-sum';}if(sm.nextElementSibling!==anc)anc.parentNode.insertBefore(sm,anc);
   sm.innerHTML=(save>0?'<div class="row"><span>🎃 Halloween-Angebot: du sparst</span><b>−'+fm(save/Math.pow(10,minor))+'</b></div>':'<div class="row"><span>🎃 Noch '+need+' Flasche'+(need>1?'n':'')+' bis zur Gratis-Flasche</span></div>')+'<div class="cdl">⏳ Angebot endet in <span>'+cdt()+'</span></div>';}
  else if(sm){sm.remove();}
