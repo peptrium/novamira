@@ -54,8 +54,6 @@ def timeline(active):
                 f'<td style="padding:8px 0;font-family:{F};{"" if i == len(items)-1 else f"border-bottom:1px solid {BD};"}"><div style="font-size:14px;font-weight:800;color:{OR2 if on else "#fff"};">{d}</div><div style="font-size:13px;color:{MU};margin-top:2px;">{t}</div></td></tr>')
     return out + '</table>'
 
-def headrow(p, a, b): return row(pill(p) + f'<div style="font-size:36px;line-height:1.08;font-weight:800;color:#FFFFFF;letter-spacing:-.02em;margin-top:14px;">{a}<br><span style="color:{OR};">{b}</span></div>', '18px 22px 18px')
-def subrow(t): return row(f'<div style="font-size:15px;line-height:1.55;color:#B4BAC2;">{t}</div>', '18px 22px 4px')
 def ticks(items):
     r = ''.join(f'<tr><td width="30" valign="top" style="width:30px;padding:7px 0;"><div style="width:20px;height:20px;line-height:20px;border-radius:50%;background:#2A1404;border:1px solid #7A3A10;color:{OR2};text-align:center;font-size:12px;font-weight:800;">&#10003;</div></td>'
                 f'<td style="padding:7px 0;font-family:{F};font-size:14px;line-height:1.45;color:{LT};">{t}</td></tr>' for t in items)
@@ -69,8 +67,8 @@ TK_VORRAT = '<b style="color:#fff;">Solange der Vorrat reicht.</b>'
 
 def teaser():
     c = 'halloween-teaser'
-    return wrap(row(logo(), '26px 20px 0', align='center') + headrow('🎃 INSIDER-VORSCHAU', 'Morgen um 18 Uhr', 'bist du früher dran.') + heroimg('teaser', utm('/alle-produkte/', c))
-        + subrow('Unser Halloween-Special: <b style="color:#fff;">jede 3. Flasche gratis</b>. Für dich startet es sechs Stunden vor allen anderen – den Zugang schicken wir dir morgen per Mail.')
+    return wrap(row(logo(), '26px 20px 6px', align='center') + heroimg('teaser', utm('/alle-produkte/', c))
+        + row(h1('Morgen um 18 Uhr', 'bist du früher dran.', 'Unser Halloween-Special: <b style="color:#fff;">jede 3. Flasche gratis</b>. Für dich startet es sechs Stunden vor allen anderen – den Zugang schicken wir dir morgen per Mail.'), '22px 22px 6px')
         + row(box(label('DER ABLAUF') + timeline(0)), '18px 16px 4px')
         + row(ticks([TK_MIX, '<b style="color:#fff;">Bei 6 Flaschen sind 2 gratis</b> – so oft du willst.', TK_VORRAT]), '12px 16px 4px')
         + row(btn('Schon mal stöbern', utm('/alle-produkte/', c)), '18px 22px 26px'))
@@ -78,8 +76,8 @@ def teaser():
 def early():
     c = 'halloween-early'
     link = f'https://peptrium.com/?sp_hw=frueh&k={EA}&utm_source=newsletter&utm_medium=email&utm_campaign={c}'
-    return wrap(row(logo(), '26px 20px 0', align='center') + headrow('🎃 EARLY ACCESS', 'Du bist drin.', 'Jede 3. Flasche gratis.') + heroimg('early', link)
-        + subrow('Für alle anderen startet es erst um Mitternacht.')
+    return wrap(row(logo(), '26px 20px 6px', align='center') + heroimg('early', link)
+        + row(h1('Du bist drin.', 'Jede 3. Flasche gratis.', 'Für alle anderen startet es erst um Mitternacht.'), '22px 22px 6px')
         + row(btn('Early Access öffnen', link), '18px 22px 4px')
         + row(f'<div style="font-size:13px;color:{OR2};text-align:center;line-height:1.5;">📱 Öffne den Link auf dem Gerät, mit dem du bestellst.</div>', '8px 22px 6px', align='center')
         + row(label('DEIN PREIS FÜR 3 FLASCHEN') + prods(c), '20px 16px 4px')
@@ -88,8 +86,8 @@ def early():
 
 def letzte():
     c = 'halloween-letzte'
-    return wrap(row(logo(), '26px 20px 0', align='center') + headrow('🎃 LETZTE CHANCE', 'Heute um 23:59', 'ist Schluss.') + heroimg('letzte', utm('/alle-produkte/', c))
-        + subrow('Danach kostet jede Flasche wieder den normalen Preis.')
+    return wrap(row(logo(), '26px 20px 6px', align='center') + heroimg('letzte', utm('/alle-produkte/', c))
+        + row(h1('Heute um 23:59', 'ist Schluss.', 'Danach kostet jede Flasche wieder den normalen Preis.'), '22px 22px 6px')
         + row(btn('Jetzt Flaschen wählen', utm('/alle-produkte/', c)), '18px 22px 6px')
         + row(label('DIE BELIEBTESTEN') + prods(c), '20px 16px 4px')
         + row(ticks([TK_MIX, TK_CODE, TK_VK]), '12px 16px 26px'))
