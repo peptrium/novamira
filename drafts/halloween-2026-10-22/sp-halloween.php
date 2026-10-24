@@ -547,6 +547,7 @@ if(C.home){var ht=0,hi=setInterval(function(){
  title.insertAdjacentHTML('beforebegin','<div class="sp-hw-ey">🎃 HALLOWEEN-SPECIAL'+(C.state==='early'?' · EARLY ACCESS':'')+'</div>');
  title.innerHTML='Jede 3. Flasche<br><span class="sp-hw-g">gratis.</span>';
  if(mob){m.classList.add('sp-hw-m');var tx=m.querySelector('.sp-hero2-text');if(tx)tx.classList.add('sp-hw-t');}
+ if(sub&&mob&&live)sub.style.display='none';
  if(sub)sub.innerHTML=live?(mob?'Die günstigste zahlst du nicht.':'Leg 3 Flaschen in den Warenkorb –<br>die günstigste zahlst du nicht.'):(mob?'Ab '+C.startT+' · Insider schon '+C.earlyT:'Ab '+C.startT+' für alle.<br>Newsletter-Abonnenten schon '+C.earlyT+'.');
  if(cta){cta.classList.add('sp-hw-cta');if(live){cta.firstChild.nodeValue='3 für 2 sichern ';}else{cta.setAttribute('href','#sp-nlh');cta.firstChild.nodeValue='Eintragen & früher dabei ';}
   var cw=cta.parentElement;if(mob&&cw)cw.classList.add('sp-hw-cw');
