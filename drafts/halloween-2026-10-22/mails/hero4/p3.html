@@ -1,0 +1,21 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="base.css"><style>
+body{background:radial-gradient(28% 32% at 79% 62%,rgba(255,112,24,.65),rgba(255,90,10,.12) 60%,transparent 82%),radial-gradient(70% 45% at 50% 15%,#15110E,#030303 70%)}
+.dim{filter:brightness(.7) saturate(.85)}
+.hot{filter:sepia(.3) saturate(1.45) brightness(1.06) drop-shadow(0 0 70px rgba(255,122,26,.75))}
+.lab{position:absolute;top:1160px;width:225px;text-align:center;font:600 54px/1 'Cormorant Garamond',serif;font-style:italic;color:#8C847C}
+.lab.g{color:#FFB25C;text-shadow:0 0 30px rgba(255,122,26,.75)}
+.tag{position:absolute;left:744px;top:412px;z-index:9;border:1.5px solid rgba(255,200,140,.8);background:linear-gradient(180deg,rgba(40,20,6,.85),rgba(20,10,3,.85));color:#FFD49A;font:800 26px/1 Inter;letter-spacing:.32em;padding:15px 22px 15px 28px;border-radius:99px;box-shadow:0 0 40px rgba(255,122,26,.45)}
+.fog{position:absolute;left:-400px;top:860px;width:1900px;opacity:.28;filter:sepia(1) saturate(3.5) hue-rotate(-16deg);mix-blend-mode:screen;z-index:6}
+</style></head><body>
+<div class="beam" style="left:640px;width:360px;height:1100px;clip-path:polygon(40% 0,60% 0,100% 100%,0 100%)"></div>
+<div class="stage" style="height:180px"></div><div class="horizon" style="top:1080px"></div>
+<div class="center cap" style="top:76px">HALLOWEEN EDITION</div>
+<div class="center serif" style="top:132px;font-size:116px;line-height:.95;font-weight:600;font-style:italic"><span class="chrome">Die dritte Flasche</span><br><span class="gold">geht aufs Haus.</span></div>
+<div class="vw dim" data-src="src/cut415.png" data-rim="left" style="left:105px;top:482px;width:225px"></div>
+<div class="vw dim" data-src="src/cut416.png" data-rim="left" style="left:428px;top:482px;width:225px"></div>
+<div class="vw hot" data-src="src/cut417.png" data-rim="both" data-top="1" style="left:750px;top:482px;width:225px"></div>
+<div class="tag">GRATIS</div>
+<div class="lab" style="left:105px">eins</div><div class="lab" style="left:428px">zwei</div><div class="lab g" style="left:750px">drei</div>
+<img class="fog" src="src/392.png">
+<div class="vig"></div><div class="grain"></div>
+<script src="vial.js"></script></body></html>

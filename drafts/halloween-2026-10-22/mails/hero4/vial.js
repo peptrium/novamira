@@ -1,0 +1,4 @@
+// <div class="vw" data-src data-rim="left|right|both" data-color>
+document.querySelectorAll('.vw').forEach(function(w){var s=w.dataset.src,side=w.dataset.rim||'right',col=w.dataset.color||'255,140,40';
+ var g=side==='left'?'linear-gradient(90deg,rgba('+col+',1) 0%,rgba('+col+',.45) 9%,rgba('+col+',.1) 20%,transparent 32%)':side==='both'?'linear-gradient(90deg,rgba('+col+',.8) 0%,transparent 22%,transparent 78%,rgba('+col+',.95) 100%)':'linear-gradient(270deg,rgba('+col+',1) 0%,rgba('+col+',.45) 9%,rgba('+col+',.1) 20%,transparent 32%)';
+ w.innerHTML='<div class="shadow"></div><img src="'+s+'"><div class="rim" style="background:'+g+';-webkit-mask-image:url('+s+');mask-image:url('+s+')"></div><div class="refl"><img src="'+s+'"></div>'+(w.dataset.top?'<div class="rim" style="background:linear-gradient(180deg,rgba(255,230,200,.55),transparent 18%);-webkit-mask-image:url('+s+');mask-image:url('+s+')"></div>':'');});

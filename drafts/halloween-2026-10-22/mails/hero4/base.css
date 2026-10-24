@@ -1,0 +1,22 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Inter:wght@500;600;700;800;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:1080px;height:1260px;overflow:hidden;background:#030303;position:relative;font-family:Inter,Arial,sans-serif;color:#fff}
+.serif{font-family:'Cormorant Garamond',Georgia,serif}
+.cap{font:700 28px/1 Inter;letter-spacing:.34em;color:#D9AE7E;white-space:nowrap}
+.chrome{background:linear-gradient(180deg,#FFFFFF 0%,#E8EBEE 30%,#9097A0 52%,#F4F6F8 70%,#A7ADB4 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 rgba(0,0,0,.6))}
+.gold{background:linear-gradient(180deg,#FFE7C2 0%,#F5B26B 38%,#C9752F 62%,#FFD49A 82%,#B8682A 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ember{background:linear-gradient(180deg,#FFE0B0 0%,#FF9C42 45%,#FF5E0A 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.center{position:absolute;left:0;right:0;text-align:center}
+/* Flasche mit Kantenlicht, Kontaktschatten, Spiegelung */
+.vw{position:absolute}
+.vw img{display:block;width:100%;position:relative;z-index:2}
+.vw .rim{position:absolute;inset:0;z-index:3;-webkit-mask-size:100% 100%;mask-size:100% 100%;mix-blend-mode:screen}
+.stage{position:absolute;left:0;right:0;bottom:0;height:300px;background:linear-gradient(180deg,rgba(255,140,60,.10),rgba(10,8,6,.0) 8%),linear-gradient(180deg,#0E0B09,#030303 85%)}
+.horizon{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(255,170,100,.55) 30%,rgba(255,200,140,.9) 50%,rgba(255,170,100,.55) 70%,transparent);filter:blur(1px)}
+.beam{position:absolute;top:-80px;background:linear-gradient(180deg,rgba(255,225,190,.22),rgba(255,170,100,.06) 75%,transparent);filter:blur(14px)}
+.vw .shadow{position:absolute;left:-18%;right:-18%;bottom:-3%;height:9%;background:radial-gradient(50% 50% at 50% 50%,rgba(0,0,0,.95),rgba(0,0,0,0) 70%);z-index:1}
+.vw .refl{position:absolute;left:0;right:0;top:100%;height:38%;overflow:hidden;z-index:1;opacity:.28;-webkit-mask-image:linear-gradient(180deg,#000,transparent 80%)}
+.vw .refl img{transform:scaleY(-1);filter:blur(2px)}
+.grain{position:absolute;inset:0;z-index:50;pointer-events:none;opacity:.10;mix-blend-mode:overlay;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.vig{position:absolute;inset:0;z-index:40;pointer-events:none;background:radial-gradient(120% 90% at 50% 45%,transparent 55%,rgba(0,0,0,.75) 100%)}
+.bokeh{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(255,170,90,.9),rgba(255,120,30,.25) 45%,transparent 70%);z-index:4}
