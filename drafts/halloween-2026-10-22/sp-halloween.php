@@ -4,7 +4,8 @@
  *
  * Ein Schalter fuer alles: Peptrium Dashboard -> Halloween (Option sp_hw).
  *  - Angebot "Jede 3. Flasche gratis – die guenstigste": vorraetige Peptid-Flaschen
- *    (keine Pens, kein Zubehoer, keine Vorbestellungen, keine Abo-/Geschenk-Zeilen),
+ *    + Vorbestellungen (seit 2026-10-24, User; behalten ihren -15-%-Vorbestellpreis als Basis)
+ *    (keine Pens, kein Zubehoer, keine Abo-/Geschenk-Zeilen),
  *    auch gemischt. Pro 3 Flaschen wird die guenstigste Einheit kostenlos
  *    (Zeilenpreis per set_price, Prio 25 – nach dem Mengenrabatt (20), vor den
  *    Geschenkstufen (30); der Mengenrabatt wird fuer diese Flaschen zurueckgesetzt).
@@ -101,7 +102,6 @@ function sp_hw_parent_eligible($pid) {
     if (in_array($pid, sp_hw_excluded_ids(), true)) $ok = false;
     if ($ok && has_term(20, 'product_cat', $pid)) $ok = false; // Zubehoer
     if ($ok && preg_match('/\bpen\b/i', (string) get_the_title($pid))) $ok = false; // auch neue Peptrium-Pens
-    if ($ok && function_exists('sp_preorder_product_ids') && in_array($pid, array_map('intval', (array) sp_preorder_product_ids()), true)) $ok = false;
     if ($ok && get_post_status($pid) !== 'publish') $ok = false;
     return $cache[$pid] = $ok;
 }
@@ -110,8 +110,23 @@ function sp_hw_product_eligible($product) {
     if (!$product) return false;
     $pid = $product->get_parent_id() ?: $product->get_id();
     if (!sp_hw_parent_eligible($pid)) return false;
-    if ($product->is_on_sale('edit')) return false;
+    // Sale-Preise nur bei Vorbestellungen (-15 %); andere reduzierte Produkte zaehlen nicht
+    if ($product->is_on_sale('edit') && !sp_hw_is_preorder($pid)) return false;
     return (float) $product->get_regular_price('edit') > 0;
+}
+
+function sp_hw_is_preorder($pid) {
+    return function_exists('sp_preorder_product_ids') && in_array((int) $pid, array_map('intval', (array) sp_preorder_product_ids()), true);
+}
+
+/** Basispreis einer Aktionsflasche: regulaer, bei Vorbestellungen der Vorbestellpreis (nie teurer als angezeigt). */
+function sp_hw_base_price($product) {
+    $reg = (float) $product->get_regular_price('edit');
+    if ($product->is_on_sale('edit')) {
+        $sale = (float) $product->get_sale_price('edit');
+        if ($sale > 0 && $sale < $reg) return $sale;
+    }
+    return $reg;
 }
 
 /** Alle zaehlenden Produkt- und Variations-IDs (fuer Karten/Warenkorb-JS). */
@@ -151,7 +166,7 @@ add_action('woocommerce_before_calculate_totals', function ($cart) {
         if (!empty($item['sp_abo_interval_days'])) continue;
         $p = $item['data'];
         if (!sp_hw_product_eligible($p)) continue;
-        $reg = (float) $p->get_regular_price('edit');
+        $reg = sp_hw_base_price($p);
         $p->set_price($reg); // Mengenrabatt fuer Aktionsflaschen zuruecksetzen
         $regs[$key] = $reg;
         for ($i = 0; $i < (int) $item['quantity']; $i++) $units[] = [$reg, $key];
@@ -175,7 +190,7 @@ add_action('woocommerce_after_calculate_totals', function ($cart) {
     if (!sp_hw_active()) return;
     foreach ($cart->get_cart() as $key => $item) {
         if (empty($item['sp_hw_free'])) continue;
-        $reg = (float) $item['data']->get_regular_price('edit');
+        $reg = sp_hw_base_price($item['data']);
         $cart->cart_contents[$key]['line_subtotal'] = round($reg * (int) $item['quantity'], 2);
     }
 }, 30);
@@ -319,6 +334,7 @@ add_action('wp_footer', function () {
     $o = sp_hw_opt();
     if (empty($o['wenig'])) return;
     if (in_array((int) get_queried_object_id(), [729, 745, 817], true)) return;
+    if (sp_hw_is_preorder(get_queried_object_id())) return; // Vorbestellung: nicht "wenige verfügbar"
     ?>
 <style>.rx-stock.sp-hw-low{color:#B45309!important;font-weight:700!important}.rx-stock.sp-hw-low .rx-stock-dot{background:#F59E0B!important;box-shadow:0 0 0 3px rgba(245,158,11,.25)!important}</style>
 <script>(function(){var st=document.querySelector('#rx-buybox .rx-stock');if(!st)return;var dot=st.querySelector('.rx-stock-dot');st.classList.add('sp-hw-low');st.innerHTML=(dot?dot.outerHTML:'')+' Nur noch wenige verfügbar';})();</script>

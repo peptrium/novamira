@@ -1,0 +1,5 @@
+*{margin:0;padding:0;box-sizing:border-box}body{width:1200px;height:720px;overflow:hidden;background:#030303;position:relative;font-family:Inter,"Segoe UI",Arial,sans-serif}
+.cap{font:700 15px/1 Inter,Arial;letter-spacing:.42em;color:#C9A27A}
+.chrome{background:linear-gradient(180deg,#FFFFFF 0%,#D9DCE0 38%,#8E949B 55%,#E9ECEF 72%,#9AA0A7 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.orange{background:linear-gradient(180deg,#FFD39A 0%,#FF9A3D 45%,#FF6A10 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.rule{height:1px;background:linear-gradient(90deg,rgba(201,162,122,.0),rgba(201,162,122,.7),rgba(201,162,122,0))}
