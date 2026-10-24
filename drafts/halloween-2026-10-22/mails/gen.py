@@ -59,7 +59,7 @@ def ticks(items):
                 f'<td style="padding:7px 0;font-family:{F};font-size:14px;line-height:1.45;color:{LT};">{t}</td></tr>' for t in items)
     return box(f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0">{r}</table>', bd=BD, bg=CARD)
 def label(t): return f'<div style="font-size:11px;font-weight:800;letter-spacing:.18em;color:{LT};margin-bottom:6px;">{t}</div>'
-def heroimg(name, link): return hero(link).replace('nl-hw-hero.jpg', f'nl-hw-{name}.jpg')
+def heroimg(name, link): return hero(link).replace('nl-hw-hero.jpg', f'nl-hw3-{name}.jpg')
 TK_MIX = '<b style="color:#fff;">Auch gemischt</b> – auch Vorbestellungen. Die günstigste Flasche ist gratis.'
 TK_CODE = '<b style="color:#fff;">Kein Code nötig</b> – wird automatisch abgezogen.'
 TK_VK = '<b style="color:#fff;">Per Vorkasse?</b> Es zählt deine Bestellung, nicht der Zahlungseingang.'
@@ -102,6 +102,6 @@ if __name__ == '__main__':
     for name, fn in [('teaser', teaser), ('early', early), ('letzte', letzte)]:
         b = fn()
         open(name + '.body', 'w').write(b)
-        v = b.replace(E + 'nl-hw-', 'nl-hw-').replace('[[unsubscribe_link]]', '#')
+        v = b.replace(E + 'nl-hw', 'nl-hw').replace('[[unsubscribe_link]]', '#')
         open('vorschau-' + name + '.html', 'w').write('<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;background:#050607;">' + v + '</body></html>')
         print(name, len(b))
