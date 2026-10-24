@@ -449,6 +449,23 @@ add_action('wp_head', function () {
 #sp-hw-cd .bar{flex:1;height:6px;border-radius:6px;background:rgba(255,255,255,.12);overflow:hidden;margin-top:6px}
 #sp-hw-cd .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--hw-or),var(--hw-or2));border-radius:6px;transition:width .3s}
 @media (prefers-reduced-motion:reduce){.sp-hw-bat{display:none}}
+#sp-hw-party{position:fixed;inset:0;pointer-events:none;z-index:2147483000;overflow:hidden}
+#sp-hw-party .t{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%) scale(.6);opacity:0;background:linear-gradient(135deg,#140A02,#2A1306);border:1px solid rgba(255,122,26,.6);color:#fff;font:800 17px/1.3 Sora,-apple-system,sans-serif;padding:15px 22px;border-radius:16px;box-shadow:0 20px 60px rgba(255,122,26,.4);white-space:nowrap;animation:sphwt 2.4s ease forwards}
+@keyframes sphwt{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}12%{opacity:1;transform:translate(-50%,-50%) scale(1.06)}20%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-62%) scale(1)}}
+#sp-hw-party .f{position:absolute;bottom:-50px;line-height:1;opacity:0;animation:sphwf 2s cubic-bezier(.2,.7,.3,1) forwards}
+#sp-hw-party .f svg{width:1.4em;fill:#0A0604;filter:drop-shadow(0 0 6px rgba(255,140,40,.8))}
+@keyframes sphwf{0%{transform:translate(0,0) rotate(0);opacity:0}10%{opacity:1}100%{transform:translate(var(--x),-105vh) rotate(var(--r));opacity:.15}}
+#sp-cat .hero.sp-hw-hero{position:relative;overflow:hidden;background:radial-gradient(70% 90% at 85% 100%,rgba(255,110,20,.28),transparent 65%),radial-gradient(60% 70% at 0% 0%,rgba(110,30,150,.28),transparent 70%),linear-gradient(160deg,#0D0F12 0%,#1E1612 100%)!important}
+#sp-cat .hero.sp-hw-hero>*{position:relative;z-index:1}
+#sp-cat .hero .sp-hw-web{position:absolute!important;z-index:0!important;right:0;top:0;width:120px;height:120px;opacity:.2;transform:scaleX(-1);pointer-events:none}
+#sp-cat .hero .sp-hw-hb{position:absolute!important;z-index:0!important;fill:#0A0604;opacity:.9;filter:drop-shadow(0 0 6px rgba(255,140,40,.45));animation:sphwhb 18s linear infinite;pointer-events:none}
+#sp-cat .hero .sp-hw-hb.a{width:34px;top:18%}#sp-cat .hero .sp-hw-hb.b{width:22px;top:55%;animation-duration:24s;animation-delay:-10s}
+.sp-hw-stamp{position:absolute;z-index:3;bottom:14px;right:14px;width:74px;height:74px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFB547,#FF7A1A 60%,#C2410C);color:#140A02;display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(12deg);box-shadow:0 8px 24px rgba(255,122,26,.45),inset 0 0 0 3px rgba(255,255,255,.35);pointer-events:none;animation:sphwst 3.5s ease-in-out infinite}
+.sp-hw-stamp span{font-size:20px;line-height:1}.sp-hw-stamp b{font:800 13px/1.1 Sora,-apple-system,sans-serif;margin-top:2px;white-space:nowrap}
+@keyframes sphwst{0%,100%{transform:rotate(12deg) scale(1)}50%{transform:rotate(8deg) scale(1.05)}}
+@media (prefers-reduced-motion:reduce){.sp-hw-stamp,#sp-cat .hero .sp-hw-hb{animation:none}}
+#sp-hw-ty{margin:0 0 18px;background:linear-gradient(135deg,#140A02,#2A1306);border:1px solid rgba(255,122,26,.5);border-radius:16px;padding:16px 18px;color:#FFE7CC;font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;display:flex;gap:14px;align-items:center}
+#sp-hw-ty .i{font-size:34px;line-height:1}#sp-hw-ty b{color:#fff}#sp-hw-ty strong{color:#FFB547;font-size:17px;white-space:nowrap}#sp-hw-ty small{display:block;color:#C9A98A;font-size:13px;margin-top:2px}
 /* Hero-Uebernahme Startseite */
 .sp-hw-ey{display:inline-flex;align-items:center;gap:7px;font:800 10.5px/1 Sora,-apple-system,sans-serif;letter-spacing:.18em;color:#FFB547;border:1px solid rgba(255,122,26,.55);background:rgba(20,10,2,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border-radius:99px;padding:7px 12px;margin:0 0 12px}
 .sp-hw-g{background:linear-gradient(90deg,#FF7A1A,#FFB547)!important;-webkit-background-clip:text!important;background-clip:text!important;color:transparent!important;-webkit-text-fill-color:transparent!important}
@@ -597,11 +614,16 @@ if(C.pp){var bb=document.getElementById('rx-buybox');if(bb&&!document.getElement
  upd();setInterval(upd,1000);
  hb.querySelector('.t3').addEventListener('click',function(){var t=document.querySelector('#rx-tiers .rx-tier[data-q="3"],.rx-tier[data-q="3"]');if(t)t.click();var a=document.querySelector('.single_add_to_cart_button');if(a){setTimeout(function(){a.scrollIntoView({behavior:'smooth',block:'center'});},150);}});}}
 /* Warenkorb-Hinweis */
+var addT=0;
+function party(){if(document.getElementById('sp-hw-party'))return;var d=document.createElement('div');d.id='sp-hw-party';var h='';
+ if(!window.matchMedia('(prefers-reduced-motion:reduce)').matches){for(var k=0;k<16;k++){var x=(Math.random()*160-80).toFixed(0),r=(Math.random()*80-40).toFixed(0);
+  h+='<span class="f" style="left:'+(4+Math.random()*92).toFixed(1)+'%;--x:'+x+'px;--r:'+r+'deg;animation-delay:'+(Math.random()*.5).toFixed(2)+'s;font-size:'+(20+Math.random()*14).toFixed(0)+'px">'+(k%3===0?'🎃':bat.replace('sp-hw-bat XX','b'))+'</span>';}}
+ d.innerHTML=h+'<div class="t">🎃 Eine Flasche geht aufs Haus!</div>';document.body.appendChild(d);setTimeout(function(){d.remove();},2600);}
 var busy=0;function cart(){if(busy)return;busy=setTimeout(function(){busy=0;fetch('/wp-json/wc/store/v1/cart',{credentials:'same-origin'}).then(function(r){return r.json()}).then(function(c){
  var n=0;(c.items||[]).forEach(function(it){if(ids[it.id]&&parseInt(it.prices&&it.prices.regular_price||0,10)>0&&!(it.item_data||[]).some(function(d){return /Geschenk/i.test(d.name||d.key||'')}))n+=it.quantity;});
  var box=document.getElementById('sp-hw-cd');var sc=document.getElementById('sp-cd-scroll')||document.getElementById('sp-cd-items');if(!sc)return;
  if(!box){box=document.createElement('div');box.id='sp-hw-cd';sc.insertAdjacentElement('afterbegin',box);}
- var r=n%3,f=Math.floor(n/3),need=3-r;
+ var r=n%3,f=Math.floor(n/3),need=3-r;var pf=0;try{pf=parseInt(sessionStorage.getItem('sp_hw_f')||'0',10)||0;sessionStorage.setItem('sp_hw_f',f);}catch(x){}if(f>pf&&Date.now()-addT<8000)party();
  var txt=n===0?'Jede 3. Flasche ist gratis – leg 3 in den Warenkorb.':(r===0?'✓ '+f+' Flasche'+(f>1?'n':'')+' gratis! Noch 3 für die nächste.':'Noch '+need+' Flasche'+(need>1?'n':'')+', dann ist eine gratis.'+(f?' ('+f+' schon gratis)':''));
  var ch=null;(c.items||[]).forEach(function(it){if(!ids[it.id]||(it.item_data||[]).some(function(d){return /Geschenk/i.test(d.name||d.key||'')}))return;var rp=parseInt(it.prices&&it.prices.regular_price||0,10);if(rp>0&&(!ch||rp<ch.rp))ch={id:it.id,rp:rp,name:it.name+((it.variation||[]).length?' '+it.variation.map(function(v){return v.value}).join(' '):'')};});
  var btn=(r===2&&ch)?'<button type="button" class="add" data-id="'+ch.id+'">+ 1× '+ch.name+' dazu – gratis 🎃</button>':'';
@@ -614,16 +636,59 @@ var busy=0;function cart(){if(busy)return;busy=setTimeout(function(){busy=0;fetc
  var sr=document.getElementById('sp-cd-total-savings-row'),sv=document.getElementById('sp-cd-total-savings-val');if(sr&&sv){sr.style.visibility=(save>0&&Math.abs(num(sv.textContent)-save/Math.pow(10,minor))<0.02)?'hidden':'';if(sr.style.visibility==='hidden')sr.style.height='0',sr.style.margin='0',sr.style.overflow='hidden';else sr.style.height=sr.style.margin='';}
  });},400);}
 setInterval(function(){var s=document.querySelector('#sp-hw-sum .cdl span');if(s)s.textContent=cdt();},1000);
-document.addEventListener('click',function(e){var b=e.target.closest('#sp-hw-cd .add');if(!b)return;b.disabled=true;b.textContent='Wird hinzugefügt …';
+document.addEventListener('click',function(e){var b=e.target.closest('#sp-hw-cd .add');if(!b)return;addT=Date.now();b.disabled=true;b.textContent='Wird hinzugefügt …';
  var fd=new FormData();fd.append('product_id',b.getAttribute('data-id'));fd.append('quantity','1');
  fetch('/?wc-ajax=add_to_cart',{method:'POST',body:fd,credentials:'same-origin'}).then(function(r){return r.json()}).then(function(d){if(window.jQuery&&d&&d.fragments)jQuery(document.body).trigger('added_to_cart',[d.fragments,d.cart_hash]);else if(window.jQuery)jQuery(document.body).trigger('added_to_cart');}).catch(function(){b.disabled=false;});});
 var items=document.getElementById('sp-cd-items');if(items){new MutationObserver(cart).observe(items,{childList:true,subtree:true});}
-if(window.jQuery)jQuery(document.body).on('added_to_cart removed_from_cart',cart);
+if(window.jQuery){jQuery(document.body).on('added_to_cart',function(){addT=Date.now();});jQuery(document.body).on('added_to_cart removed_from_cart',cart);}
 document.addEventListener('click',function(e){if(e.target.closest('#sp-cart-fab'))cart();});
+/* Tab-Titel, wenn der Besucher weggeht */
+if(!document.body.classList.contains('woocommerce-order-received')){var otl=document.title;document.addEventListener('visibilitychange',function(){if(document.hidden){otl=document.title;document.title='🎃 Deine 3. Flasche wartet …';}else if(/^🎃 Deine 3/.test(document.title)){document.title=otl;}});}
+/* Deko: Kategorie-Kopf + Stempel aufs Produktbild */
+var webS='<svg class="sp-hw-web" viewBox="0 0 100 100" fill="none" stroke="#fff" stroke-width=".8"><path d="M0 0L100 100M0 0L50 100M0 0L100 50M0 0L0 100M0 0L100 0"/><path d="M0 20Q14 14 20 0M0 40Q28 28 40 0M0 62Q44 44 62 0M0 84Q60 60 84 0"/></svg>';
+if(C.cat){var dt=0,di=setInterval(function(){var h=document.querySelector('#sp-cat .hero');if(!h){if(++dt>40)clearInterval(di);return;}clearInterval(di);if(h.querySelector('.sp-hw-web'))return;h.classList.add('sp-hw-hero');h.insertAdjacentHTML('afterbegin',webS+bat.replace('sp-hw-bat XX','sp-hw-hb a')+bat.replace('sp-hw-bat XX','sp-hw-hb b'));},150);}
+if(C.pp){var st=0,si=setInterval(function(){var bd=document.querySelector('.sp-img-bd');if(!bd){if(++st>40)clearInterval(si);return;}clearInterval(si);var im=bd.parentElement;if(im&&!im.querySelector('.sp-hw-stamp'))im.insertAdjacentHTML('beforeend','<div class="sp-hw-stamp"><span>🎃</span><b>3 für 2</b></div>');},150);}
 })();
 </script>
     <?php
 }, 120);
+
+/* ---------------------------------------------------------------------
+ * Danke-Seite + Bestellmails: zeigen, was die Gratis-Flasche gespart hat
+ * (auch nach Aktionsende, solange die Bestellung im Aktionszeitraum lag).
+ * ------------------------------------------------------------------- */
+function sp_hw_order_saving($order) {
+    if (!$order || (int) $order->get_meta('_sp_hw') < 1) return null;
+    $free = 0; $save = 0.0;
+    foreach ($order->get_items() as $it) {
+        $m = $it->get_meta('Halloween-Angebot');
+        if (!$m) continue;
+        $free += (int) $m;
+        $save += (float) $it->get_subtotal() - (float) $it->get_total();
+    }
+    if ($free < 1 || $save <= 0) return null;
+    return ['free' => $free, 'save' => round($save, 2)];
+}
+
+add_action('woocommerce_thankyou', function ($order_id) {
+    $sv = sp_hw_order_saving(wc_get_order($order_id));
+    if (!$sv) return;
+    $n = $sv['free'] . ' Flasche' . ($sv['free'] > 1 ? 'n' : '');
+    echo '<div id="sp-hw-ty"><span class="i">🎃</span><div><b>Halloween-Angebot: ' . esc_html($n) . ' gratis</b><br>Du sparst <strong>' . wp_kses_post(wc_price($sv['save'])) . '</strong><small>Danke, dass du dabei bist!</small></div></div>';
+    echo "<script>(function(){var b=document.getElementById('sp-hw-ty'),t=0,i=setInterval(function(){var h=document.getElementById('sp-ty-hero');if(h){clearInterval(i);var bank=h.nextElementSibling&&/bacs|bank|ueberweisung/i.test(h.nextElementSibling.className)?h.nextElementSibling:h;bank.insertAdjacentElement('afterend',b);}else if(++t>30){clearInterval(i);var w=document.querySelector('.woocommerce-order');if(w)w.insertAdjacentElement('afterbegin',b);}},150);})();</script>";
+}, 1);
+
+add_action('woocommerce_email_before_order_table', function ($order, $sent_to_admin, $plain, $email = null) {
+    if ($sent_to_admin || $plain || !$email) return;
+    if (!in_array($email->id, ['customer_on_hold_order', 'customer_processing_order'], true)) return;
+    $sv = sp_hw_order_saving($order);
+    if (!$sv) return;
+    $n = $sv['free'] . ' Flasche' . ($sv['free'] > 1 ? 'n' : '');
+    echo '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 18px;border-collapse:separate"><tr><td style="background:#1C0E04;border:1px solid #7A3A0E;border-radius:14px;padding:16px 18px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Inter,Arial,sans-serif;color:#FFE7CC;font-size:15px;line-height:1.45">'
+        . '<span style="font-size:13px;letter-spacing:.14em;font-weight:800;color:#FFB547">🎃 HALLOWEEN-ANGEBOT</span><br>'
+        . '<b style="color:#ffffff;font-size:17px">' . esc_html($n) . ' gratis – du sparst ' . wp_kses_post(wc_price($sv['save'])) . '</b>'
+        . '</td></tr></table>';
+}, 5, 4);
 
 /* ---------------------------------------------------------------------
  * Admin
