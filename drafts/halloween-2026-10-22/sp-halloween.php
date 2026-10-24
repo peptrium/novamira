@@ -458,7 +458,7 @@ add_action('wp_head', function () {
 .sp-hw-hcd span{min-width:46px;text-align:center;background:rgba(20,10,2,.6);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid rgba(255,122,26,.4);border-radius:10px;padding:6px 4px;font:800 16px/1 Sora,-apple-system,sans-serif;color:#fff;font-variant-numeric:tabular-nums}
 .sp-hw-hcd small{display:block;font-size:8.5px;letter-spacing:.12em;color:#C9A98A;margin-top:4px;font-weight:700}
 .sp-hw-vr{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font:700 12px/1 Sora,-apple-system,sans-serif;color:#FFD9B0;background:rgba(20,10,2,.88);border:1px dashed rgba(255,181,71,.55);border-radius:99px;padding:7px 11px}
-.sp-hw-cw .sp-hw-vr{margin-top:0}
+.sp-hw-cw .sp-hw-vr{margin:-2px 0 2px;background:none;border:0;padding:0;font-size:11.5px;color:#E8C9A8;text-shadow:0 1px 6px rgba(0,0,0,.9)}.sp-hw-cw .sp-hw-vr i{width:6px;height:6px}
 .sp-hw-vr i{width:7px;height:7px;border-radius:50%;background:#FF7A1A;box-shadow:0 0 0 0 rgba(255,122,26,.7);animation:sphwvr 1.6s infinite}
 @keyframes sphwvr{0%{box-shadow:0 0 0 0 rgba(255,122,26,.7)}70%{box-shadow:0 0 0 8px rgba(255,122,26,0)}100%{box-shadow:0 0 0 0 rgba(255,122,26,0)}}
 .sp-hw-hov{position:absolute;inset:0;pointer-events:none;z-index:0;overflow:hidden}
@@ -551,9 +551,9 @@ if(C.home){var ht=0,hi=setInterval(function(){
  if(cta){cta.classList.add('sp-hw-cta');if(live){cta.firstChild.nodeValue='3 für 2 sichern ';}else{cta.setAttribute('href','#sp-nlh');cta.firstChild.nodeValue='Eintragen & früher dabei ';}
   var cw=cta.parentElement;if(mob&&cw)cw.classList.add('sp-hw-cw');
   var vr='<div class="sp-hw-vr"><i></i>'+(live?'Nur solange der Vorrat reicht':'Begrenzter Vorrat – Insider kaufen zuerst')+'</div>';
-  if(mob&&cw)cw.insertAdjacentHTML('afterbegin',vr);else if(sub)sub.insertAdjacentHTML('afterend',vr);
   if(live){var hc=document.createElement('div');hc.className='sp-hw-hcd';cta.insertAdjacentElement('beforebegin',hc);
-   var t3=function(){var l=left(C.end);hc.innerHTML='<span>'+l.d+'<small>TAGE</small></span><span>'+pad(l.h)+'<small>STD</small></span><span>'+pad(l.m)+'<small>MIN</small></span><span>'+pad(l.s)+'<small>SEK</small></span>';};t3();setInterval(t3,1000);}}
+   var t3=function(){var l=left(C.end);hc.innerHTML='<span>'+l.d+'<small>TAGE</small></span><span>'+pad(l.h)+'<small>STD</small></span><span>'+pad(l.m)+'<small>MIN</small></span><span>'+pad(l.s)+'<small>SEK</small></span>';};t3();setInterval(t3,1000);}
+  if(mob&&cw){if(live&&hc)hc.insertAdjacentHTML('afterend',vr);else cw.insertAdjacentHTML('afterbegin',vr);}else if(sub)sub.insertAdjacentHTML('afterend',vr);}
  if(wrap){var ov=document.createElement('div');ov.className='sp-hw-hov';var em='';for(var k=0;k<14;k++){em+='<i style="left:'+(5+Math.random()*90).toFixed(1)+'%;animation-delay:-'+(Math.random()*7).toFixed(2)+'s;animation-duration:'+(5+Math.random()*4).toFixed(2)+'s"></i>';}
   ov.innerHTML='<svg class="web" viewBox="0 0 100 100" fill="none" stroke="#fff" stroke-width=".8"><path d="M0 0L100 100M0 0L50 100M0 0L100 50M0 0L0 100M0 0L100 0"/><path d="M0 20Q14 14 20 0M0 40Q28 28 40 0M0 62Q44 44 62 0M0 84Q60 60 84 0"/></svg>'
    +['h1','h2','h3'].map(function(c){return bat.replace('sp-hw-bat XX','hb '+c);}).join('')+em+'<span class="pk l">🎃</span><span class="pk r">🎃</span>';
