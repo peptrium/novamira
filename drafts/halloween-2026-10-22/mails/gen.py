@@ -65,12 +65,30 @@ TK_CODE = '<b style="color:#fff;">Kein Code nötig</b> – wird automatisch abge
 TK_VK = '<b style="color:#fff;">Per Vorkasse?</b> Es zählt deine Bestellung, nicht der Zahlungseingang.'
 TK_VORRAT = '<b style="color:#fff;">Solange der Vorrat reicht.</b>'
 
+NEW = [('nl-hw-p-cagri.jpg', 'Cagrilintid', '10 mg', 'NEU', '104,90 €', '209,80 €', '/produkt/cagrilintid/'),
+       ('nl-hw-p-mt2.jpg', 'MT-2', '10 mg', 'NEU', '29,90 €', '59,80 €', '/produkt/melanotan-2/'),
+       ('nl-hw-p-glow.jpg', 'GLOW', '70 mg', 'NEU', '139,90 €', '279,80 €', '/produkt/glow/'),
+       ('nl-hw-p-bpc.jpg', 'BPC-157', '10 mg', 'WIEDER DA', '39,90 €', '79,80 €', '/produkt/bpc-157/')]
+def newgrid(c, deal):
+    def card(t):
+        img, n, mg, tag, price, three, path = t
+        u = utm(path, c)
+        sub = (f'<div style="font-size:12px;color:{MU};margin-top:4px;">3 Flaschen</div><div style="font-size:16px;font-weight:800;color:{OR2};white-space:nowrap;">{three}</div>' if deal
+               else f'<div style="font-size:15px;font-weight:800;color:#fff;margin-top:4px;white-space:nowrap;">{price}</div>')
+        tc = OR2 if tag == 'NEU' else '#7FD8A6'
+        return (f'<td width="50%" valign="top" style="width:50%;padding:5px;"><a href="{u}" style="text-decoration:none;display:block;background:{CARD};border:1px solid {BD};border-radius:14px;overflow:hidden;">'
+                f'<img src="{E}{img}" width="270" alt="{n}" style="display:block;width:100%;height:auto;border:0;">'
+                f'<div style="padding:10px 12px 12px;font-family:{F};"><div style="font-size:10px;font-weight:800;letter-spacing:.16em;color:{tc};">{tag}</div>'
+                f'<div style="font-size:16px;font-weight:800;color:#fff;margin-top:3px;">{n} <span style="font-size:12px;font-weight:600;color:{MU};">{mg}</span></div>{sub}</div></a></td>')
+    return ('<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>' + card(NEW[0]) + card(NEW[1]) + '</tr><tr>' + card(NEW[2]) + card(NEW[3]) + '</tr></table>')
+
 def teaser():
     c = 'halloween-teaser'
     return wrap(row(logo(), '26px 20px 6px', align='center') + heroimg('teaser', utm('/alle-produkte/', c))
         + row(h1('Morgen um 18 Uhr', 'bist du früher dran.', 'Unser Halloween-Special: <b style="color:#fff;">jede 3. Flasche gratis</b>. Für dich startet es sechs Stunden vor allen anderen – den Zugang schicken wir dir morgen per Mail.'), '22px 22px 6px')
         + row(box(label('DER ABLAUF') + timeline(0)), '18px 16px 4px')
         + row(ticks([TK_MIX, '<b style="color:#fff;">Bei 6 Flaschen sind 2 gratis</b> – so oft du willst.', TK_VORRAT]), '12px 16px 4px')
+        + row(label('NEU IM SHOP') + f'<div style="font-size:14px;color:{LT};line-height:1.5;margin-bottom:8px;">Drei neue Produkte ab Donnerstag – und BPC-157 ist schon wieder da. <b style="color:#fff;">Als Insider bestellst du die Neuen als Erste.</b> Alle zählen bei „jede 3. gratis“ mit.</div>' + newgrid(c, False), '20px 16px 4px')
         + row(btn('Schon mal stöbern', utm('/alle-produkte/', c)), '18px 22px 26px'))
 
 def early():
@@ -81,6 +99,7 @@ def early():
         + row(btn('Early Access öffnen', link), '18px 22px 4px')
         + row(f'<div style="font-size:13px;color:{OR2};text-align:center;line-height:1.5;">📱 Öffne den Link auf dem Gerät, mit dem du bestellst.</div>', '8px 22px 6px', align='center')
         + row(label('DEIN PREIS FÜR 3 FLASCHEN') + prods(c), '20px 16px 4px')
+        + row(label('JETZT NEU IM SHOP') + f'<div style="font-size:14px;color:{LT};line-height:1.5;margin-bottom:8px;">Ab sofort für dich bestellbar – für alle anderen erst ab Mitternacht. Auch gemischt: <b style="color:#fff;">2× GLOW + 1× MT-2 → MT-2 gratis.</b></div>' + newgrid(c, True), '20px 16px 4px')
         + row(ticks([TK_MIX, TK_CODE, TK_VK, TK_VORRAT]), '12px 16px 4px')
         + row(btn('Jetzt Flaschen wählen', link), '18px 22px 26px'))
 
@@ -90,11 +109,12 @@ def letzte():
         + row(h1('Heute um 23:59', 'ist Schluss.', 'Danach kostet jede Flasche wieder den normalen Preis.'), '22px 22px 6px')
         + row(btn('Jetzt Flaschen wählen', utm('/alle-produkte/', c)), '18px 22px 6px')
         + row(label('DIE BELIEBTESTEN') + prods(c), '20px 16px 4px')
+        + row(box(f'<div style="font-size:14px;color:#E6E8EB;line-height:1.5;">✨ <b>Neu dabei:</b> <span style="color:{MU};">Cagrilintid, MT-2 und GLOW – und BPC-157 ist wieder da. Alle zählen mit.</span> <a href="{utm("/alle-produkte/", c)}" style="color:{OR2};font-weight:700;text-decoration:none;">Ansehen →</a></div>', bd=BD, bg=CARD), '12px 16px 4px')
         + row(ticks([TK_MIX, TK_CODE, TK_VK]), '12px 16px 26px'))
 
 SUBJ = {
-    'teaser': ('Morgen 18 Uhr: du bist früher dran 🎃', 'Jede 3. Flasche geht aufs Haus.'),
-    'early': ('Du bist drin 🎃', 'Für alle anderen erst ab Mitternacht.'),
+    'teaser': ('Morgen 18 Uhr: du bist früher dran 🎃', 'Jede 3. Flasche gratis – plus 3 neue Produkte.'),
+    'early': ('Du bist drin 🎃', 'Jede 3. Flasche gratis – und die Neuheiten sind schon da.'),
     'letzte': ('Heute um Mitternacht ist Schluss', 'Danach wieder volle Preise.'),
 }
 
