@@ -86,6 +86,20 @@ function sp_hw_deko() {
     return !empty($o['deko']) && in_array($st, ['teaser', 'early', 'live'], true);
 }
 
+/* Automatisch einschalten (Option sp_hw['auto_on'] = Zeitstempel): beim ersten nicht gecachten
+ * Aufruf danach wird 'on' gesetzt – update_option leert dabei auch den Seiten-Cache. */
+add_action('init', function () {
+    $o = get_option('sp_hw', []);
+    if (!is_array($o) || empty($o['auto_on']) || !empty($o['on']) || time() < (int) $o['auto_on']) return;
+    $o['on'] = 1;
+    $o['auto_on'] = 0;
+    update_option('sp_hw', $o, false);
+    delete_transient('sp_hw_ids_v1');
+    $log = (array) get_option('sp_hw_log', []);
+    $log[] = [time(), 0, 'an (automatisch)'];
+    update_option('sp_hw_log', array_slice($log, -50), false);
+}, 1);
+
 /* ---------------------------------------------------------------------
  * Welche Flaschen zaehlen
  * ------------------------------------------------------------------- */
@@ -765,6 +779,7 @@ function sp_hw_render_page() {
     if (!empty($_POST['sp_hw_save']) && check_admin_referer('sp_hw')) {
         $o = sp_hw_opt();
         $o['on'] = empty($_POST['on']) ? 0 : 1;
+        if ($o['on']) $o['auto_on'] = 0;
         $o['deko'] = empty($_POST['deko']) ? 0 : 1;
         foreach (['early', 'start', 'end'] as $k) {
             $v = sanitize_text_field(wp_unslash($_POST[$k] ?? ''));
@@ -782,6 +797,7 @@ function sp_hw_render_page() {
     $o = sp_hw_opt();
     $now = time();
     if (empty($o['on'])) { $phase = '<span style="background:#757575;color:#fff;padding:3px 10px;border-radius:99px">AUS</span> Niemand sieht etwas, die Preise sind normal.'; }
+    if (empty($o['on']) && !empty($o['auto_on'])) { $phase .= ' <b>Schaltet sich automatisch ein am ' . esc_html(wp_date('d.m.Y \\u\\m H:i', (int) $o['auto_on'], $tz)) . ' Uhr.</b>'; }
     elseif ($now >= $o['end']) { $phase = '<span style="background:#757575;color:#fff;padding:3px 10px;border-radius:99px">BEENDET</span> Die Aktion ist vorbei, der Shop läuft normal.'; }
     elseif ($now >= $o['start']) { $phase = '<span style="background:#E65100;color:#fff;padding:3px 10px;border-radius:99px">LÄUFT</span> Für alle aktiv.'; }
     elseif ($now >= $o['early']) { $phase = '<span style="background:#6A1B9A;color:#fff;padding:3px 10px;border-radius:99px">EARLY ACCESS</span> Aktiv für alle, die über den Newsletter-Link kommen. Alle anderen sehen den Teaser.'; }
