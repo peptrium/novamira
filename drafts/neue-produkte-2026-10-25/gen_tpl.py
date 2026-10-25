@@ -8,7 +8,7 @@ IDS = {'cagri': (1051, 1052, 'https://peptrium.com/wp-content/uploads/2026/10/ca
        'glow': (1055, 1056, 'https://peptrium.com/wp-content/uploads/2026/10/glow-peptrium.png')}
 # Karten für "Wird häufig zusammen gekauft" (Name, URL, Bild, Preis)
 REL = {
-    65: ('Retatrutide', '/produkt/retatrutide/', 'https://peptrium.com/wp-content/uploads/2026/08/8792D35C-5DD0-4537-B142-4C882F5F04DC-300x300.png', 'ab 74,90'),
+    65: ('Retatrutide', '/produkt/retatrutide/', 'https://peptrium.com/wp-content/uploads/2026/08/8792D35C-5DD0-4537-B142-4C882F5F04DC-300x300.png', 'ab 79,90'),
     68: ('GHK-Cu', '/produkt/ghk-cu/', 'https://peptrium.com/wp-content/uploads/2026/08/9FABD238-B0DE-40C2-87DB-B5240E33DEF3-300x300.png', 'ab 39,90'),
     71: ('Mots-C', '/produkt/mots-c/', 'https://peptrium.com/wp-content/uploads/2026/08/7255FFFB-6823-45F9-AC96-88637F1411CB-300x300.png', '34,90'),
     74: ('Bac Water', '/produkt/bac-water/', 'https://peptrium.com/wp-content/uploads/2026/08/F36AD2AF-7A25-405E-8801-88F12605CC69-300x300.png', '9,90'),

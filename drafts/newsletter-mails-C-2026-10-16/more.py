@@ -22,7 +22,7 @@ def nohelp(f): return re.sub(r'<div style="font-size:15px;font-weight:700;color:
 def bighead(a, b='', size=34): return f'<div style="text-align:left;font-size:{size}px;line-height:1.08;font-weight:800;color:#FFF;letter-spacing:-.02em;">{a}' + (f'<br><span style="color:#8E959E;">{b}</span>' if b else '') + '</div>'
 def sub(t, m='12px 0 0'): return f'<div style="text-align:left;font-size:15px;line-height:1.55;color:{MUT};margin:{m};">{t}</div>'
 def mini(keys, c):
-    PP = {'ghk': ('GHK-Cu', 'ab 39,90 €', '/produkt/ghk-cu/'), 'mots': ('Mots-C', 'ab 34,90 €', '/produkt/mots-c/'), 'reta': ('Retatrutide', 'ab 74,90 €', '/produkt/retatrutide/')}
+    PP = {'ghk': ('GHK-Cu', 'ab 39,90 €', '/produkt/ghk-cu/'), 'mots': ('Mots-C', 'ab 34,90 €', '/produkt/mots-c/'), 'reta': ('Retatrutide', 'ab 79,90 €', '/produkt/retatrutide/')}
     cell = lambda k: f'<td width="50%" valign="top" style="width:50%;padding:5px;"><a href="{utm(PP[k][2], c)}" style="display:block;text-decoration:none;background:{CARD};border:1px solid {BD};border-radius:14px;overflow:hidden;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td width="64" style="width:64px;line-height:0;"><img src="{U}sp-email/nl-p-{k}.jpg" width="64" height="64" alt="" style="display:block;border:0;"></td><td style="padding:8px 10px;text-align:left;font-family:{F};"><div style="font-size:13px;font-weight:800;color:#FFF;">{PP[k][0]}</div><div style="font-size:11px;color:{MUT};">{PP[k][1]}</div></td></tr></table></a></td>'
     return '<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>' + ''.join(cell(k) for k in keys) + '</tr></table>'
 def foot_service(why): return nohelp(foot()).replace('Du bekommst diese Mail, weil du den Peptrium-Newsletter abonniert hast.<br><a href="[[unsubscribe_link]]" style="color:#7D848D;">Abmelden</a>', why)
@@ -59,7 +59,7 @@ def build():
         + row(label('DIE BELIEBTESTE KOMBI') + bighead('Womit die meisten', 'starten.'), '32px 20px 18px')
         + row(f'<div style="{CHRG}border-radius:22px;padding:2px;"><div style="background:{CARD};border-radius:20px;padding:22px 14px 18px;">{setrow}'
               f'<div style="font-size:21px;font-weight:800;color:#FFF;margin-top:16px;">Retatrutide Starter-Set</div><div style="font-size:13px;line-height:1.5;color:{MUT};margin:4px 0 12px;">Peptid, Bac Water zum Anmischen und Spritzen – alles für den Anfang.</div>'
-              f'<div style="font-size:26px;font-weight:800;color:#FFF;margin-bottom:14px;">94,70 €</div>' + btn('Set ansehen', utm('/produkt/retatrutide/', c)) + '</div></div>', '0 20px 24px')
+              f'<div style="font-size:26px;font-weight:800;color:#FFF;margin-bottom:14px;">99,70 €</div>' + btn('Set ansehen', utm('/produkt/retatrutide/', c)) + '</div></div>', '0 20px 24px')
         + row(label('SO SPARST DU', 10) + f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>{tip("−10 %", "ab 3 Stück eines Peptids")}{tip("150 €", "ab hier Versand gratis")}{tip("🎁", "ab 200 € ein Geschenk dazu")}</tr></table>', '0 16px 24px')
         + row(label('AUCH OFT IM ERSTEN WARENKORB', 8) + mini(['ghk', 'mots'], c), '0 15px 24px')
         + row(f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border:1px solid {BD};border-radius:16px;overflow:hidden;"><tr><td width="30%" style="background:#FFFFFF;padding:14px 4px;text-align:center;font-family:{F};"><div style="font-size:24px;font-weight:800;color:#0D0F12;line-height:1;">10 %</div></td><td style="background:{CARD};padding:12px 10px;text-align:center;border-left:2px dashed {IN};font-family:{F};"><div style="font-size:17px;font-weight:800;font-family:{MONO};color:#FFF;word-break:break-all;">{S("hallo_code")}</div><div style="font-size:11px;color:{DIM};margin-top:3px;">dein Code · gültig bis {S("hallo_gueltig_bis")}</div></td></tr></table>', '0 20px 30px')
@@ -109,7 +109,7 @@ def build():
 
 SAMPLE_DATA = {
     'hallo_code': 'HALLO-7K2QX', 'hallo_gueltig_bis': '15.11.2026',
-    'abo_name': 'Retatrutide', 'abo_bild': PI['reta'], 'abo_preis': '74,90 €', 'abo_preis_abo': '63,67 €', 'abo_ersparnis': '11,23 €',
+    'abo_name': 'Retatrutide', 'abo_bild': PI['reta'], 'abo_preis': '79,90 €', 'abo_preis_abo': '67,92 €', 'abo_ersparnis': '11,98 €',
     'wd_name': 'BPC-157', 'wd_bild': IMG + '104D478F-BD97-4CA2-A036-29E66BDE6ECF-300x300.png', 'wd_preis': '39,90 €', 'wd_link': '#',
     'qv_basis': 'deinem GHK-Cu', 'qv_grund': 'Wird oft zusammen mit GHK-Cu erforscht – und passt gut in deine nächste Bestellung.', 'qv_name': 'Mots-C', 'qv_info': '10 mg · lyophilisiert', 'qv_preis': '34,90 €', 'qv_bild': PI['mots'], 'qv_link': '#',
     'bw_link': 'https://peptrium.com/?sp_bewertung=abc', 'bw_nr': '3285', 'bw_produkt': 'deiner Bestellung',

@@ -33,8 +33,8 @@ def prods(c):
         f'<td width="44" style="width:44px;padding-right:12px;"><a href="{u}" style="display:block;width:36px;height:36px;line-height:36px;border-radius:50%;background:#fff;color:#0D0F12;text-align:center;font-weight:800;text-decoration:none;font-size:18px;">&rarr;</a></td>'
         '</tr></table></td></tr>')
     return ('<table role="presentation" width="100%" cellpadding="0" cellspacing="0">'
-            + p(E + 'nl-hw-p-reta10.jpg', 'Retatrutide 10 mg', '224,70 €', '149,80 €', utm('/produkt/retatrutide/?attribute_volumen=10mg', c))
-            + p(E + 'nl-hw-p-reta20.jpg', 'Retatrutide 20 mg', '434,70 €', '289,80 €', utm('/produkt/retatrutide/?attribute_volumen=20mg', c))
+            + p(E + 'nl-hw-p-reta10.jpg', 'Retatrutide 10 mg', '239,70 €', '159,80 €', utm('/produkt/retatrutide/?attribute_volumen=10mg', c))
+            + p(E + 'nl-hw-p-reta20.jpg', 'Retatrutide 20 mg', '449,70 €', '299,80 €', utm('/produkt/retatrutide/?attribute_volumen=20mg', c))
             + p(E + 'nl-hw-p-ghk100.jpg', 'GHK-Cu 100 mg', '224,70 €', '149,80 €', utm('/produkt/ghk-cu/?attribute_volumen=100mg', c)) + '</table>')
 def foot():
     return (f'<div style="height:1px;background:#2C3138;margin:0 0 22px;"></div>' + logo()

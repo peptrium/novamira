@@ -971,7 +971,7 @@ SPHTML,
       <div class="sp-rel-card-img"><img src="https://peptrium.com/wp-content/uploads/2026/08/8792D35C-5DD0-4537-B142-4C882F5F04DC-300x300.png" alt="Retatrutide" loading="lazy"></div>
       <div class="sp-rel-card-body">
         <h3>Retatrutide</h3>
-        <div class="sp-rel-card-price">ab 74,90&nbsp;&euro;</div>
+        <div class="sp-rel-card-price">ab 79,90&nbsp;&euro;</div>
       </div>
     </a>
     <a href="https://peptrium.com/produkt/mots-c/" class="sp-rel-card">

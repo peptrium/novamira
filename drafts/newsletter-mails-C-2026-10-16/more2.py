@@ -69,7 +69,7 @@ def build():
         + f'<tr><td style="padding:0;line-height:0;background:{HB};"><img src="{U}sp-email/nl-w3-start.jpg" width="600" alt="" style="display:block;width:100%;max-width:600px;height:auto;border:0;"></td></tr>'
         + lrow(f'<div style="background:{AL};border:1px solid {"#EFE2CC" if THEME == "bunt" else LBD};border-radius:22px;padding:22px 14px 18px;text-align:center;">{setrow}'
                f'<div style="font-size:21px;font-weight:800;color:{INK};margin-top:16px;">Retatrutide Starter-Set</div><div style="font-size:13px;line-height:1.5;color:{LMUT};margin:4px 0 12px;">Peptid, Bac Water zum Anmischen und Spritzen – alles für den Anfang.</div>'
-               f'<div style="font-size:26px;font-weight:800;color:{INK};margin-bottom:14px;">94,70 €</div>' + lbtn('Set ansehen', utm('/produkt/retatrutide/', c)) + '</div>', '22px 20px 22px')
+               f'<div style="font-size:26px;font-weight:800;color:{INK};margin-bottom:14px;">99,70 €</div>' + lbtn('Set ansehen', utm('/produkt/retatrutide/', c)) + '</div>', '22px 20px 22px')
         + lrow(eyebrow('SO SPARST DU', LMUT) + f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>{tip("−10 %", "ab 3 Stück eines Peptids", "#EEF7EE" if THEME == "bunt" else "#F5F6F7")}{tip("150 €", "ab hier Versand gratis", "#EAF1FE" if THEME == "bunt" else "#F5F6F7")}{tip("🎁", "ab 200 € ein Geschenk dazu", "#FBF0E6" if THEME == "bunt" else "#F5F6F7")}</tr></table>', '26px 16px 6px')
         + lrow(eyebrow('AUCH OFT IM ERSTEN WARENKORB', LMUT) + f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>{mini(PI["ghk"], "GHK-Cu", "50 mg · lyophilisiert", utm("/produkt/ghk-cu/", c))}{mini(PI["mots"], "Mots-C", "10 mg · lyophilisiert", utm("/produkt/mots-c/", c))}</tr></table>', '18px 16px 10px')
         + lrow(f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border:1px solid {"#EFE2CC" if THEME == "bunt" else LBD};border-radius:16px;overflow:hidden;"><tr><td width="30%" style="background:{A};padding:14px 4px;text-align:center;font-family:{F};"><div style="font-size:24px;font-weight:800;color:#FFF;line-height:1;">10 %</div></td>'
@@ -112,7 +112,7 @@ def build():
 
 SAMPLE_DATA = {
     'hallo_code': 'HALLO-7K2QX', 'hallo_gueltig_bis': '15.11.2026',
-    'abo_name': 'Retatrutide', 'abo_bild': PI['reta'], 'abo_preis': '74,90 €', 'abo_preis_abo': '63,67 €', 'abo_ersparnis': '11,23 €',
+    'abo_name': 'Retatrutide', 'abo_bild': PI['reta'], 'abo_preis': '79,90 €', 'abo_preis_abo': '67,92 €', 'abo_ersparnis': '11,98 €',
     'wd_name': 'BPC-157', 'wd_bild': IMG + '104D478F-BD97-4CA2-A036-29E66BDE6ECF-300x300.png', 'wd_preis': '33,92 €', 'wd_link': '#',
     'qv_basis': 'deinem Retatrutide', 'qv_grund': 'Wird oft zusammen mit Retatrutide erforscht – und passt gut in deine nächste Bestellung.', 'qv_name': 'GHK-Cu', 'qv_info': 'lyophilisiert · HPLC-geprüft', 'qv_preis': '39,90 €', 'qv_bild': PI['ghk'], 'qv_link': '#',
 }
