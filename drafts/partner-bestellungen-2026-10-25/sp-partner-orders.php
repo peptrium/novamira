@@ -247,7 +247,7 @@ add_action('slicewp_affiliate_account_tab_bestellungen_top', function () {
           $msum = array_sum(array_column($vis, 'prov'));
           $label = $m === '0000-00' ? 'Ohne Datum' : $mnames[substr($m, 5, 2)] . ' ' . substr($m, 0, 4); ?>
       <details class="mo"<?php echo $first ? ' open' : ''; ?>>
-        <summary><b><?php echo esc_html($label); ?></b><span><?php echo count($vis); ?> Bestellung<?php echo count($vis) === 1 ? '' : 'en'; ?></span><span class="sum"><?php echo esc_html(sp_pao_money($msum)); ?></span></summary>
+        <summary><b><?php echo esc_html($label); ?></b><span><?php echo count($vis); ?> Bestellung<?php echo count($vis) === 1 ? '' : 'en'; ?><?php $wm = count(array_filter($wait, function ($r) use ($m) { return $r['ts'] && wp_date('Y-m', $r['ts']) === $m; })); if ($wm) echo ' · +' . $wm . ' offen'; ?></span><span class="sum"><?php echo esc_html(sp_pao_money($msum)); ?></span></summary>
         <div class="in"><?php foreach ($list as $r) echo str_replace('class="it ', 'class="it' . ($r['k'] === 'storno' ? ' sx' : '') . ' ', sp_pao_card($r, $lab)); ?>
           <?php if (count($vis) < count($list)) : ?><button type="button" class="tgl">Stornierte anzeigen (<?php echo count($list) - count($vis); ?>)</button><?php endif; ?>
         </div>
