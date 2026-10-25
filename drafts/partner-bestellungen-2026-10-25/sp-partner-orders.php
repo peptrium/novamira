@@ -31,7 +31,7 @@ add_filter('slicewp_affiliate_account_tabs', function ($tabs) {
 function sp_pao_last_reminder($o) {
     $ts = array_map('intval', array_filter((array) $o->get_meta('_sp_vorkasse_reminders')));
     $auto = $o->get_meta('_sp_vk_auto_sent');
-    if ($auto) $ts[] = (int) strtotime(get_gmt_from_date($auto) . ' UTC');
+    if ($auto && strtotime($auto)) $ts[] = (int) strtotime(get_gmt_from_date($auto) . ' UTC'); // 'skip-dupe' = keine Erinnerung
     return $ts ? max($ts) : 0;
 }
 
@@ -76,7 +76,7 @@ function sp_pao_rows($aff) {
         if (in_array($r['cstatus'], ['rejected'], true) || in_array($st, ['cancelled', 'failed', 'refunded', 'trash'], true)) $k = 'storno';
         elseif ($r['cstatus'] === 'paid') $k = 'paid';
         elseif ($r['cstatus'] === 'unpaid' || in_array($st, ['processing', 'completed'], true)) $k = 'offen';
-        else $k = 'wartet';
+        else $k = $o->get_meta('_sp_dupe_suspect') ? 'dupe' : 'wartet'; // doppelt bestellt → wird geprüft, keine Erinnerung
         $ln = trim((string) $o->get_billing_last_name());
         $r['k'] = $k;
         $r['nr'] = $o->get_order_number();
@@ -151,8 +151,12 @@ add_action('slicewp_affiliate_account_tab_bestellungen_top', function () {
     $open = round($earned - $sent, 2);
     $rows = sp_pao_rows($aff);
     $pend = $sums['pending'];
-    foreach ($rows as $r) if ($r['k'] === 'wartet' && $r['date'] === '') $pend += $r['prov']; // nachgetragene Codes (noch keine Provision angelegt)
-    $lab = ['wartet' => ['Wartet auf Zahlung', 'w'], 'offen' => ['Bezahlt · Provision offen', 'o'], 'paid' => ['Provision ausgezahlt', 'p'], 'storno' => ['Storniert', 's']];
+    foreach ($rows as $r) {
+        if ($r['k'] === 'wartet' && $r['date'] === '') $pend += $r['prov']; // nachgetragene Codes (noch keine Provision angelegt)
+        if ($r['k'] === 'dupe' && $r['date'] !== '') $pend -= $r['prov']; // Doppelbestellung zählt nicht als ausstehend
+    }
+    $pend = max(0, $pend);
+    $lab = ['wartet' => ['Wartet auf Zahlung', 'w'], 'offen' => ['Bezahlt · Provision offen', 'o'], 'paid' => ['Provision ausgezahlt', 'p'], 'storno' => ['Storniert', 's'], 'dupe' => ['Doppelt bestellt – wird geprüft', 'd']];
     $wait = array_values(array_filter($rows, function ($r) { return $r['k'] === 'wartet'; }));
     $rest = array_values(array_filter($rows, function ($r) { return $r['k'] !== 'wartet'; }));
     $months = [];
@@ -160,7 +164,7 @@ add_action('slicewp_affiliate_account_tab_bestellungen_top', function () {
     krsort($months);
     $mon = wp_date('Y-m');
     $mN = 0; $mP = 0;
-    foreach ($rows as $r) if ($r['ts'] && wp_date('Y-m', $r['ts']) === $mon && $r['k'] !== 'storno') { $mN++; $mP += $r['prov']; }
+    foreach ($rows as $r) if ($r['ts'] && wp_date('Y-m', $r['ts']) === $mon && !in_array($r['k'], ['storno', 'dupe'], true)) { $mN++; $mP += $r['prov']; }
     $mnames = ['01' => 'Januar', '02' => 'Februar', '03' => 'März', '04' => 'April', '05' => 'Mai', '06' => 'Juni', '07' => 'Juli', '08' => 'August', '09' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Dezember'];
     $bonus = sp_pao_hw_bonus();
     $nonce = wp_create_nonce('sp_pao');
@@ -188,7 +192,7 @@ add_action('slicewp_affiliate_account_tab_bestellungen_top', function () {
         #sp-pao .av{width:42px;height:42px;border-radius:50%;background:linear-gradient(145deg,#E9ECEF,#D3D7DC);color:#30353B;font-weight:800;font-size:13.5px;display:flex;align-items:center;justify-content:center}
         #sp-pao .k-wartet{border-color:#F4D7A8;background:linear-gradient(180deg,#FFFBF4,#fff)}
         #sp-pao .k-wartet .av{background:linear-gradient(145deg,#FFE7C2,#FFD08A);color:#7A4600}
-        #sp-pao .k-storno{opacity:.6}
+        #sp-pao .k-storno{opacity:.6}#sp-pao .k-dupe{opacity:.7;background:#F7F8F9}#sp-pao .k-dupe .rt b{text-decoration:line-through;color:var(--mut)}
         #sp-pao .mid{min-width:0}
         #sp-pao .mid .t{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}#sp-pao .mid .t b{font-size:14.5px;font-weight:800}#sp-pao .mid .t span{font-size:12px;color:var(--mut)}
         #sp-pao .pr{font-size:12.5px;color:#3E444B;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -244,7 +248,7 @@ add_action('slicewp_affiliate_account_tab_bestellungen_top', function () {
       <h4>Alle Bestellungen</h4>
       <?php if ($months) : $first = true; foreach ($months as $m => $list) :
           $vis = array_filter($list, function ($r) { return $r['k'] !== 'storno'; });
-          $msum = array_sum(array_column($vis, 'prov'));
+          $msum = array_sum(array_column(array_filter($vis, function ($r) { return $r['k'] !== 'dupe'; }), 'prov'));
           $label = $m === '0000-00' ? 'Ohne Datum' : $mnames[substr($m, 5, 2)] . ' ' . substr($m, 0, 4); ?>
       <details class="mo"<?php echo $first ? ' open' : ''; ?>>
         <summary><b><?php echo esc_html($label); ?></b><span><?php echo count($vis); ?> Bestellung<?php echo count($vis) === 1 ? '' : 'en'; ?><?php $wm = count(array_filter($wait, function ($r) use ($m) { return $r['ts'] && wp_date('Y-m', $r['ts']) === $m; })); if ($wm) echo ' · +' . $wm . ' offen'; ?></span><span class="sum"><?php echo esc_html(sp_pao_money($msum)); ?></span></summary>
