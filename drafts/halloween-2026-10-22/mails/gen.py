@@ -85,7 +85,7 @@ def newgrid(c, deal):
 def teaser():
     c = 'halloween-teaser'
     return wrap(row(logo(), '26px 20px 6px', align='center') + heroimg('teaser', utm('/alle-produkte/', c))
-        + row(h1('Morgen um 18 Uhr', 'bist du früher dran.', 'Unser Halloween-Special: <b style="color:#fff;">jede 3. Flasche gratis</b>. Für dich startet es sechs Stunden vor allen anderen – den Zugang schicken wir dir morgen per Mail.'), '22px 22px 6px')
+        + row(h1('Donnerstag 18 Uhr', 'bist du früher dran.', 'Unser Halloween-Special: <b style="color:#fff;">jede 3. Flasche gratis</b>. Für dich startet es sechs Stunden vor allen anderen – den Zugang schicken wir dir am Donnerstag um 18 Uhr per Mail.'), '22px 22px 6px')
         + row(box(label('DER ABLAUF') + timeline(0)), '18px 16px 4px')
         + row(ticks([TK_MIX, '<b style="color:#fff;">Bei 6 Flaschen sind 2 gratis</b> – so oft du willst.', TK_VORRAT]), '12px 16px 4px')
         + row(label('NEU IM SHOP') + f'<div style="font-size:14px;color:{LT};line-height:1.5;margin-bottom:8px;">Drei neue Produkte ab Donnerstag – und BPC-157 ist schon wieder da. <b style="color:#fff;">Als Insider bestellst du die Neuen als Erste.</b> Alle zählen bei „jede 3. gratis“ mit.</div>' + newgrid(c, False), '20px 16px 4px')
@@ -113,7 +113,7 @@ def letzte():
         + row(ticks([TK_MIX, TK_CODE, TK_VK]), '12px 16px 26px'))
 
 SUBJ = {
-    'teaser': ('Morgen 18 Uhr: du bist früher dran 🎃', 'Jede 3. Flasche gratis – plus 3 neue Produkte.'),
+    'teaser': ('Donnerstag 18 Uhr: du bist früher dran 🎃', 'Jede 3. Flasche gratis – plus 3 neue Produkte.'),
     'early': ('Du bist drin 🎃', 'Jede 3. Flasche gratis – und die Neuheiten sind schon da.'),
     'letzte': ('Heute um Mitternacht ist Schluss', 'Danach wieder volle Preise.'),
 }
