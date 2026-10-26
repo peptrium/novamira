@@ -22,7 +22,7 @@ h1{font-size:118px;line-height:.98;font-weight:800;letter-spacing:-.035em;text-s
 .free{position:relative}.free img{filter:drop-shadow(0 0 70px rgba(255,122,26,.85)) drop-shadow(0 30px 40px rgba(0,0,0,.8))!important}
 .stamp{position:absolute;top:40%;left:50%;transform:translate(-50%,-50%) rotate(-12deg);font-size:50px;font-weight:800;letter-spacing:.08em;color:#140A02;background:linear-gradient(90deg,#FF6A00,#FFB547);padding:12px 28px;border-radius:14px;box-shadow:0 10px 50px rgba(255,122,26,.7)}
 .cta{position:absolute;left:80px;right:150px;bottom:440px;text-align:center}
-.url{display:block;background:linear-gradient(90deg,#FF6A00,#FFB547);color:#140A02;font-size:50px;font-weight:800;letter-spacing:-.01em;border-radius:28px;padding:30px 20px;box-shadow:0 16px 60px rgba(255,106,0,.55)}
+.url{display:block;background:linear-gradient(90deg,#FF6A00,#FFB547);color:#140A02;font-size:72px;font-weight:800;letter-spacing:-.01em;border-radius:28px;padding:30px 20px;box-shadow:0 16px 60px rgba(255,106,0,.55)}
 .url small{display:block;font-size:24px;font-weight:700;letter-spacing:.14em;opacity:.75;margin-bottom:4px}
 .or{font-size:28px;color:#E7D6C6;margin-top:16px;font-weight:600}
 .foot{position:absolute;left:80px;right:150px;bottom:395px;font-size:19px;color:#7d7068;text-align:center}
@@ -57,8 +57,8 @@ def vials(names, free_idx, top, h=480, gap=-30):
         if i==free_idx: out+=f'<div class="free"><img src="img/{n}.png" style="height:{hh}px"><div class="stamp">GRATIS</div></div>'
         else: out+=f'<img class="{"dim" if free_idx is not None else ""}" src="img/{n}.png" style="height:{hh}px">'
     return out+'</div>'
-def cta(sub='oder einfach Link in Bio'):
-    return f'<div class="cta"><div class="url"><small>JETZT ÖFFNEN</small>peptrium.com/halloween</div><div class="or">{sub}</div></div>'
+def cta(sub='Einfach im Browser eintippen'):
+    return f'<div class="cta"><div class="url"><small>JETZT AUF</small>peptrium.com</div><div class="or">{sub}</div></div>'
 T='<div style="position:absolute;left:80px;right:150px;top:280px">'
 P={}
 P['1-hook']=page(T+'<div class="pill">🎃 HALLOWEEN BEI PEPTRIUM</div><h1 style="margin-top:28px">Jede 3.<br>Flasche<br><span class="o">gratis.</span></h1>'
@@ -66,7 +66,7 @@ P['1-hook']=page(T+'<div class="pill">🎃 HALLOWEEN BEI PEPTRIUM</div><h1 style
   +vials(['reta','ghk','mots'],2,860,h=430)+cta(),moon=(560,1060,520))
 P['2-insider']=page(T+'<div class="pill">🔑 NUR FÜR INSIDER</div><h1 style="margin-top:28px;font-size:104px">6 Stunden<br><span class="o">früher rein.</span></h1>'
   '<div class="ticket" style="margin-top:40px"><div class="a">EARLY ACCESS</div><div class="b"><div class="t1">START FÜR INSIDER</div><div class="t2">Do 18:00</div><div class="t3">alle anderen erst Fr 0:00</div></div></div>'
-  '<div class="steps" style="margin-top:44px"><div class="st"><i>1</i>peptrium.com/halloween öffnen</div><div class="st"><i>2</i>Newsletter eintragen & bestätigen</div><div class="st"><i>3</i>Zugang kommt Do 18 Uhr per Mail</div></div></div>'
+  '<div class="steps" style="margin-top:44px"><div class="st"><i>1</i>peptrium.com öffnen</div><div class="st"><i>2</i>Newsletter eintragen & bestätigen</div><div class="st"><i>3</i>Zugang kommt Do 18 Uhr per Mail</div></div></div>'
   +cta('Kostenlos · jederzeit abmeldbar'),moon=(900,700,260))
 P['3-neu']=page(T+'<div class="pill">✨ NEU ZU HALLOWEEN</div><h1 style="margin-top:28px;font-size:104px">3 neue<br>Peptide <span class="o">+1<br>ist zurück.</span></h1>'
   '<div class="chips" style="margin-top:30px"><span>Cagrilintid</span><span>MT-2</span><span>GLOW</span><span class="w">BPC-157 wieder da</span></div></div>'
