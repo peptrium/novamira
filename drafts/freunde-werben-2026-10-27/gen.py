@@ -34,38 +34,68 @@ def share(code):
     b = lambda t, u, bg: f'<td width="50%" style="width:50%;padding:4px;"><a href="{u}" style="display:block;background:{bg};color:#FFF;text-align:center;text-decoration:none;font-weight:800;font-size:14px;padding:14px 6px;border-radius:12px;font-family:{F};">{t}</a></td>'
     return f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>{b("Per WhatsApp teilen", wa, "#1FA855")}{b("Per Telegram teilen", tg, "#229ED9")}</tr></table>'
 
+def ex_row(l, r, bold=False):
+    w = '800' if bold else '600'
+    return (f'<tr><td style="padding:9px 0;border-bottom:1px solid {LBD};text-align:left;font-size:14px;color:{LMUT};font-family:{F};">{l}</td>'
+            f'<td style="padding:9px 0;border-bottom:1px solid {LBD};text-align:right;font-size:15px;font-weight:{w};color:{INK};white-space:nowrap;font-family:{F};">{r}</td></tr>')
+def dots(active):
+    out = ''
+    for i, t in enumerate(('1. Freund', '2. Freund', '3. Freund'), 1):
+        on = i <= active
+        out += (f'<td width="33%" valign="top" style="width:33%;padding:4px;text-align:center;font-family:{F};"><div style="height:6px;border-radius:3px;background:{GOLD if on else "#3A4048"};"></div>'
+                f'<div style="font-size:12px;font-weight:800;color:{"#FFF" if on else "#8E959E"};margin-top:8px;">{t}</div><div style="font-size:11px;color:#C9CDD2;margin-top:2px;">20 % für dich</div></td>')
+    return f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>{out}</tr></table>'
+def bullet(t, col=GOLD, fg=INK):
+    return f'<tr><td width="26" valign="top" style="width:26px;padding:5px 0;color:{col};font-weight:800;font-family:{F};">✓</td><td style="padding:5px 0;font-size:14px;line-height:1.45;color:{fg};text-align:left;font-family:{F};">{t}</td></tr>'
+def msgbox(code):
+    return (f'<div style="background:#E7F7EC;border-radius:16px 16px 16px 4px;padding:14px 16px;text-align:left;font-family:{F};font-size:15px;line-height:1.5;color:{INK};">'
+            f'Hey, ich bestell meine Peptide bei Peptrium – geht schnell und ist diskret verpackt. Mit meinem Code <b>{code}</b> sparst du 10 %: peptrium.com</div>')
+
 def build():
     M = {}
-    E = U + 'sp-email/'
-    # ---------- 1. Ankuendigung (Kampagne an Kunden-Abonnenten, persoenlicher Code als Kontakt-Property) ----------
+    # ---------- 1. Ankuendigung v2 ----------
     c = 'freunde-werben'
     code = S('freund_code')
     M['freunde-start'] = wrap(bar('Freunde werben')
-        + lrow(eyebrow('NEU · FREUNDE WERBEN', GOLD) + h1('Empfiehl uns weiter.', 'Ihr spart beide.', '#FFFFFF', '#8E959E', 34)
-               + p('Dein Freund spart 10 % auf seine Bestellung. Du bekommst dafür 20 % auf deine nächste – für jeden neuen Freund wieder.', col='#C9CDD2'), '34px 20px 26px', '#0D0F12')
-        + lrow(f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>{tile("10 %", "für deinen Freund – auf jede Bestellung mit deinem Code")}{tile("20 %", "für dich – nach jeder neuen Empfehlung", GOLD, GOLDL)}</tr></table>', '24px 16px 8px')
-        + lrow(codebox('DEIN PERSÖNLICHER CODE', code, 'Einfach weitergeben – im Warenkorb oder an der Kasse eingeben.', GOLD, GOLDL) + '<div style="height:12px;"></div>' + share(code), '14px 20px 10px')
+        + lrow(eyebrow('DEIN PERSÖNLICHER CODE IST FERTIG', GOLD) + h1('Teil Peptrium.', 'Spar 20 %.', '#FFFFFF', '#8E959E', 38)
+               + p('Jeder Freund, der mit deinem Code bestellt, spart 10 %. Und du bekommst dafür jedes Mal 20 % auf deine nächste Bestellung.', col='#C9CDD2')
+               + '<div style="height:20px;"></div>'
+               + f'<div style="border:2px dashed {GOLD};border-radius:16px;padding:16px 14px;text-align:center;font-family:{F};"><div style="font-size:11px;font-weight:800;letter-spacing:.18em;color:{GOLD};">DEIN CODE</div>'
+               + f'<div style="font-size:30px;font-weight:800;font-family:{MONO};color:#FFF;margin-top:6px;letter-spacing:.04em;word-break:break-all;">{code}</div></div>'
+               + '<div style="height:12px;"></div>' + share(code), '34px 20px 28px', '#0D0F12')
         + lrow(eyebrow('SO EINFACH GEHT\'S', LMUT) + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">'
-               + step(1, 'Code teilen', 'Per WhatsApp, Telegram oder persönlich.')
-               + step(2, 'Dein Freund bestellt', 'Mit deinem Code spart er 10 %.')
-               + step(3, 'Du bekommst 20 %', 'Sobald seine Bestellung bezahlt ist, kommt dein Code per Mail.', GOLD) + '</table>', '18px 20px 6px')
-        + lrow(f'<div style="background:#0D0F12;border-radius:18px;padding:18px 16px;text-align:left;font-family:{F};"><div style="font-size:11px;font-weight:800;letter-spacing:.16em;color:{GOLD};">BONUS AB 3 EMPFEHLUNGEN</div>'
-               f'<div style="font-size:17px;font-weight:800;color:#FFF;margin-top:6px;line-height:1.3;">Einladung ins Partnerprogramm</div><div style="font-size:13px;line-height:1.5;color:#C9CDD2;margin-top:4px;">Mit eigenem Link und Provision auf jede Bestellung.</div></div>', '14px 20px 8px')
-        + lrow(small('Gilt für jede neue Person, die mit deinem Code bestellt. Deinen eigenen Code kannst du nicht selbst einlösen. Dein 20-%-Code gilt 60 Tage, einmal einlösbar, nicht mit anderen Codes kombinierbar.'), '10px 20px 30px')
+               + step(1, 'Code schicken', 'Ein Klick oben – die Nachricht ist schon fertig.')
+               + step(2, 'Dein Freund spart 10 %', 'Er gibt den Code im Warenkorb oder an der Kasse ein.')
+               + step(3, 'Du bekommst 20 %', 'Sobald er bezahlt hat, kommt dein Code automatisch per Mail.', GOLD) + '</table>', '26px 20px 8px')
+        + lrow(eyebrow('DAS BRINGT ES DIR KONKRET', LMUT) + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">'
+               + ex_row('Dein Freund bestellt für 150 €', 'spart 15 €') + ex_row('Deine nächste Bestellung: 190 €', 'du sparst 38 €', True)
+               + '</table>' + small('<div style="margin-top:8px;">Beispielrechnung.</div>'), '18px 20px 8px')
+        + lrow(eyebrow('DIE NACHRICHT FÜR DEINE FREUNDE', LMUT) + msgbox(code)
+               + small('<div style="margin-top:8px;">Gedrückt halten zum Kopieren – oder einfach oben auf WhatsApp/Telegram tippen.</div>'), '18px 20px 8px')
+        + lrow(card('<div style="font-size:15px;font-weight:800;color:' + INK + ';">Wem du ihn schicken kannst</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:6px;">'
+                    + bullet('Freunden, die sich auch für Peptide interessieren') + bullet('Leuten, die dich schon mal gefragt haben, wo du bestellst') + bullet('deinen Telegram- oder WhatsApp-Gruppen') + '</table>', LBD, '#F5F6F7'), '14px 20px 8px')
+        + lrow(f'<div style="background:#0D0F12;border-radius:20px;padding:20px 16px;font-family:{F};text-align:left;"><div style="font-size:11px;font-weight:800;letter-spacing:.16em;color:{GOLD};">KEIN LIMIT</div>'
+               f'<div style="font-size:19px;font-weight:800;color:#FFF;margin-top:6px;line-height:1.3;">Jeder neue Freund = wieder 20 % für dich.</div>'
+               f'<div style="font-size:13px;line-height:1.5;color:#C9CDD2;margin:4px 0 14px;">Und ab 3 Freunden laden wir dich ins Partnerprogramm ein – dann gibt es Geld statt Rabatt.</div>' + dots(0) + '</div>', '14px 20px 8px')
+        + lrow(small('Gilt für jede neue Person, die mit deinem Code bestellt und bezahlt. Deinen eigenen Code kannst du nicht selbst einlösen. Dein 20-%-Code gilt 60 Tage, einmal einlösbar, nicht mit anderen Codes kombinierbar. Deinen Code findest du jederzeit in deinem Kundenkonto.'), '12px 20px 30px')
         + lfoot())
 
-    # ---------- 2. Belohnung (Automation auf Ereignis sp_freund_belohnung) ----------
+    # ---------- 2. Belohnung v2 ----------
     c = 'freunde-belohnung'
     pshow = S('partner_show')
     partner = (f'<tr><td style="padding:6px 20px 10px;background:#FFFFFF;"><div style="display:{pshow};">'
                f'<div style="background:#0D0F12;border-radius:20px;padding:22px 18px;text-align:left;font-family:{F};">'
-               f'<div style="font-size:11px;font-weight:800;letter-spacing:.16em;color:{GOLD};">WARUM DU DIESE MAIL BEKOMMST</div>'
-               f'<div style="font-size:22px;font-weight:800;color:#FFF;margin-top:8px;line-height:1.2;">Du hast schon 3 Leute<br><span style="color:#8E959E;">von uns überzeugt.</span></div>'
-               f'<div style="font-size:14px;line-height:1.55;color:#C9CDD2;margin-top:10px;">Das schaffen nur wenige. Deshalb laden wir dich in unser Partnerprogramm ein – statt Rabatt bekommst du dort Provision auf jede Bestellung über deinen Link.</div>'
-               f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:14px 0 16px;">'
-               + ''.join(f'<tr><td width="26" valign="top" style="width:26px;padding:5px 0;color:{GOLD};font-weight:800;font-family:{F};">✓</td><td style="padding:5px 0;font-size:14px;color:#FFF;text-align:left;font-family:{F};">{t}</td></tr>'
-                         for t in ('15 % Provision auf jede Bestellung', 'Eigener Link und Code für deine Kontakte', 'Übersicht und Auszahlung in deinem Partnerkonto'))
-               + '</table>' + lbtn('Partnerprogramm ansehen', utm('/affiliate-programm/', c), GOLD) + '</div></div></td></tr>')
+               f'<div style="font-size:11px;font-weight:800;letter-spacing:.16em;color:{GOLD};">WARUM WIR DICH EINLADEN</div>'
+               f'<div style="font-size:23px;font-weight:800;color:#FFF;margin-top:8px;line-height:1.2;">3 Leute haben auf<br><span style="color:#8E959E;">deine Empfehlung bestellt.</span></div>'
+               f'<div style="font-size:14px;line-height:1.55;color:#C9CDD2;margin-top:10px;">Das heißt: Man vertraut deinem Urteil. Genau das ist alles, was ein Partner braucht. Du machst einfach weiter wie bisher – nur bekommst du dafür keinen Rabatt mehr, sondern <b style="color:#FFF;">Geld</b>.</div>'
+               f'<div style="background:#1A1E24;border-radius:14px;padding:14px;margin:16px 0;text-align:center;"><div style="font-size:12px;color:#C9CDD2;">Deine 3 Empfehlungen hätten dir als Partner schon gebracht:</div>'
+               f'<div style="font-size:30px;font-weight:800;color:{GOLD};margin-top:4px;">{S("partner_beispiel")}</div><div style="font-size:11px;color:#8E959E;margin-top:2px;">bei 20 % Provision auf ihre Bestellungen</div></div>'
+               '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;">'
+               + bullet('Bis zu 25 % Provision auf jede Bestellung über deinen Link', GOLD, '#FFF')
+               + bullet('Eigener Code: deine Kontakte sparen weiter 10 %', GOLD, '#FFF')
+               + bullet('Persönlicher Ansprechpartner + Partnerkonto mit allen Bestellungen', GOLD, '#FFF')
+               + bullet('Kostenlos, kein Mindestumsatz, jederzeit beenden', GOLD, '#FFF')
+               + '</table>' + lbtn('In 2 Minuten bewerben', utm('/affiliate-programm/', c), GOLD) + '</div></div></td></tr>')
     M['freunde-belohnung'] = wrap(bar('Danke')
         + lrow(eyebrow('EMPFEHLUNG NR. ' + S('freund_anzahl'), GOLD) + h1('Dein Tipp kam an.', 'Hier sind deine 20 %.', '#FFFFFF', '#8E959E', 34)
                + p('Jemand hat mit deinem Code bestellt und bezahlt. Danke, dass du Peptrium weiterempfiehlst!', col='#C9CDD2'), '34px 20px 26px', '#0D0F12')
@@ -75,28 +105,39 @@ def build():
                f'<div style="font-size:12px;color:{LMUT};margin-top:4px;">einmal einlösbar · gültig bis {S("belohnung_bis")}</div></td></tr></table><div style="height:14px;"></div>'
                + lbtn('Jetzt einlösen', utm('/alle-produkte/', c)), '24px 20px 14px')
         + partner
-        + lrow(eyebrow('NOCH JEMAND IM KOPF?', LMUT) + p('Dein Empfehlungscode gilt weiter – für jeden neuen Freund gibt es wieder 20 % für dich.', '0 0 12px')
+        + lrow(eyebrow('NOCH JEMAND IM KOPF?', LMUT) + p('Dein Empfehlungscode gilt weiter – jeder neue Freund bringt dir wieder 20 %.', '0 0 12px')
                + codebox('DEIN EMPFEHLUNGSCODE', S('freund_code'), '', INK) + '<div style="height:12px;"></div>' + share(S('freund_code')), '18px 20px 30px')
         + lfoot('Du bekommst diese Mail, weil jemand deinen Empfehlungscode bei Peptrium genutzt hat.'))
 
-    # ---------- 3. Creator-Einladung (Kampagne nach Halloween an Kunden-Abonnenten) ----------
+    # ---------- 3. Creator v2 ----------
     c = 'creator'
+    calc = ''.join(ex_row(f'{n} Bestellungen im Monat', v, n >= 70) for n, v in ((10, '≈ 380 €'), (30, '≈ 1.430 €'), (70, '≈ 3.330 €'), (170, '≈ 8.080 €')))
     M['creator'] = wrap(bar('Partnerprogramm')
-        + lrow(eyebrow('WIR WACHSEN', GOLD) + h1('Wir suchen Creator.', 'Vielleicht dich?', '#FFFFFF', '#8E959E', 36)
-               + p('Du kennst Peptrium schon als Kunde – die beste Voraussetzung, um anderen davon zu erzählen. Und dafür Geld zu bekommen.', col='#C9CDD2'), '36px 20px 28px', '#0D0F12')
-        + lrow(f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>{tile3("15 %", "Provision auf jede Bestellung")}{tile3("10 %", "Rabatt-Code für deine Follower")}{tile3("🎁", "Gratis-Produkt für dein erstes Video")}</tr></table>', '24px 16px 8px')
-        + lrow(eyebrow('SO LÄUFT\'S', LMUT) + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">'
-               + step(1, 'Bewerben', 'Dauert 2 Minuten – mit deinem Social-Media-Account.')
-               + step(2, 'Freigeschaltet werden', 'Du bekommst deinen Link, deinen Code und einen persönlichen Creator Manager.')
-               + step(3, 'Erstes Video posten', 'Dein Gratis-Produkt kommt in 2 Werktagen. Ab dann verdienst du an jeder Bestellung.', GOLD) + '</table>', '18px 20px 8px')
-        + lrow(card('<div style="font-size:15px;font-weight:800;color:' + INK + ';">Du brauchst keine riesige Reichweite.</div>'
-                    + p('Ehrliche Videos von echten Kunden funktionieren oft besser als große Accounts. TikTok, Instagram oder YouTube – Hauptsache, du hast Lust auf Content.', '6px 0 0'), LBD, '#F5F6F7'), '12px 20px 10px')
-        + lrow(lbtn('Jetzt als Partner bewerben', utm('/affiliate-programm/', c), INK) + '<div style="height:14px;"></div>'
-               + small('Wichtig: Unsere Produkte sind ausschließlich für Laborforschungszwecke. In Videos daher keine Heilversprechen und keine Dosierangaben – dein Creator Manager hilft dir bei passenden Formaten. Es gelten die <a href="' + utm('/affiliate-bedingungen/', c) + '" style="color:' + LMUT + ';">Partner-Bedingungen</a>.'), '14px 20px 30px')
+        + lrow(eyebrow('NEBENBEI VERDIENEN', GOLD) + h1('Teil deine Erfahrung.', 'Verdien daran mit.', '#FFFFFF', '#8E959E', 36)
+               + p('Du kennst Peptrium schon als Kunde. Als Partner empfiehlst du uns weiter – und bekommst bis zu 25 % von jeder Bestellung, die über dich kommt.', col='#C9CDD2')
+               + f'<div style="background:#1A1E24;border-radius:16px;padding:16px;margin-top:20px;text-align:left;font-family:{F};"><div style="font-size:11px;font-weight:800;letter-spacing:.16em;color:{GOLD};">ECHTES BEISPIEL</div>'
+               f'<div style="font-size:16px;line-height:1.45;color:#FFF;margin-top:6px;">Unsere aktivste Partnerin hat im Oktober <b style="color:{GOLD};">über 1.400 € Provision</b> verdient – mit einem einzigen Social-Media-Account.</div></div>', '36px 20px 28px', '#0D0F12')
+        + lrow(eyebrow('WAS DRIN IST', LMUT) + '<div style="font-size:15px;line-height:1.5;color:' + LMUT + ';margin-bottom:10px;">Unsere Bestellungen liegen im Schnitt bei rund 190 €. So viel bleibt bei dir hängen:</div>'
+               + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">' + calc + '</table>'
+               + small('<div style="margin-top:8px;">Rechenbeispiel mit 190 € pro Bestellung, 20 % Provision bis 25 Bestellungen im Monat, darüber 25 %. Wie viel du verdienst, hängt von deiner Reichweite ab.</div>'), '26px 20px 8px')
+        + lrow(card('<div style="font-size:15px;font-weight:800;color:' + INK + ';">Du kümmerst dich nur ums Teilen.</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:6px;">'
+                    + bullet('Kein Lager, kein Versand, kein Kundenservice – das machen wir')
+                    + bullet('Deine Follower sparen 10 % mit deinem Code – das macht das Empfehlen leicht')
+                    + bullet('Gratis-Produkt für dein erstes Video')
+                    + bullet('Partnerkonto: jede Bestellung und Provision live im Blick')
+                    + bullet('Kostenlos, kein Mindestumsatz, jederzeit beenden') + '</table>', LBD, '#F5F6F7'), '14px 20px 8px')
+        + lrow(eyebrow('SO STARTEST DU', LMUT) + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">'
+               + step(1, 'Bewerben', '2 Minuten, mit deinem TikTok-, Instagram- oder YouTube-Account.')
+               + step(2, 'Link, Code und Creator Manager', 'Dein Ansprechpartner hilft dir mit Ideen und Formaten.')
+               + step(3, 'Posten und verdienen', 'Jede Bestellung über deinen Link oder Code bringt dir Provision.', GOLD) + '</table>', '18px 20px 8px')
+        + lrow(f'<div style="border:2px solid {GOLD};background:{GOLDL};border-radius:18px;padding:16px;text-align:left;font-family:{F};"><div style="font-size:15px;font-weight:800;color:{INK};">⏰ Bester Zeitpunkt: jetzt.</div>'
+               f'<div style="font-size:14px;line-height:1.5;color:{LMUT};margin-top:4px;">Am 27.11. ist Black Friday – die stärkste Kaufwoche des Jahres. Wer jetzt startet, ist bis dahin eingerichtet.</div></div>', '14px 20px 8px')
+        + lrow(lbtn('Jetzt kostenlos bewerben', utm('/affiliate-programm/', c), INK) + '<div style="height:14px;"></div>'
+               + small('Wichtig: Unsere Produkte sind ausschließlich für Laborforschungszwecke. In deinen Inhalten daher keine Heilversprechen und keine Dosierangaben – erzähl von deiner Erfahrung mit Peptrium (Bestellung, Versand, Qualität). Es gelten die <a href="' + utm('/affiliate-bedingungen/', c) + '" style="color:' + LMUT + ';">Partner-Bedingungen</a>.'), '14px 20px 30px')
         + lfoot())
     return M
 
-SAMPLE_DATA = {'freund_code': 'FREUND-ANNA7K', 'freund_anzahl': '3', 'belohnung_code': 'DANKE-Q4M8X2', 'belohnung_bis': '26.12.2026', 'partner_show': 'block'}
+SAMPLE_DATA = {'freund_code': 'FREUND-ANNA7K', 'freund_anzahl': '3', 'belohnung_code': 'DANKE-Q4M8X2', 'belohnung_bis': '26.12.2026', 'partner_show': 'block', 'partner_beispiel': '115 €'}
 
 if __name__ == '__main__':
     os.chdir(_own)
