@@ -1,0 +1,1 @@
+const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:390,height:800},deviceScaleFactor:2});await p.goto('file://'+process.cwd()+'/vorschau.html');await p.waitForTimeout(500);await p.screenshot({path:'entwurf-retatrutide.png',fullPage:true});await b.close();})();
