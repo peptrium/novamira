@@ -70,7 +70,7 @@ def build():
                + step(2, 'Dein Freund spart 10 %', 'Er gibt den Code im Warenkorb oder an der Kasse ein.')
                + step(3, 'Du bekommst 20 %', 'Sobald er bezahlt hat, kommt dein Code automatisch per Mail.', GOLD) + '</table>', '26px 20px 8px')
         + lrow(eyebrow('DAS BRINGT ES DIR KONKRET', LMUT) + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">'
-               + ex_row('Dein Freund bestellt für 150 €', 'spart 15 €') + ex_row('Deine nächste Bestellung: 190 €', 'du sparst 38 €', True)
+               + ex_row('Dein Freund bestellt für 150 €', 'spart 15 €') + ex_row('Deine nächste Bestellung: 200 €', 'du sparst 40 €', True)
                + '</table>' + small('<div style="margin-top:8px;">Beispielrechnung.</div>'), '18px 20px 8px')
         + lrow(eyebrow('DIE NACHRICHT FÜR DEINE FREUNDE', LMUT) + msgbox(code)
                + small('<div style="margin-top:8px;">Gedrückt halten zum Kopieren – oder einfach oben auf WhatsApp/Telegram tippen.</div>'), '18px 20px 8px')
@@ -91,7 +91,7 @@ def build():
                f'<div style="font-size:23px;font-weight:800;color:#FFF;margin-top:8px;line-height:1.2;">3 Leute haben auf<br><span style="color:#8E959E;">deine Empfehlung bestellt.</span></div>'
                f'<div style="font-size:14px;line-height:1.55;color:#C9CDD2;margin-top:10px;">Das heißt: Man vertraut deinem Urteil. Genau das ist alles, was ein Partner braucht. Du machst einfach weiter wie bisher – nur bekommst du dafür keinen Rabatt mehr, sondern <b style="color:#FFF;">Geld</b>.</div>'
                f'<div style="background:#1A1E24;border-radius:14px;padding:14px;margin:16px 0;text-align:center;"><div style="font-size:12px;color:#C9CDD2;">Deine 3 Empfehlungen hätten dir als Partner schon gebracht:</div>'
-               f'<div style="font-size:30px;font-weight:800;color:{GOLD};margin-top:4px;">{S("partner_beispiel")}</div><div style="font-size:11px;color:#8E959E;margin-top:2px;">bei 20 % Provision auf ihre Bestellungen</div></div>'
+               f'<div style="font-size:30px;font-weight:800;color:{GOLD};margin-top:4px;">{S("partner_beispiel")}</div><div style="font-size:11px;color:#8E959E;margin-top:2px;">schon bei 15 % Provision auf ihre Bestellungen</div></div>'
                '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;">'
                + bullet('Bis zu 25 % Provision auf jede Bestellung über deinen Link', GOLD, '#FFF')
                + bullet('Eigener Code: deine Kontakte sparen weiter 10 %', GOLD, '#FFF')
@@ -113,15 +113,15 @@ def build():
 
     # ---------- 3. Creator v2 ----------
     c = 'creator'
-    calc = ''.join(ex_row(f'{n} Bestellungen im Monat', v, n >= 70) for n, v in ((10, '≈ 380 €'), (30, '≈ 1.430 €'), (70, '≈ 3.330 €'), (170, '≈ 8.080 €')))
+    calc = ''.join(ex_row(f'{n} Bestellungen im Monat', v, n >= 70) for n, v in ((10, '300 – 500 €'), (30, '900 – 1.500 €'), (70, '2.100 – 3.500 €'), (170, '5.100 – 8.500 €')))
     M['creator'] = wrap(bar('Partnerprogramm')
         + lrow(eyebrow('NEBENBEI VERDIENEN', GOLD) + h1('Teil deine Erfahrung.', 'Verdien daran mit.', '#FFFFFF', '#8E959E', 36)
                + p('Du kennst Peptrium schon als Kunde. Als Partner empfiehlst du uns weiter – und bekommst bis zu 25 % von jeder Bestellung, die über dich kommt.', col='#C9CDD2')
                + f'<div style="background:#1A1E24;border-radius:16px;padding:16px;margin-top:20px;text-align:left;font-family:{F};"><div style="font-size:11px;font-weight:800;letter-spacing:.16em;color:{GOLD};">ECHTES BEISPIEL</div>'
                f'<div style="font-size:16px;line-height:1.45;color:#FFF;margin-top:6px;">Einer unserer Partner verdient im Schnitt <b style="color:{GOLD};">rund 5.000 € Provision im Monat</b> – nur durchs Teilen und Empfehlen.</div></div>', '36px 20px 28px', '#0D0F12')
-        + lrow(eyebrow('WAS DRIN IST', LMUT) + '<div style="font-size:15px;line-height:1.5;color:' + LMUT + ';margin-bottom:10px;">Unsere Bestellungen liegen im Schnitt bei rund 190 €. So viel bleibt bei dir hängen:</div>'
+        + lrow(eyebrow('WAS DRIN IST', LMUT) + '<div style="font-size:15px;line-height:1.5;color:' + LMUT + ';margin-bottom:10px;">Unsere Bestellungen liegen im Schnitt bei rund 200 €. So viel bleibt bei dir hängen:</div>'
                + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">' + calc + '</table>'
-               + small('<div style="margin-top:8px;">Rechenbeispiel mit 190 € pro Bestellung, 20 % Provision bis 25 Bestellungen im Monat, darüber 25 %. Wie viel du verdienst, hängt von deiner Reichweite ab.</div>'), '26px 20px 8px')
+               + small('<div style="margin-top:8px;">Rechenbeispiel mit 200 € pro Bestellung und 15–25 % Provision. Wie viel du verdienst, hängt von deiner Reichweite ab.</div>'), '26px 20px 8px')
         + lrow(card('<div style="font-size:15px;font-weight:800;color:' + INK + ';">Du kümmerst dich nur ums Teilen.</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:6px;">'
                     + bullet('Kein Lager, kein Versand, kein Kundenservice – das machen wir')
                     + bullet('Deine Follower sparen 10 % mit deinem Code – das macht das Empfehlen leicht')
@@ -139,7 +139,7 @@ def build():
         + lfoot())
     return M
 
-SAMPLE_DATA = {'freund_code': 'FREUND-ANNA7K', 'freund_anzahl': '3', 'belohnung_code': 'DANKE-Q4M8X2', 'belohnung_bis': '26.12.2026', 'partner_show': 'block', 'partner_beispiel': '115 €'}
+SAMPLE_DATA = {'freund_code': 'FREUND-ANNA7K', 'freund_anzahl': '3', 'belohnung_code': 'DANKE-Q4M8X2', 'belohnung_bis': '26.12.2026', 'partner_show': 'block', 'partner_beispiel': '90 €'}
 
 if __name__ == '__main__':
     os.chdir(_own)
@@ -154,3 +154,10 @@ if __name__ == '__main__':
         for k, v in build().items():
             open(k + '.body', 'w').write(v)
         print('ok')
+
+# Betreff / Vorschautext (Vorschlag 2026-10-27)
+SUBJ = {
+    'freunde-start': ('Dein Code ist fertig: 10 % für Freunde, 20 % für dich', 'Einmal teilen – jeder neue Freund bringt dir wieder 20 %.'),
+    'freunde-belohnung': ('Dein Tipp kam an – hier sind deine 20 %', 'Jemand hat mit deinem Code bestellt. Danke!'),
+    'creator': ('Nebenbei verdienen mit Peptrium?', 'Bis zu 25 % Provision – nur durchs Teilen und Empfehlen.'),
+}
