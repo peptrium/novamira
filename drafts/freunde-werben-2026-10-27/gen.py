@@ -79,7 +79,7 @@ def build():
         + lrow(f'<div style="background:#0D0F12;border-radius:20px;padding:20px 16px;font-family:{F};text-align:left;"><div style="font-size:11px;font-weight:800;letter-spacing:.16em;color:{GOLD};">KEIN LIMIT</div>'
                f'<div style="font-size:19px;font-weight:800;color:#FFF;margin-top:6px;line-height:1.3;">Jeder neue Freund = wieder 20 % für dich.</div>'
                f'<div style="font-size:13px;line-height:1.5;color:#C9CDD2;margin:4px 0 14px;">Und ab 3 Freunden laden wir dich ins Partnerprogramm ein – dann gibt es Geld statt Rabatt.</div>' + dots(0) + '</div>', '14px 20px 8px')
-        + lrow(small('Gilt für jede neue Person, die mit deinem Code bestellt und bezahlt. Deinen eigenen Code kannst du nicht selbst einlösen. Dein 20-%-Code gilt 60 Tage, einmal einlösbar, nicht mit anderen Codes kombinierbar. Deinen Code findest du jederzeit in deinem Kundenkonto.'), '12px 20px 30px')
+        + lrow(small('Gilt für jede neue Person, die mit deinem Code bestellt und bezahlt. Deinen eigenen Code kannst du nicht selbst einlösen. Dein 20-%-Code gilt 60 Tage, einmal einlösbar, nicht mit anderen Codes kombinierbar.'), '12px 20px 30px')
         + lfoot())
 
     # ---------- 2. Belohnung v2 ----------
