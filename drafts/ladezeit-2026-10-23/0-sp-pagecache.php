@@ -152,6 +152,8 @@ foreach (['save_post', 'deleted_post', 'trashed_post', 'edited_term', 'created_t
 }
 add_action('updated_option', function ($name) {
     if ($name === 'sp_pc_gen' || $name === 'sp_pc') return;
+    // Elementor/RCB schreiben diese Optionen beim normalen Seitenaufruf – kein Inhaltswechsel (sonst wird der Cache dauernd geleert, 2026-10-27)
+    if (preg_match('/^(elementor_atomic_cache_validity|elementor_.*_cache|rcb-notice-states)/', $name)) return;
     if (preg_match('/^(sp_hw|sp_redesign|sp_wartung|sp_nlp|sp_cmp|sp_seo|sp_rd_webp_map|sp_bbv|sp_imp|sp_an_google|sp_an_bing|site_icon|blogname|blogdescription|woocommerce_(price|currency|default)|woocommerce_free_shipping|rcb-|elementor_)/', $name)) sp_pc_purge('opt:' . $name);
 });
 add_action('added_option', function ($name) {
