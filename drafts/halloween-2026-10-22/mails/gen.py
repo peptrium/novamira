@@ -112,14 +112,24 @@ def letzte():
         + row(box(f'<div style="font-size:14px;color:#E6E8EB;line-height:1.5;">✨ <b>Neu dabei:</b> <span style="color:{MU};">Cagrilintid, MT-2 und GLOW – und BPC-157 ist wieder da. Alle zählen mit.</span> <a href="{utm("/alle-produkte/", c)}" style="color:{OR2};font-weight:700;text-decoration:none;">Ansehen →</a></div>', bd=BD, bg=CARD), '12px 16px 4px')
         + row(ticks([TK_MIX, TK_CODE, TK_VK]), '12px 16px 26px'))
 
+def morgen():
+    """Erinnerung Mi 28.10. 18 Uhr (2026-10-27, Nutzer: 1 Tag vor Early Access) an alle, die den Teaser nicht geoeffnet haben + neue Abonnenten."""
+    c = 'halloween-morgen'
+    return wrap(row(logo(), '26px 20px 6px', align='center') + heroimg('teaser', utm('/alle-produkte/', c))
+        + row(h1('Morgen 18 Uhr', 'bist du früher dran.', 'Unser Halloween-Special: <b style="color:#fff;">jede 3. Flasche gratis</b> – plus drei neue Produkte. Für dich geht es 6 Stunden vor allen anderen los. Den Zugangslink schicken wir dir morgen um 18 Uhr per Mail.'), '22px 22px 6px')
+        + row(ticks([TK_MIX, '<b style="color:#fff;">Neu:</b> Cagrilintid, MT-2 und GLOW – und BPC-157 ist wieder da.', TK_VORRAT]), '16px 16px 4px')
+        + row(box(label('DER ABLAUF') + timeline(0)), '12px 16px 4px')
+        + row(btn('Schon mal stöbern', utm('/alle-produkte/', c)), '18px 22px 26px'))
+
 SUBJ = {
     'teaser': ('Donnerstag 18 Uhr: du bist früher dran 🎃', 'Jede 3. Flasche gratis – plus 3 neue Produkte.'),
     'early': ('Du bist drin 🎃', 'Jede 3. Flasche gratis – und die Neuheiten sind schon da.'),
     'letzte': ('Heute um Mitternacht ist Schluss', 'Danach wieder volle Preise.'),
+    'morgen': ('Morgen 18 Uhr: dein früher Zugang 🎃', 'Jede 3. Flasche gratis – und 3 neue Produkte.'),
 }
 
 if __name__ == '__main__':
-    for name, fn in [('teaser', teaser), ('early', early), ('letzte', letzte)]:
+    for name, fn in [('teaser', teaser), ('early', early), ('letzte', letzte), ('morgen', morgen)]:
         b = fn()
         open(name + '.body', 'w').write(b)
         v = b.replace(E + 'nl-hw', 'nl-hw').replace('[[unsubscribe_link]]', '#')
