@@ -28,9 +28,11 @@ def codebox(label, code, sub='', col=INK, bg='#F5F6F7'):
 def small(t): return f'<div style="font-size:12px;line-height:1.55;color:{LMUT};">{t}</div>'
 
 def share(code):
-    txt = f'Ich bestelle meine Peptide bei Peptrium. Mit meinem Code {code} sparst du 10 %: https://peptrium.com'
+    txt = f'Hey, ich hol meine Peps bei Peptrium – kommt schnell und diskret. Mit meinem Code {code} sparst du 10 % 👉 https://peptrium.com'
     wa = 'https://wa.me/?text=' + urllib.parse.quote(txt, safe=':/')
-    tg = 'https://t.me/share/url?url=' + urllib.parse.quote('https://peptrium.com', safe='') + '&text=' + urllib.parse.quote(f'Mit meinem Code {code} sparst du 10 % bei Peptrium.', safe='')
+    tg = 'https://t.me/share/url?url=' + urllib.parse.quote('https://peptrium.com', safe='') + '&text=' + urllib.parse.quote(f'Hey, ich hol meine Peps bei Peptrium – kommt schnell und diskret. Mit meinem Code {code} sparst du 10 % 👉', safe='')
+    qc = urllib.parse.quote(code, safe='')
+    wa, tg = wa.replace(qc, code), tg.replace(qc, code)  # Omnisend-Platzhalter muss unkodiert bleiben
     b = lambda t, u, bg: f'<td width="50%" style="width:50%;padding:4px;"><a href="{u}" style="display:block;background:{bg};color:#FFF;text-align:center;text-decoration:none;font-weight:800;font-size:14px;padding:14px 6px;border-radius:12px;font-family:{F};">{t}</a></td>'
     return f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>{b("Per WhatsApp teilen", wa, "#1FA855")}{b("Per Telegram teilen", tg, "#229ED9")}</tr></table>'
 
@@ -49,7 +51,7 @@ def bullet(t, col=GOLD, fg=INK):
     return f'<tr><td width="26" valign="top" style="width:26px;padding:5px 0;color:{col};font-weight:800;font-family:{F};">✓</td><td style="padding:5px 0;font-size:14px;line-height:1.45;color:{fg};text-align:left;font-family:{F};">{t}</td></tr>'
 def msgbox(code):
     return (f'<div style="background:#E7F7EC;border-radius:16px 16px 16px 4px;padding:14px 16px;text-align:left;font-family:{F};font-size:15px;line-height:1.5;color:{INK};">'
-            f'Hey, ich bestell meine Peptide bei Peptrium – geht schnell und ist diskret verpackt. Mit meinem Code <b>{code}</b> sparst du 10 %: peptrium.com</div>')
+            f'Hey, ich hol meine Peps bei Peptrium – kommt schnell und diskret. Mit meinem Code <b>{code}</b> sparst du 10 % 👉 peptrium.com</div>')
 
 def build():
     M = {}
@@ -73,7 +75,7 @@ def build():
         + lrow(eyebrow('DIE NACHRICHT FÜR DEINE FREUNDE', LMUT) + msgbox(code)
                + small('<div style="margin-top:8px;">Gedrückt halten zum Kopieren – oder einfach oben auf WhatsApp/Telegram tippen.</div>'), '18px 20px 8px')
         + lrow(card('<div style="font-size:15px;font-weight:800;color:' + INK + ';">Wem du ihn schicken kannst</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:6px;">'
-                    + bullet('Freunden, die sich auch für Peptide interessieren') + bullet('Leuten, die dich schon mal gefragt haben, wo du bestellst') + bullet('deinen Telegram- oder WhatsApp-Gruppen') + '</table>', LBD, '#F5F6F7'), '14px 20px 8px')
+                    + bullet('Freunden, die sich auch für Peps interessieren') + bullet('Leuten, die dich schon mal gefragt haben, wo du bestellst') + bullet('deinen Telegram- oder WhatsApp-Gruppen') + '</table>', LBD, '#F5F6F7'), '14px 20px 8px')
         + lrow(f'<div style="background:#0D0F12;border-radius:20px;padding:20px 16px;font-family:{F};text-align:left;"><div style="font-size:11px;font-weight:800;letter-spacing:.16em;color:{GOLD};">KEIN LIMIT</div>'
                f'<div style="font-size:19px;font-weight:800;color:#FFF;margin-top:6px;line-height:1.3;">Jeder neue Freund = wieder 20 % für dich.</div>'
                f'<div style="font-size:13px;line-height:1.5;color:#C9CDD2;margin:4px 0 14px;">Und ab 3 Freunden laden wir dich ins Partnerprogramm ein – dann gibt es Geld statt Rabatt.</div>' + dots(0) + '</div>', '14px 20px 8px')
@@ -116,7 +118,7 @@ def build():
         + lrow(eyebrow('NEBENBEI VERDIENEN', GOLD) + h1('Teil deine Erfahrung.', 'Verdien daran mit.', '#FFFFFF', '#8E959E', 36)
                + p('Du kennst Peptrium schon als Kunde. Als Partner empfiehlst du uns weiter – und bekommst bis zu 25 % von jeder Bestellung, die über dich kommt.', col='#C9CDD2')
                + f'<div style="background:#1A1E24;border-radius:16px;padding:16px;margin-top:20px;text-align:left;font-family:{F};"><div style="font-size:11px;font-weight:800;letter-spacing:.16em;color:{GOLD};">ECHTES BEISPIEL</div>'
-               f'<div style="font-size:16px;line-height:1.45;color:#FFF;margin-top:6px;">Unsere aktivste Partnerin hat im Oktober <b style="color:{GOLD};">über 1.400 € Provision</b> verdient – mit einem einzigen Social-Media-Account.</div></div>', '36px 20px 28px', '#0D0F12')
+               f'<div style="font-size:16px;line-height:1.45;color:#FFF;margin-top:6px;">Einer unserer Partner verdient im Schnitt <b style="color:{GOLD};">rund 5.000 € Provision im Monat</b> – nur durchs Teilen und Empfehlen.</div></div>', '36px 20px 28px', '#0D0F12')
         + lrow(eyebrow('WAS DRIN IST', LMUT) + '<div style="font-size:15px;line-height:1.5;color:' + LMUT + ';margin-bottom:10px;">Unsere Bestellungen liegen im Schnitt bei rund 190 €. So viel bleibt bei dir hängen:</div>'
                + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">' + calc + '</table>'
                + small('<div style="margin-top:8px;">Rechenbeispiel mit 190 € pro Bestellung, 20 % Provision bis 25 Bestellungen im Monat, darüber 25 %. Wie viel du verdienst, hängt von deiner Reichweite ab.</div>'), '26px 20px 8px')
