@@ -20,7 +20,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-const SP_PC_TTL = 600;
+const SP_PC_TTL = 3600; // 1 h (war 10 min) – Änderungen leeren den Cache ohnehin sofort
 
 function sp_pc_opts() {
     $o = get_option('sp_pc');
@@ -84,6 +84,13 @@ if (sp_pc_request_ok()) {
         exit;
     }
     sp_pc_stat('miss_' . gmdate('Ymd'));
+    $sp_pc_m = (int) wp_cache_get('miss_' . gmdate('Ymd'), 'sp_pc_stat');
+    if ($sp_pc_m >= 200 && $sp_pc_m % 50 === 0) {
+        add_action('shutdown', function () use ($sp_pc_m) {
+            $h = (int) wp_cache_get('hit_' . gmdate('Ymd'), 'sp_pc_stat');
+            if ($h < $sp_pc_m * 0.5) sp_pc_alert('Heute nur ' . $h . ' Seiten aus dem Cache, aber ' . $sp_pc_m . ' neu gebaut – der Cache greift nicht richtig, der Shop lädt langsamer.');
+        });
+    }
     $GLOBALS['sp_pc_store'] = null; // wird in template_redirect entschieden
     $GLOBALS['sp_pc_k'] = sp_pc_key();
     header('X-SP-Cache: MISS');
@@ -136,6 +143,26 @@ function sp_pc_purge($why = '') {
     $log[] = gmdate('d.m. H:i:s') . ' ' . $why . ' ' . substr($_SERVER['REQUEST_URI'] ?? '', 0, 60);
     wp_cache_set('log', $log, 'sp_pc_stat', 7 * DAY_IN_SECONDS);
     update_option('sp_pc_gen', ((int) get_option('sp_pc_gen', 1)) + 1, true);
+    $k = 'purge_' . gmdate('YmdH');
+    sp_pc_stat($k);
+    $n = (int) wp_cache_get($k, 'sp_pc_stat');
+    if ($n === 12) sp_pc_alert('Der Seiten-Cache wurde in der letzten Stunde schon ' . $n . '-mal geleert (normal: 0–3). Der Shop wird dadurch langsam.');
+}
+
+/** Warnmail an den Admin, höchstens alle 12 Stunden. */
+function sp_pc_alert($msg) {
+    if (wp_cache_get('alert_sent', 'sp_pc_stat')) return;
+    wp_cache_set('alert_sent', 1, 'sp_pc_stat', 12 * HOUR_IN_SECONDS);
+    $log = wp_cache_get('log', 'sp_pc_stat');
+    $last = is_array($log) ? implode("\n", array_slice($log, -10)) : '';
+    $al = get_option('sp_pc_alerts', []);
+    $al = is_array($al) ? array_slice($al, -19) : [];
+    $al[] = wp_date('d.m.Y H:i') . ' ' . $msg;
+    update_option('sp_pc_alerts', $al, false);
+    $send = function () use ($msg, $last) {
+        if (function_exists('wp_mail')) wp_mail(get_option('admin_email'), 'Peptrium: Seiten-Cache-Problem', $msg . "\n\nLetzte Leerungen:\n" . $last . "\n\nPeptrium Dashboard → Seiten-Cache");
+    };
+    if (did_action('shutdown')) $send(); else add_action('shutdown', $send, 1);
 }
 foreach (['save_post', 'deleted_post', 'trashed_post', 'edited_term', 'created_term', 'delete_term', 'wp_update_nav_menu',
     'woocommerce_product_set_stock_status', 'woocommerce_variation_set_stock_status', 'woocommerce_product_set_stock',
@@ -152,9 +179,16 @@ foreach (['save_post', 'deleted_post', 'trashed_post', 'edited_term', 'created_t
 }
 add_action('updated_option', function ($name) {
     if ($name === 'sp_pc_gen' || $name === 'sp_pc') return;
-    // Elementor/RCB schreiben diese Optionen beim normalen Seitenaufruf – kein Inhaltswechsel (sonst wird der Cache dauernd geleert, 2026-10-27)
-    if (preg_match('/^(elementor_atomic_cache_validity|elementor_.*_cache|rcb-notice-states)/', $name)) return;
-    if (preg_match('/^(sp_hw|sp_redesign|sp_wartung|sp_nlp|sp_cmp|sp_seo|sp_rd_webp_map|sp_bbv|sp_imp|sp_an_google|sp_an_bing|site_icon|blogname|blogdescription|woocommerce_(price|currency|default)|woocommerce_free_shipping|rcb-|elementor_)/', $name)) sp_pc_purge('opt:' . $name);
+    // Eigene Schalter + Shop-Einstellungen leeren den Cache immer (auch sp_hw-Autostart im Frontend).
+    if (preg_match('/^(sp_hw|sp_redesign|sp_wartung|sp_nlp|sp_cmp|sp_seo|sp_rd_webp_map|sp_bbv|sp_imp|sp_an_google|sp_an_bing|site_icon|blogname|blogdescription|woocommerce_(price|currency|default)|woocommerce_free_shipping)/', $name)) {
+        sp_pc_purge('opt:' . $name);
+        return;
+    }
+    // Elementor/Cookie-Banner schreiben eigene Optionen auch beim normalen Seitenaufruf (2026-10-27: Cache wurde dadurch
+    // dauernd geleert) → nur leeren, wenn jemand im Backend Einstellungen speichert, nie bei Besucher-Aufrufen.
+    if (!is_admin() || wp_doing_ajax() || wp_doing_cron()) return;
+    if (preg_match('/(_cache|cache_validity|notice-states)/', $name)) return;
+    if (preg_match('/^(rcb-|elementor_)/', $name)) sp_pc_purge('opt:' . $name);
 });
 add_action('added_option', function ($name) {
     if (preg_match('/^(sp_hw|sp_redesign|sp_wartung|sp_nlp)/', $name)) sp_pc_purge('add:' . $name);
