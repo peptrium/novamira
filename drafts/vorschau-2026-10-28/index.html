@@ -1,0 +1,163 @@
+<title>Peptrium Entwürfe</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: eine schmale Handy-Spalte, oben fixierte Reiter, je Thema Erklärung + Bildschirme untereinander */
+:root{
+  --bg:#EEF0F2; --card:#FFFFFF; --fg:#0D0F12; --mut:#5B6169; --line:#DDE1E5; --acc:#2E9B57; --accbg:#E6F5EC; --chip:#0D0F12; --chipfg:#FFFFFF;
+  --f:'Sora',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0B0D10;--card:#15181C;--fg:#EEF0F2;--mut:#9AA3AC;--line:#262A30;--acc:#7DDBA0;--accbg:#13281C;--chip:#EEF0F2;--chipfg:#0D0F12;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0B0D10;--card:#15181C;--fg:#EEF0F2;--mut:#9AA3AC;--line:#262A30;--acc:#7DDBA0;--accbg:#13281C;--chip:#EEF0F2;--chipfg:#0D0F12;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:520px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:8px 48px}
+header.top{padding-block:18px 6px}
+.ey{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+h1{font-size:28px;line-height:1.1;font-weight:800;letter-spacing:-.02em;margin:6px 0 8px;text-wrap:balance}
+.lead{color:var(--mut);margin:0;font-size:14px}
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);margin:12px calc(-1 * max(16px,env(safe-area-inset-left,0px))) 0;padding:10px max(16px,env(safe-area-inset-left,0px));display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line)}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs a{flex:none;text-decoration:none;color:var(--fg);border:1px solid var(--line);background:var(--card);border-radius:999px;padding:8px 13px;font-size:13px;font-weight:700}
+nav.tabs a[aria-current="page"]{background:var(--chip);color:var(--chipfg);border-color:var(--chip)}
+nav.tabs a:focus-visible,.sub button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+section{padding-top:18px}
+h2{font-size:22px;line-height:1.15;font-weight:800;margin:0 0 6px;text-wrap:balance}
+.box{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 15px;margin:12px 0}
+.box h3{font-size:13px;font-weight:800;margin:0 0 6px;letter-spacing:.02em}
+.box ul{margin:0;padding-left:18px;color:var(--fg);font-size:14px}.box li{margin:3px 0}
+.box.tip{background:var(--accbg);border-color:transparent}.box.tip h3{color:var(--acc)}
+.shot{margin:16px 0 0}
+.shot figcaption{font-size:13px;font-weight:700;margin:0 0 7px;display:flex;gap:8px;align-items:baseline}
+.shot figcaption span{font-weight:500;color:var(--mut)}
+.shot img{display:block;width:100%;max-width:100%;height:auto;border-radius:22px;border:1px solid var(--line);background:var(--card)}
+.sub{display:flex;gap:6px;margin:12px 0 0;flex-wrap:wrap}
+.sub button{font-family:var(--f);font-size:13px;font-weight:700;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:12px;padding:9px 12px;cursor:pointer}
+.sub button[aria-pressed="true"]{background:var(--chip);color:var(--chipfg);border-color:var(--chip)}
+.live{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;font-weight:700;margin-top:12px}
+.live small{display:block;font-weight:500;color:var(--mut);font-size:12.5px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--acc);flex:none;box-shadow:0 0 0 4px var(--accbg)}
+.foot{color:var(--mut);font-size:12px;margin-top:28px}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <p class="ey">Peptrium · Entwürfe vom 28.10.</p>
+  <h1>Alle Entwürfe zum Durchsehen</h1>
+  <p class="lead">So, wie es auf dem Handy aussehen würde. Noch nichts davon ist live – außer dem Peptid-Rechner. Beispieldaten (Namen, IBAN, Bestellnummern) sind erfunden.</p>
+</header>
+
+<nav class="tabs" aria-label="Themen">
+  <a href="#produkt">Produktseite</a>
+  <a href="#partner">Partner-Link</a>
+  <a href="#girocode">GiroCode</a>
+  <a href="#nachkauf">Nochmal bestellen</a>
+  <a href="#startseite">Startseite</a>
+  <a href="#rechner">Rechner (live)</a>
+</nav>
+
+<section id="v-produkt" data-view="produkt">
+  <h2>Produktseite</h2>
+  <p class="lead">Drei Richtungen, jeweils die komplette Seite von oben bis unten (Beispiel Retatrutide). Unten bleibt beim Scrollen eine Kaufleiste stehen.</p>
+  <div class="sub" role="group" aria-label="Variante wählen">
+    <button type="button" data-v="d" aria-pressed="true">D · Clean hell</button>
+    <button type="button" data-v="e" aria-pressed="false">E · Dunkel Premium</button>
+    <button type="button" data-v="f" aria-pressed="false">F · Kauf-Assistent</button>
+  </div>
+  <div class="box" id="pp-note"></div>
+  <figure class="shot"><img id="pp-img" src="img/pp-d.jpg" alt="Entwurf Produktseite" loading="lazy" width="780" height="7372"></figure>
+  <div class="box tip"><h3>Meine Empfehlung</h3><p style="margin:0;font-size:14px">Look von <b>E</b> (passt zu Startseite und Newsletter), in der weißen Kaufkarte aber die Übersicht mit Geschenk-Balken aus <b>F</b>. So sieht man sofort, was man zahlt und was gratis dazukommt.</p></div>
+</section>
+
+<section id="v-partner" data-view="partner" hidden>
+  <h2>Partner-Link: „Empfohlen von …“</h2>
+  <p class="lead">Rund drei Viertel der Bestellungen kommen über Partner. Wer über einen Partner-Link kommt, sieht oben eine persönliche Begrüßung statt der normalen Startseite.</p>
+  <div class="box"><h3>Was neu ist</h3><ul>
+    <li>Karte „Empfohlen von Lena“ + „Dein Partner-Vorteil ist aktiv −10 %“</li>
+    <li>Die 4 Produkte, die über diesen Partner am meisten gekauft werden</li>
+    <li>Normaler Preis + grüne Zeile „mit Lenas Vorteil …“ – bewusst kein Streichpreis</li>
+    <li>Im Warenkorb bleibt der Vorteil mit Partnername sichtbar</li>
+  </ul></div>
+  <figure class="shot"><figcaption>1 <span>Startseite für Partner-Besucher</span></figcaption><img src="img/pa-0.jpg" alt="Partner-Startseite" loading="lazy" width="780" height="1690"></figure>
+  <figure class="shot"><figcaption>2 <span>Warenkorb mit Partner-Vorteil</span></figcaption><img src="img/pa-1.jpg" alt="Warenkorb mit Partner-Vorteil" loading="lazy" width="780" height="1690"></figure>
+  <div class="box tip"><h3>Offene Frage an dich</h3><p style="margin:0;font-size:14px">Darf der Partnername sichtbar sein? Sonst steht dort „Empfohlen von deinem Creator“. Foto und eigener Satz nur, wenn der Partner beides selbst hinterlegt.</p></div>
+</section>
+
+<section id="v-girocode" data-view="girocode" hidden>
+  <h2>Vorkasse in 10 Sekunden</h2>
+  <p class="lead">Fast alle zahlen per Überweisung. Weil 94 % am Handy bestellen, stehen dort zuerst große Kopier-Felder – den eigenen Bildschirm kann man nicht scannen. Der QR-Code (GiroCode) ist für den PC oder zum Speichern als Bild.</p>
+  <div class="box"><h3>Was neu ist</h3><ul>
+    <li>Betrag, IBAN, Verwendungszweck, Empfänger je mit „Kopieren“ + „Alles kopieren“</li>
+    <li>QR-Code zum Aufklappen: am PC scannen oder als Bild in der Banking-App öffnen</li>
+    <li>Derselbe Code in der Bestellmail</li>
+    <li>Tipp „Echtzeitüberweisung“ – Geld ist sofort da, du kannst schneller versenden</li>
+  </ul></div>
+  <figure class="shot"><figcaption>1 <span>Danke-Seite am Handy</span></figcaption><img src="img/gc-0.jpg" alt="Danke-Seite mit Kopier-Feldern" loading="lazy" width="780" height="1690"></figure>
+  <figure class="shot"><figcaption>2 <span>QR aufgeklappt / am PC</span></figcaption><img src="img/gc-1.jpg" alt="GiroCode aufgeklappt" loading="lazy" width="780" height="1690"></figure>
+  <figure class="shot"><figcaption>3 <span>In der Bestellmail</span></figcaption><img src="img/gc-2.jpg" alt="Bestellmail mit GiroCode" loading="lazy" width="780" height="1690"></figure>
+</section>
+
+<section id="v-nachkauf" data-view="nachkauf" hidden>
+  <h2>Nochmal bestellen</h2>
+  <p class="lead">Erst 4 von 56 Kunden haben nachbestellt. Mit einem Tipp liegt die alte Bestellung wieder im Warenkorb – zu aktuellen Preisen, nur was lieferbar ist, ohne Geschenke.</p>
+  <figure class="shot"><figcaption>1 <span>Kundenkonto · Meine Bestellungen</span></figcaption><img src="img/nb-0.jpg" alt="Kundenkonto mit Nochmal-bestellen-Knopf" loading="lazy" width="780" height="1690"></figure>
+  <figure class="shot"><figcaption>2 <span>Warenkorb öffnet sich fertig gefüllt</span></figcaption><img src="img/nb-1.jpg" alt="Gefüllter Warenkorb" loading="lazy" width="780" height="1690"></figure>
+  <figure class="shot"><figcaption>3 <span>Knopf auch in der Versandmail</span></figcaption><img src="img/nb-2.jpg" alt="Versandmail mit Nochmal-bestellen" loading="lazy" width="780" height="1690"></figure>
+</section>
+
+<section id="v-startseite" data-view="startseite" hidden>
+  <h2>Startseite oben</h2>
+  <p class="lead">312 von 817 Besuchern sehen nur eine Seite. Ziel: sofort sichtbar, wohin man tippen kann.</p>
+  <div class="box"><h3>Was neu ist</h3><ul>
+    <li>Suchfeld immer sichtbar statt nur als Lupe</li>
+    <li>Hero kürzer, darunter 4 große Kacheln: Retatrutide, Pens, Neuheiten, Alle Produkte</li>
+    <li>Suche zeigt schon beim Tippen Produkte mit Preis und „+“, dazu Ratgeber</li>
+  </ul></div>
+  <figure class="shot"><figcaption>1 <span>Startseite oben</span></figcaption><img src="img/hp-0.jpg" alt="Startseite mit Kacheln" loading="lazy" width="780" height="1688"></figure>
+  <figure class="shot"><figcaption>2 <span>Suche nach Antippen</span></figcaption><img src="img/hp-1.jpg" alt="Live-Suche" loading="lazy" width="780" height="1688"></figure>
+</section>
+
+<section id="v-rechner" data-view="rechner" hidden>
+  <h2>Peptid-Rechner</h2>
+  <p class="lead">Schon live. Am besten direkt ausprobieren: Produkt antippen, Werte ändern, die Spritze bewegt sich mit.</p>
+  <a class="live" href="https://peptrium.com/peptid-rechner/" target="_blank" rel="noopener"><span class="dot"></span><span>peptrium.com/peptid-rechner<small>Öffnet die echte Seite in einem neuen Tab</small></span></a>
+  <div class="box"><h3>Was sich geändert hat</h3><ul>
+    <li>Echte U-100-Spritze: 0 an der Nadel, Kolbenkante auf dem Strich</li>
+    <li>Produkte aus dem Shop als Chips, Werte direkt eintippbar</li>
+    <li>Warnung, wenn die Menge nicht in die Spritze passt</li>
+    <li>Zubehör mit einem Tipp in den Warenkorb, Teilen-Link</li>
+  </ul></div>
+</section>
+
+<p class="foot">Sag einfach, was dir gefällt oder was anders soll – dann baue ich es ein.</p>
+</div>
+
+<script>
+(function(){
+  var NOTES={
+    d:'<h3>D · Clean hell</h3><ul><li>Großes Bild mit Vorschaubildern, helle ruhige Seite</li><li>Mengen als Kacheln mit Stückpreis, Zubehör per Schalter</li><li>„Gesamt · du sparst …“ direkt über dem Kaufknopf</li><li>Kundenstimmen als dunkler Block mit der schrägen Flasche</li></ul>',
+    e:'<h3>E · Dunkel Premium</h3><ul><li>Flasche groß auf dunklem Grund, Name groß darunter</li><li>Weiße Kaufkarte mit Gesamtpreis und Mengen als Liste</li><li>Dunkle Bereiche: Kundenstimmen, Qualität, Set</li><li>Passt am besten zu Startseite und Newslettern</li></ul>',
+    f:'<h3>F · Kauf-Assistent</h3><ul><li>Oben kompakt: Bild + Fakten nebeneinander</li><li>3 Schritte: Größe → Menge → Zubehör</li><li>Mini-Warenkorb mit Versand gratis und Geschenk-Balken</li><li>Am klarsten bei größeren Bestellungen</li></ul>'
+  };
+  var H={d:7372,e:6629,f:5766}, W={d:780,e:800,f:780};
+  var img=document.getElementById('pp-img'), note=document.getElementById('pp-note');
+  function setV(v){
+    img.src='img/pp-'+v+'.jpg'; img.width=W[v]; img.height=H[v]; note.innerHTML=NOTES[v];
+    document.querySelectorAll('.sub button').forEach(function(b){b.setAttribute('aria-pressed',b.getAttribute('data-v')===v?'true':'false');});
+    try{localStorage.setItem('ppv',v);}catch(e){}
+  }
+  document.querySelectorAll('.sub button').forEach(function(b){b.addEventListener('click',function(){setV(b.getAttribute('data-v'));});});
+  var start='d';try{var s=localStorage.getItem('ppv');if(s&&NOTES[s])start=s;}catch(e){}
+  setV(start);
+  var views=['produkt','partner','girocode','nachkauf','startseite','rechner'];
+  function route(){
+    var h=(location.hash||'').replace('#','');if(views.indexOf(h)<0)h='produkt';
+    document.querySelectorAll('[data-view]').forEach(function(s){s.hidden=s.getAttribute('data-view')!==h;});
+    document.querySelectorAll('nav.tabs a').forEach(function(a){if(a.getAttribute('href')==='#'+h)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
+  }
+  window.addEventListener('hashchange',function(){route();window.scrollTo(0,0);});
+  route();
+})();
+</script>

@@ -35,7 +35,7 @@ C1='''
 .ok b{margin-left:auto;background:#2E9B57;color:#fff;border-radius:999px;padding:3px 9px;font:800 11px Sora}
 .h{padding:20px 16px 8px}.h p{font:800 10.5px Sora;letter-spacing:.12em;color:#8E959E}.h h2{font:800 24px/1.12 Sora;margin:6px 0 0}.h h2 em{font-style:normal;color:#8E959E}
 .pl{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:6px 14px 0}
-.pc{background:#fff;color:#0D0F12;border-radius:18px;overflow:hidden}.pc img{width:100%;height:150px;object-fit:cover;background:#0D0F12}.pc div{padding:9px 10px 10px}.pc b{display:block;font:800 13.5px Sora}.pc .r{font:600 10.5px Sora;color:#5B6169;margin:2px 0 6px}.pc .p{display:flex;align-items:center;justify-content:space-between}.pc .p span{font:800 13.5px Sora}.pc .p s{font:600 10.5px Sora;color:#9AA0A6;margin-left:4px}.pc .p i{width:30px;height:30px;border-radius:50%;background:#0D0F12;display:flex;align-items:center;justify-content:center}
+.pc{background:#fff;color:#0D0F12;border-radius:18px;overflow:hidden}.pc img{width:100%;height:150px;object-fit:cover;background:#0D0F12}.pc div{padding:9px 10px 10px}.pc b{display:block;font:800 13.5px Sora}.pc .r{font:600 10.5px Sora;color:#5B6169;margin:2px 0 6px}.pc .p{display:flex;align-items:center;justify-content:space-between}.pc .p span{font:800 13.5px Sora}.pc .p s{font:600 10.5px Sora;color:#9AA0A6;margin-left:4px}.pc .p em.pv{display:block;font:700 10.5px Sora;color:#0B6B3A;font-style:normal;margin-top:1px}.pc .p i{width:30px;height:30px;border-radius:50%;background:#0D0F12;display:flex;align-items:center;justify-content:center}
 .pc .tg{position:relative}.pc .tg em{position:absolute;left:8px;top:8px;background:#7DDBA0;color:#0D0F12;font:800 9.5px Sora;font-style:normal;border-radius:999px;padding:3px 7px}
 .why{margin:14px 14px 0;display:flex;justify-content:space-between;font:600 11px Sora;color:#A8B0B9}.why span{display:flex;align-items:center;gap:5px}
 .dr{position:absolute;left:0;right:0;bottom:0;top:120px;background:#fff;color:#0D0F12;border-radius:26px 26px 0 0;box-shadow:0 -20px 50px rgba(0,0,0,.4)}
@@ -47,10 +47,10 @@ C1='''
 '''
 def s1():
     pcs=[('reta','Retatrutide','10 & 20 mg','71,91 €','79,90 €','Meistgekauft bei Lena'),('pen','Retatrutide-Pen','fertig gemischt','238,41 €','264,90 €',''),('ghk','GHK-Cu','50 & 100 mg','35,91 €','39,90 €',''),('glow','GLOW','70 mg Blend','125,91 €','139,90 €','Neu')]
-    g=''.join(f'<div class="pc"><div class="tg">{f"<em>{t}</em>" if t else ""}<img src="{T[k]}"></div><div><b>{n}</b><p class="r"><span class="st">★★★★★</span> {sub}</p><div class="p"><span>{p}<s>{o}</s></span><i>{ic("cart","#fff",14)}</i></div></div></div>' for k,n,sub,p,o,t in pcs)
-    a=f'''<div class="col"><p class="cap">1 · Partner-Landing (oben auf der Startseite)<small>Nur für Besucher über einen Partner-Link. Name + Foto/Initiale des Partners, Vorteil schon aktiv, darunter die Produkte, die über diesen Partner am meisten gekauft werden – Preise schon mit −10 %.</small></p>
+    g=''.join(f'<div class="pc"><div class="tg">{f"<em>{t}</em>" if t else ""}<img src="{T[k]}"></div><div><b>{n}</b><p class="r"><span class="st">★★★★★</span> {sub}</p><div class="p"><span>{o}<em class="pv">mit Lenas Vorteil {p}</em></span><i>{ic("cart","#fff",14)}</i></div></div></div>' for k,n,sub,p,o,t in pcs)
+    a=f'''<div class="col"><p class="cap">1 · Partner-Landing (oben auf der Startseite)<small>Nur für Besucher über einen Partner-Link. Name + Foto/Initiale des Partners, Vorteil schon aktiv, darunter die Produkte, die über diesen Partner am meisten gekauft werden. Normaler Preis + grüne Zeile „mit Lenas Vorteil“ (kein Streichpreis). Foto/Satz nur, wenn der Partner es selbst hinterlegt.</small></p>
 <div class="ph ph1">{HDR}
-<div class="pb"><span class="av">L</span><span class="t"><small>EMPFOHLEN VON</small><b>Lena</b><span>„Hier bestelle ich selbst.“</span></span></div>
+<div class="pb"><span class="av">L</span><span class="t"><small>EMPFOHLEN VON</small><b>Lena</b><span>hat dir Peptrium empfohlen</span></span></div>
 <div class="ok">{ic('check','#9BE7B7',16,2.6)}Dein Partner-Vorteil ist aktiv<b>−10 %</b></div>
 <div class="h"><p>LENAS COMMUNITY KAUFT AM HÄUFIGSTEN</p><h2>Direkt loslegen –<br><em>ohne lange suchen.</em></h2></div>
 <div class="pl">{g}</div>
@@ -80,6 +80,8 @@ C2='''
 .rw{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid #F1F3F4}.rw span{width:112px;font:600 11.5px Sora;color:#6B7178;flex:none}.rw b{flex:1;font:700 13px Sora;font-variant-numeric:tabular-nums}.rw i{width:32px;height:32px;border-radius:10px;background:#F2F4F5;display:flex;align-items:center;justify-content:center}
 .rw.vz b{color:#B26B00}
 .fast{margin-top:12px;background:#FFF6E5;border:1px solid #FBE1B0;border-radius:14px;padding:10px 12px;display:flex;gap:9px;font:600 12px/1.45 Sora;color:#6B4400}
+.cp{display:flex;align-items:center;gap:10px;border:1px solid #E7E9EC;border-radius:14px;padding:10px 10px 10px 12px;margin:0 0 7px}.cp span{flex:1;min-width:0}.cp small{display:block;font:600 10.5px Sora;color:#6B7178}.cp b{font:800 14px Sora;font-variant-numeric:tabular-nums}.cp i{font-style:normal;display:flex;align-items:center;gap:5px;background:#F2F4F5;border-radius:10px;padding:8px 10px;font:700 11.5px Sora}.cp.vz{border-color:#FBE1B0;background:#FFFBF2}.cp.vz b{color:#B26B00}
+.fold{margin-top:10px;border:1.5px dashed #CDD1D5;border-radius:14px;padding:11px 12px;display:flex;align-items:center;gap:10px}.fold span{flex:1;display:flex;align-items:center;gap:10px}.fold b{display:block;font:800 13px Sora}.fold small{display:block;font:500 11px Sora;color:#6B7178}.fold em{font-style:normal;color:#6B7178}
 .mob{margin-top:12px;display:flex;gap:8px}.mob span{flex:1;border:1.5px solid #E3E6E9;border-radius:14px;padding:11px 6px;text-align:center;font:700 12px Sora;display:flex;align-items:center;justify-content:center;gap:6px}
 .ml{background:#F2F4F6;height:100%;padding:16px}
 .ml .bx{background:#fff;border-radius:20px;overflow:hidden}
@@ -90,20 +92,32 @@ def s2():
     rows=lambda vz=True: f'''<div class="rw"><span>Empfänger</span><b>STM Prime Holdings LLC</b><i>{ic('copy','#0D0F12',15)}</i></div>
 <div class="rw"><span>IBAN</span><b>DE89 3704 0044 0532 0130 00</b><i>{ic('copy','#0D0F12',15)}</i></div>
 <div class="rw vz"><span>Verwendungszweck</span><b>Bestellung 3312</b><i>{ic('copy','#0D0F12',15)}</i></div>'''
-    a=f'''<div class="col"><p class="cap">2 · Danke-Seite mit GiroCode<small>Banking-App öffnen → QR scannen → alles ist ausgefüllt (Empfänger, IBAN, Betrag, Verwendungszweck). Funktioniert mit fast allen deutschen/österreichischen Banking-Apps. Am Handy zusätzlich „Kopieren“-Knöpfe.</small></p>
-<div class="ph">{HDR}<div class="ty"><div class="ck">{ic('check','#fff',26,3)}</div><h1>Danke, Thomas!</h1><p>Bestellung #3312 ist eingegangen.</p></div>
-<div class="qc"><p class="lb">⏳ LETZTER SCHRITT: ÜBERWEISEN</p><h2>Mit dem Handy scannen –<br>fertig in 10 Sekunden.</h2>
-<div class="qr"><div class="box"><img src="{QR}"></div><ol><li>Banking-App öffnen</li><li>„Scannen“ / „Foto-Überweisung“ wählen</li><li>QR-Code scannen &amp; bestätigen</li></ol></div>
-<div class="amt"><span>Betrag</span><b>225,63 €</b></div>{rows()}
-<div class="fast">{ic('bolt','#B26B00',18,2.2)}<span><b>Tipp: Echtzeitüberweisung wählen.</b> Dann ist das Geld sofort da und wir versenden schneller.</span></div></div></div></div>'''
-    b=f'''<div class="col"><p class="cap">… auch in der Bestellmail<small>Wer am Handy bestellt, kann den Code nicht mit demselben Handy scannen – deshalb dort zusätzlich „Kopieren“. Am PC bestellt? QR mit dem Handy scannen. In der Mail steht derselbe Code (als Bild).</small></p>
+    a=f'''<div class="col"><p class="cap">2a · Danke-Seite am Handy<small>Am Handy kann man den eigenen Bildschirm nicht scannen – deshalb zuerst große Kopier-Zeilen (jede einzeln + „Alles kopieren“). Der QR-Code ist darunter einklappbar: als Bild speichern → in vielen Banking-Apps „Foto-Überweisung“ aus der Galerie.</small></p>
+<div class="ph">{HDR}<div class="ty" style="padding-bottom:64px"><div class="ck">{ic('check','#fff',26,3)}</div><h1>Danke, Thomas!</h1><p>Bestellung #3312 ist eingegangen.</p></div>
+<div class="qc"><p class="lb">⏳ LETZTER SCHRITT: ÜBERWEISEN</p><h2>Überweise 225,63 € –<br>mit 3 Tipps kopiert.</h2>
+<div class="cp"><span><small>Betrag</small><b>225,63 €</b></span><i>{ic('copy','#0D0F12',15)}Kopieren</i></div>
+<div class="cp"><span><small>IBAN</small><b>DE89 3704 0044 0532 0130 00</b></span><i>{ic('copy','#0D0F12',15)}Kopieren</i></div>
+<div class="cp vz"><span><small>Verwendungszweck – bitte genau so</small><b>Bestellung 3312</b></span><i>{ic('copy','#0D0F12',15)}Kopieren</i></div>
+<div class="cp"><span><small>Empfänger</small><b>STM Prime Holdings LLC</b></span><i>{ic('copy','#0D0F12',15)}Kopieren</i></div>
+<div class="btn" style="margin-top:12px;height:50px">{ic('copy','#fff',17,2)}Alles kopieren</div>
+<div class="fold"><span>{ic('phone','#0D0F12',17)}<b>QR-Code für die Banking-App</b><small>am PC scannen oder als Bild speichern</small></span><em>▾</em></div>
+<div class="fast">{ic('bolt','#B26B00',18,2.2)}<span><b>Echtzeitüberweisung wählen</b> – dann ist das Geld sofort da und wir versenden schneller.</span></div></div></div></div>'''
+    a2=f'''<div class="col"><p class="cap">2b · … QR aufgeklappt / am PC<small>Am PC steht der QR-Code direkt groß da (Handy-Kamera bzw. Banking-App drauf halten). Am Handy: „Als Bild speichern“ → Banking-App → Foto-Überweisung → Bild aus der Galerie.</small></p>
+<div class="ph">{HDR}<div class="qc" style="margin:14px">
+<p class="lb">GIROCODE</p><h2>Scannen statt tippen.</h2>
+<div class="qr"><div class="box"><img src="{QR}"></div><ol><li>Banking-App öffnen</li><li>„Scannen“ / „Foto-Überweisung“</li><li>Code scannen &amp; bestätigen</li></ol></div>
+<div class="btn" style="margin-top:20px;height:48px;background:#fff;color:#0D0F12;border:1.5px solid #0D0F12">↓ Als Bild speichern</div>
+<p style="font:500 12px/1.5 Sora;color:#5B6169;margin-top:10px">Funktioniert mit vielen deutschen und österreichischen Banking-Apps (GiroCode / EPC-QR-Standard). Klappt es nicht: einfach die Kopier-Zeilen nutzen.</p>
+<div class="amt"><span>Betrag</span><b>225,63 €</b></div>
+<div class="rw vz"><span>Verwendungszweck</span><b>Bestellung 3312</b><i>{ic('copy','#0D0F12',15)}</i></div></div></div></div>'''
+    b=f'''<div class="col"><p class="cap">2c · … in der Bestellmail<small>Wer am Handy bestellt, kann den Code nicht mit demselben Handy scannen – deshalb dort zusätzlich „Kopieren“. Am PC bestellt? QR mit dem Handy scannen. In der Mail steht derselbe Code (als Bild).</small></p>
 <div class="ph"><div class="ml"><div class="bx"><div class="top"><img src="{T['logo']}"><b>Danke, Thomas! 🙌</b><small>Bestellung #3312 · noch nicht bezahlt</small></div>
 <div class="in"><p style="font:800 15px Sora;margin:0 0 10px">So bezahlst du in 10 Sekunden</p>
 <div class="qr"><div class="box" style="width:130px;height:130px"><img src="{QR}"></div><ol><li>Banking-App öffnen</li><li>QR-Code scannen</li><li>Bestätigen – fertig</li></ol></div>
 <div class="amt"><span>Betrag</span><b>225,63 €</b></div>
 <div class="rw"><span>Empfänger</span><b>STM Prime Holdings LLC</b></div><div class="rw"><span>IBAN</span><b>DE89 3704 0044 …</b></div><div class="rw vz"><span>Verwendungszweck</span><b>Bestellung 3312</b></div>
-<div class="fast">{ic('bolt','#B26B00',18,2.2)}<span>Mit <b>Echtzeitüberweisung</b> versenden wir oft noch am selben Tag.</span></div></div></div></div></div></div>'''
-    return a+b
+<div class="fast">{ic('bolt','#B26B00',18,2.2)}<span>Mit <b>Echtzeitüberweisung</b> ist das Geld sofort da – wir versenden schneller.</span></div></div></div></div></div></div>'''
+    return a+a2+b
 
 # ---------- 3 Nochmal bestellen ----------
 C3='''
