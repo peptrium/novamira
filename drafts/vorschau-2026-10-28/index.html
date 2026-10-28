@@ -50,6 +50,7 @@ h2{font-size:22px;line-height:1.15;font-weight:800;margin:0 0 6px;text-wrap:bala
 </header>
 
 <nav class="tabs" aria-label="Themen">
+  <a href="#kaufbox">Kaufbox kompakt</a>
   <a href="#produkt">Produktseite</a>
   <a href="#partner">Partner-Link</a>
   <a href="#girocode">GiroCode</a>
@@ -58,7 +59,21 @@ h2{font-size:22px;line-height:1.15;font-weight:800;margin:0 0 6px;text-wrap:bala
   <a href="#rechner">Rechner (live)</a>
 </nav>
 
-<section id="v-produkt" data-view="produkt">
+<section id="v-kaufbox" data-view="kaufbox">
+  <h2>Kaufbox kompakter</h2>
+  <p class="lead">Die Produktseite bleibt wie sie ist – nur die Kaufbox wird kleiner. Heute ist sie 1.076 px hoch (fast 1,5 Handy-Bildschirme). Alle Funktionen bleiben: Größe, Mengenrabatt, Zubehör, Abo, Gesamtpreis.</p>
+  <figure class="shot"><figcaption>Vorher <span>aktuell live, 1.076 px</span></figcaption><img src="img/bb-0.jpg" alt="Aktuelle Kaufbox" loading="lazy" width="780" height="2284"></figure>
+  <div class="box"><h3>K1 · Zeilen (≈ 430 px)</h3><ul><li>Jede Wahl ist eine Zeile: Label links, Auswahl rechts</li><li>Mengen als kleine Leiste mit −10/−15/−20 %</li><li>Zubehör als 2 Chips, Abo als kleiner Schalter</li><li>Gesamtpreis und Knopf in einer Reihe</li></ul></div>
+  <figure class="shot"><img src="img/bb-1.jpg" alt="Kaufbox K1" loading="lazy" width="780" height="882"></figure>
+  <div class="box"><h3>K2 · Auswahlfelder (≈ 350 px)</h3><ul><li>Größe und Menge als zwei Felder nebeneinander</li><li>Antippen öffnet unten eine Liste mit Stück- und Gesamtpreis</li><li>Am kompaktesten, Rabatt sieht man aber erst nach dem Antippen</li></ul></div>
+  <figure class="shot"><img src="img/bb-2.jpg" alt="Kaufbox K2" loading="lazy" width="780" height="770"></figure>
+  <figure class="shot"><figcaption>K2 <span>Menge angetippt</span></figcaption><img src="img/bb-3.jpg" alt="Kaufbox K2 mit Mengenliste" loading="lazy" width="780" height="1016"></figure>
+  <div class="box"><h3>K3 · Zähler + Rabattleiste (≈ 400 px)</h3><ul><li>Statt 4 Kacheln ein −/+ Zähler</li><li>Leiste zeigt, ab wann es günstiger wird („Noch 1 Stück → −10 % auf alle“)</li><li>Zubehör &amp; Abo eingeklappt</li></ul></div>
+  <figure class="shot"><img src="img/bb-4.jpg" alt="Kaufbox K3" loading="lazy" width="780" height="874"></figure>
+  <div class="box tip"><h3>Meine Empfehlung</h3><p style="margin:0;font-size:14px"><b>K1</b>: weniger als halb so hoch, aber Rabattstufen und Zubehör bleiben sichtbar – das sind genau die Dinge, die den Bestellwert erhöhen. „Über 2.500+ zufriedene Kunden“ würde ich weglassen, die Zahl ist nicht belegt.</p></div>
+</section>
+
+<section id="v-produkt" data-view="produkt" hidden>
   <h2>Produktseite</h2>
   <p class="lead">Drei Richtungen, jeweils die komplette Seite von oben bis unten (Beispiel Retatrutide). Unten bleibt beim Scrollen eine Kaufleiste stehen.</p>
   <div class="sub" role="group" aria-label="Variante wählen">
@@ -151,9 +166,9 @@ h2{font-size:22px;line-height:1.15;font-weight:800;margin:0 0 6px;text-wrap:bala
   document.querySelectorAll('.sub button').forEach(function(b){b.addEventListener('click',function(){setV(b.getAttribute('data-v'));});});
   var start='d';try{var s=localStorage.getItem('ppv');if(s&&NOTES[s])start=s;}catch(e){}
   setV(start);
-  var views=['produkt','partner','girocode','nachkauf','startseite','rechner'];
+  var views=['kaufbox','produkt','partner','girocode','nachkauf','startseite','rechner'];
   function route(){
-    var h=(location.hash||'').replace('#','');if(views.indexOf(h)<0)h='produkt';
+    var h=(location.hash||'').replace('#','');if(views.indexOf(h)<0)h='kaufbox';
     document.querySelectorAll('[data-view]').forEach(function(s){s.hidden=s.getAttribute('data-view')!==h;});
     document.querySelectorAll('nav.tabs a').forEach(function(a){if(a.getAttribute('href')==='#'+h)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
   }
