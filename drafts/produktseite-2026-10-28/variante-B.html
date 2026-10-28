@@ -1,0 +1,77 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=390">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>*{box-sizing:border-box}body{margin:0;width:390px;font-family:Sora,sans-serif;color:#0D0F12;background:#fff;-webkit-font-smoothing:antialiased}
+p{margin:0}img{display:block}
+.hd{background:#0D0F12;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;color:#fff;position:relative;z-index:3}
+.hd .lg{display:flex;align-items:center;gap:8px;font:700 18px Sora}.hd .lg img{width:30px;height:30px}
+.ib{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.08);display:inline-flex;align-items:center;justify-content:center;margin-left:6px}
+.ib svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2}
+.stars{color:#F5A524;letter-spacing:1px}
+.ck{color:#2E9B57;font-weight:800}
+.tag{position:absolute;right:12px;top:12px;background:#FF5A1F;color:#fff;font:800 11px Sora;padding:5px 10px;border-radius:999px;z-index:20;box-shadow:0 4px 12px rgba(0,0,0,.25)}
+
+body{background:#0B0D10;color:#fff}
+.hero{position:relative;height:430px;overflow:hidden;background:radial-gradient(90% 70% at 50% 40%,#2A2F36 0%,#0B0D10 70%)}
+.hero img.v{position:absolute;left:50%;top:10px;transform:translateX(-50%);height:420px;-webkit-mask-image:linear-gradient(180deg,#000 70%,transparent);mask-image:linear-gradient(180deg,#000 70%,transparent)}
+.hero .bd{position:absolute;left:16px;top:14px;display:flex;gap:6px}.hero .bd span{border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);border-radius:999px;font:700 11px Sora;padding:5px 9px;backdrop-filter:blur(6px)}
+.ttl{padding:0 16px;margin-top:-70px;position:relative}
+.ttl h1{font:800 34px/1.05 Sora;margin:0 0 8px;letter-spacing:-.02em}
+.ttl .rt{font:600 12.5px Sora;color:#A8B0B9}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 0}.chips span{font:700 11.5px Sora;border-radius:999px;padding:6px 10px;background:#1A1E23;color:#D5D9DE}
+.card{background:#fff;color:#0D0F12;border-radius:26px;margin:18px 10px 0;padding:18px 16px}
+.pr{display:flex;align-items:baseline;justify-content:space-between}.pr b{font:800 32px Sora}.pr span{font:700 12px Sora;color:#2E9B57}
+.lb{font:800 11px Sora;letter-spacing:.08em;color:#6B7178;margin:14px 0 8px}
+.pill{display:flex;background:#F2F4F5;border-radius:14px;padding:4px}.pill div{flex:1;text-align:center;padding:10px 0;border-radius:11px;font:800 15px Sora;color:#5B6169}.pill div small{display:block;font:600 11px Sora}.pill .on{background:#0D0F12;color:#fff}
+.tiers div{display:flex;align-items:center;justify-content:space-between;border:1.5px solid #E3E6E9;border-radius:14px;padding:11px 12px;margin:0 0 7px;font:700 14px Sora}.tiers div small{font:600 12px Sora;color:#5B6169}.tiers div em{font-style:normal;font:800 11px Sora;background:#ECF8F1;color:#0B6B3A;border-radius:999px;padding:3px 8px;margin-left:8px}.tiers .on{border-color:#0D0F12;box-shadow:inset 0 0 0 1px #0D0F12}
+.tiers .r{display:flex;align-items:center;gap:10px}.tiers .r i{width:20px;height:20px;border-radius:50%;border:2px solid #CDD1D5}.tiers .on .r i{border:6px solid #0D0F12}
+.cta{height:58px;border-radius:16px;background:#0D0F12;color:#fff;display:flex;align-items:center;justify-content:center;font:800 16px Sora;margin-top:14px}
+.addl{font:600 12.5px Sora;color:#4B5157;margin-top:12px;display:flex;align-items:center;gap:8px}.addl b{width:20px;height:20px;border-radius:6px;background:#0D0F12;color:#fff;font:800 12px/20px Sora;text-align:center}
+.mini{display:flex;justify-content:space-between;font:600 11.5px Sora;color:#6B7178;margin-top:14px;padding-top:12px;border-top:1px solid #EEF0F2}
+.dsec{padding:34px 16px 6px}
+.dsec h2{font:800 25px/1.1 Sora;margin:0 0 14px;letter-spacing:-.01em}.dsec h2 em{font-style:normal;color:#8E959E}
+.ey{display:inline-block;font:800 10.5px Sora;letter-spacing:.1em;color:#A8B0B9;border:1px solid #2A2F35;border-radius:999px;padding:5px 10px;margin:0 0 10px}
+.big{display:flex;gap:14px;align-items:center;background:#14171B;border:1px solid #23272D;border-radius:20px;padding:16px;margin:0 0 12px}.big b{font:800 40px Sora}.big small{font:600 12px Sora;color:#A8B0B9}
+.rvs{display:flex;gap:10px;overflow:hidden;margin-right:-16px}.rv{flex:0 0 250px;background:#14171B;border:1px solid #23272D;border-radius:18px;padding:14px}.rv p{font:500 13px/1.5 Sora;color:#D5D9DE;margin:6px 0 10px}.rv small{font:700 11.5px Sora;color:#fff}
+.tilt{position:relative;height:0}.tilt img{position:absolute;right:-30px;top:-120px;width:150px;transform:rotate(18deg);opacity:.95}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.grid div{background:#14171B;border:1px solid #23272D;border-radius:16px;padding:14px}.grid i{font-style:normal;font-size:20px}.grid b{display:block;font:800 14px Sora;margin:8px 0 2px}.grid small{font:500 11.5px/1.4 Sora;color:#A8B0B9}
+.setd{background:linear-gradient(160deg,#1B1F24,#101215);border:1px solid #2A2F35;border-radius:22px;padding:16px}
+.setd .imgs{display:flex;gap:-10px;margin:0 0 12px}.setd .imgs img{width:70px;height:70px;border-radius:16px;object-fit:cover;border:2px solid #101215;margin-right:-14px;background:#0D0F12}
+.setd p{font:500 13px/1.5 Sora;color:#C9CED4}.setd .row{display:flex;justify-content:space-between;align-items:center;margin-top:14px}.setd .row b{font:800 22px Sora}.setd .row span{background:#fff;color:#0D0F12;border-radius:14px;padding:13px 16px;font:800 13.5px Sora}
+.lt{background:#F4F5F6;color:#0D0F12;border-radius:28px 28px 0 0;margin-top:34px;padding:28px 16px 10px}
+.lt h2{font:800 23px/1.15 Sora;margin:0 0 12px}
+.lt p.t{font:500 13.5px/1.6 Sora;color:#3A3F45;margin:0 0 10px}
+.fq div{display:flex;justify-content:space-between;padding:15px 0;border-bottom:1px solid #E3E6E9;font:700 14px Sora}.fq div span{color:#9AA0A6}
+.rg{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.rg span{background:#fff;border:1px solid #E3E6E9;border-radius:999px;padding:9px 12px;font:700 12px Sora}
+.more2{display:flex;gap:10px;overflow:hidden;margin-right:-16px}.pc{flex:0 0 160px;background:#fff;border-radius:16px;overflow:hidden}.pc img{width:160px;height:150px;object-fit:cover;background:#0D0F12}.pc div{padding:9px}.pc b{display:block;font:800 13.5px Sora}.pc small{font:700 12.5px Sora}
+.dis{font:500 11px/1.5 Sora;color:#6B7178;text-align:center;padding:18px 24px 30px;background:#F4F5F6}
+</style></head><body><div class="hd"><span class="lg"><img src="https://peptrium.com/wp-content/uploads/2026/08/IMG_2644-cropped-300x300.png">Peptrium</span><span><span class="ib"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></span><span class="ib"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg></span><span class="ib"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></span></span></div><span class="tag">B · Dunkel Premium</span><div class="hero"><div class="bd"><span>★ Bestseller</span><span>✓ HPLC ≥ 99 %</span></div><img class="v" src="https://peptrium.com/wp-content/uploads/2026/08/8792D35C-5DD0-4537-B142-4C882F5F04DC-768x1024.png"></div>
+<div class="ttl"><h1>Retatrutide</h1><p class="rt"><span class="stars">★★★★★</span> 4,8 · 378 Bewertungen · Forschungspeptid</p>
+<div class="chips"><span>✓ 99 % Reinheit</span><span>✓ LC-MS geprüft</span><span>✓ Versand aus DE</span><span>✓ Diskret</span></div></div>
+<div class="card"><div class="pr"><b>79,90 €</b><span>● Auf Lager</span></div>
+<p class="lb">GRÖSSE</p><div class="pill"><div class="on">10 mg<small>79,90 €</small></div><div>20 mg<small>149,90 €</small></div></div>
+<p class="lb">MENGE – JE MEHR, DESTO GÜNSTIGER</p><div class="tiers">
+<div class="on"><span class="r"><i></i>1 Ampulle</span><small>79,90 €</small></div>
+<div><span class="r"><i></i>3 Ampullen<em>−10 %</em></span><small>215,73 €</small></div>
+<div><span class="r"><i></i>5 Ampullen<em>−15 %</em></span><small>339,58 €</small></div>
+<div><span class="r"><i></i>10 Ampullen<em>−20 %</em></span><small>639,20 €</small></div></div>
+<div class="cta">In den Warenkorb · 79,90 €</div>
+<p class="addl"><b>+</b> Bac Water 3 ml dazu (+9,90 €) – zum Anmischen</p>
+<div class="mini"><span>🚚 2 Werktage</span><span>📦 Neutral</span><span>🔒 Vorkasse · Krypto</span></div></div>
+
+<div class="dsec"><span class="ey">● KUNDENSTIMMEN</span><div class="tilt"><img src="https://peptrium.com/wp-content/uploads/2026/08/retatrutide-tilted-glass-v3.png"></div><h2>Das sagen Kunden<br><em>über Retatrutide.</em></h2>
+<div class="big"><b>4,8</b><span><span class="stars">★★★★★</span><br><small>aus 378 Bewertungen</small></span></div>
+<div class="rvs"><div class="rv"><span class="stars">★★★★★</span><p>„Alles gut gelaufen, bin zufrieden. Lieferung kam schnell und diskret.“</p><small>Robert N.</small></div><div class="rv"><span class="stars">★★★★★</span><p>„Top Service, Fragen auf Telegram wurden sofort beantwortet.“</p><small>Sandra K.</small></div><div class="rv"><span class="stars">★★★★★</span><p>„Saubere Verpackung, Etiketten klar beschriftet. Gerne wieder.“</p><small>Marco B.</small></div><div class="rv"><span class="stars">★★★★★</span><p>„Zweite Bestellung, wieder nach 2 Tagen da.“</p><small>Julia W.</small></div></div></div>
+
+<div class="dsec"><span class="ey">● WARUM PEPTRIUM</span><h2>Qualität, die du<br><em>nachprüfen kannst.</em></h2>
+<div class="grid"><div><i>🧪</i><b>HPLC ≥ 99 %</b><small>Jede Charge geprüft</small></div><div><i>🔬</i><b>LC-MS</b><small>Identität bestätigt</small></div><div><i>❄️</i><b>Lyophilisiert</b><small>Stabil gelagert</small></div><div><i>📦</i><b>Diskret</b><small>Neutral, mit DHL-Nr.</small></div></div></div>
+
+<div class="dsec"><span class="ey">● KOMPLETT-SET</span><h2>Startklar<br><em>in einem Paket.</em></h2><div class="setd">
+<div class="imgs"><img src="https://peptrium.com/wp-content/uploads/2026/08/8792D35C-5DD0-4537-B142-4C882F5F04DC-300x300.png"><img src="https://peptrium.com/wp-content/uploads/2026/08/F36AD2AF-7A25-405E-8801-88F12605CC69-300x300.png"><img src="https://peptrium.com/wp-content/uploads/2026/08/insulinspritze-10er-pack-wide-300x300.png"></div>
+<p>Retatrutide 10 mg + Bac Water 3 ml + Insulinspritzen 10er – alles, was du für die Vorbereitung brauchst.</p>
+<div class="row"><b>99,70 €</b><span>Set in den Warenkorb</span></div></div></div>
+
+<div class="lt"><h2>Über Retatrutide</h2><p class="t">Retatrutide ist ein synthetisches Peptid, das in der Forschung als dreifacher Rezeptor-Agonist (GIP, GLP-1, Glukagon) untersucht wird. Geliefert als gefriergetrocknetes Pulver in 10- oder 20-mg-Ampullen …</p><p class="t"><b><u>Weiterlesen</u></b></p>
+<div class="rg"><span>📘 10 mg oder 20 mg?</span><span>📘 Was ist „GLP-3“?</span><span>🧮 Peptid-Rechner</span><span>❄️ Lagerung</span></div>
+<h2 style="margin-top:22px">Häufige Fragen</h2><div class="fq"><div>Wie schnell wird verschickt?<span>+</span></div><div>Wie kann ich bezahlen?<span>+</span></div><div>Wie wird verpackt?<span>+</span></div><div>10 mg oder 20 mg – was ist der Unterschied?<span>+</span></div><div>Wie lagere ich die Ampulle?<span>+</span></div></div>
+<h2 style="margin-top:26px">Auch beliebt</h2><div class="more2"><div class="pc"><img src="https://peptrium.com/wp-content/uploads/2026/10/cagrilintid-peptrium-300x300.png"><div><b>Cagrilintid</b><small>104,90 €</small></div></div><div class="pc"><img src="https://peptrium.com/wp-content/uploads/2026/08/45D2BF40-474D-46BE-9C9E-885EE2E57738-300x300.png"><div><b>Retatrutide-Pen</b><small>ab 264,90 €</small></div></div><div class="pc"><img src="https://peptrium.com/wp-content/uploads/2026/08/9FABD238-B0DE-40C2-87DB-B5240E33DEF3-300x300.png"><div><b>GHK-Cu</b><small>ab 39,90 €</small></div></div></div></div>
+<p class="dis">Nur für Laborforschungszwecke – nicht für den menschlichen oder veterinärmedizinischen Gebrauch.</p></body></html>
