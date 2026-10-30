@@ -121,15 +121,28 @@ def morgen():
         + row(box(label('DER ABLAUF') + timeline(0)), '12px 16px 4px')
         + row(btn('Schon mal stöbern', utm('/alle-produkte/', c)), '18px 22px 26px'))
 
+def jetzt():
+    """Reminder Fr 30.10. (2026-10-30, Nutzer: Reminder an alle Mail-Abos) - Aktion fuer alle live bis So 23:59."""
+    c = 'halloween-jetzt'
+    return wrap(row(logo(), '26px 20px 6px', align='center') + heroimg('jetzt', utm('/alle-produkte/', c))
+        + row(h1('Jetzt für alle:', 'jede 3. Flasche gratis.', 'Unser Halloween-Special läuft – nur noch bis <b style="color:#fff;">Sonntag 23:59</b>. Die günstigste Flasche geht automatisch aufs Haus.'), '22px 22px 6px')
+        + row(btn('Jetzt Flaschen wählen', utm('/alle-produkte/', c)), '18px 22px 6px')
+        + row(label('DEIN PREIS FÜR 3 FLASCHEN') + prods(c), '20px 16px 4px')
+        + row(label('NEU IM SHOP') + f'<div style="font-size:14px;color:{LT};line-height:1.5;margin-bottom:8px;">Cagrilintid, MT-2 und GLOW sind da – und BPC-157 ist zurück. Alle zählen mit, auch gemischt.</div>' + newgrid(c, True), '20px 16px 4px')
+        + row(ticks([TK_MIX, TK_CODE, TK_VK, TK_VORRAT]), '12px 16px 4px')
+        + row(box(label('DER ABLAUF') + timeline(1)), '12px 16px 4px')
+        + row(btn('Zum Shop', utm('/alle-produkte/', c)), '18px 22px 26px'))
+
 SUBJ = {
     'teaser': ('Donnerstag 18 Uhr: du bist früher dran 🎃', 'Jede 3. Flasche gratis – plus 3 neue Produkte.'),
     'early': ('Du bist drin 🎃', 'Jede 3. Flasche gratis – und die Neuheiten sind schon da.'),
     'letzte': ('Heute um Mitternacht ist Schluss', 'Danach wieder volle Preise.'),
+    'jetzt': ('Jetzt live: jede 3. Flasche gratis 🎃', 'Nur bis Sonntag 23:59 – plus 3 neue Produkte.'),
     'morgen': ('Morgen 18 Uhr: dein früher Zugang 🎃', 'Jede 3. Flasche gratis – und 3 neue Produkte.'),
 }
 
 if __name__ == '__main__':
-    for name, fn in [('teaser', teaser), ('early', early), ('letzte', letzte), ('morgen', morgen)]:
+    for name, fn in [('teaser', teaser), ('early', early), ('letzte', letzte), ('morgen', morgen), ('jetzt', jetzt)]:
         b = fn()
         open(name + '.body', 'w').write(b)
         v = b.replace(E + 'nl-hw', 'nl-hw').replace('[[unsubscribe_link]]', '#')
