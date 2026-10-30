@@ -164,8 +164,9 @@ def jetzt():
     return wrap(row(logo(), '26px 20px 6px', align='center')
         + f'<tr><td style="padding:0;line-height:0;background:{BG};"><a href="{shop}" style="display:block;line-height:0;"><img src="{E}nl-hw5-jetzt.jpg" width="600" alt="Bis Sonntag: 3 für 2" style="display:block;width:100%;height:auto;border:0;"></a></td></tr>'
         + row(f'<div style="font-size:30px;line-height:1.15;font-weight:800;color:#fff;letter-spacing:-.02em;text-align:center;">Es läuft – für alle.</div>'
-              f'<div style="font-size:15px;line-height:1.55;color:{LT};text-align:center;margin-top:10px;">Leg 3 Flaschen in den Warenkorb, die günstigste geht aufs Haus. Noch drei Tage.</div>', '24px 22px 4px', align='center')
+              f'<div style="font-size:15px;line-height:1.55;color:{LT};text-align:center;margin-top:10px;">Leg 3 Flaschen in den Warenkorb, die günstigste geht aufs Haus. Noch drei Tage – solange der Vorrat reicht.</div>', '24px 22px 4px', align='center')
         + row(days3(), '14px 12px 4px')
+        + row(f'<div style="background:#2A1404;border:1px solid #7A3A10;border-radius:14px;padding:12px 14px;text-align:center;font-family:{F};"><div style="font-size:15px;font-weight:800;color:{OR2};">⏳ Nur noch wenige verfügbar</div><div style="font-size:13px;color:{LT};margin-top:3px;">Gilt nur, solange der Vorrat reicht – wenn eine Größe weg ist, ist sie weg.</div></div>', '10px 16px 4px')
         + row(btnw('Jetzt 3 für 2 sichern', shop), '16px 22px 6px')
         + row(label('SO RECHNET SICH DAS') + calc(), '22px 16px 4px')
         + row(label('DEIN PREIS FÜR 3 FLASCHEN') + plist(c), '22px 16px 4px')
@@ -176,7 +177,7 @@ SUBJ = {
     'teaser': ('Donnerstag 18 Uhr: du bist früher dran 🎃', 'Jede 3. Flasche gratis – plus 3 neue Produkte.'),
     'early': ('Du bist drin 🎃', 'Jede 3. Flasche gratis – und die Neuheiten sind schon da.'),
     'letzte': ('Heute um Mitternacht ist Schluss', 'Danach wieder volle Preise.'),
-    'jetzt': ('Jetzt live: jede 3. Flasche gratis 🎃', 'Nur bis Sonntag 23:59 – plus 3 neue Produkte.'),
+    'jetzt': ('Jetzt live: jede 3. Flasche gratis 🎃', 'Nur bis Sonntag – und nur solange der Vorrat reicht.'),
     'morgen': ('Morgen 18 Uhr: dein früher Zugang 🎃', 'Jede 3. Flasche gratis – und 3 neue Produkte.'),
 }
 
