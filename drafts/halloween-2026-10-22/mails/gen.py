@@ -121,17 +121,56 @@ def morgen():
         + row(box(label('DER ABLAUF') + timeline(0)), '12px 16px 4px')
         + row(btn('Schon mal stöbern', utm('/alle-produkte/', c)), '18px 22px 26px'))
 
+PU = '#B78CFF'; PUB = '#3A2560'; PUBG = '#140C22'
+def days3():
+    d = [('FR', '30.10.', 'heute'), ('SA', '31.10.', 'Halloween'), ('SO', '1.11.', 'bis 23:59')]
+    cells = ''
+    for i, (t, dt, sub) in enumerate(d):
+        on = i == 0
+        cells += (f'<td width="33%" style="width:33%;padding:4px;"><div style="background:{"#2A1404" if on else PUBG};border:1px solid {"#7A3A10" if on else PUB};border-radius:14px;padding:12px 6px;text-align:center;font-family:{F};">'
+                  f'<div style="font-size:22px;font-weight:800;color:{OR2 if on else "#fff"};">{t}</div><div style="font-size:12px;color:{MU};margin-top:2px;">{dt}</div>'
+                  f'<div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:{OR2 if on else PU};margin-top:6px;text-transform:uppercase;">{sub}</div></div></td>')
+    return f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>{cells}</tr></table>'
+def calc():
+    """Rechenbeispiel als grosse Karte."""
+    r = lambda l, v, c='#fff', w='600': f'<tr><td style="padding:6px 0;font-family:{F};font-size:15px;color:{MU};">{l}</td><td align="right" style="padding:6px 0;font-family:{F};font-size:15px;font-weight:{w};color:{c};white-space:nowrap;">{v}</td></tr>'
+    t = ('<table role="presentation" width="100%" cellpadding="0" cellspacing="0">' + r('1× Retatrutide 10 mg', '79,90 €') + r('2× Retatrutide 10 mg', '159,80 €')
+         + r('3× Retatrutide 10 mg', '+ 0,00 € 🎃', OR2, '800') + '</table>'
+         + f'<div style="height:1px;background:{PUB};margin:8px 0 10px;"></div>'
+         + f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="font-family:{F};font-size:15px;font-weight:800;color:#fff;">Du zahlst für 3</td><td align="right" style="font-family:{F};font-size:24px;font-weight:800;color:#fff;">159,80 €</td></tr></table>')
+    return f'<div style="background:{PUBG};border:1px solid {PUB};border-radius:18px;padding:16px 18px;">{t}</div>'
+def plist(c):
+    items = [('Retatrutide 10 mg', '159,80 €', '/produkt/retatrutide/?attribute_volumen=10mg', ''), ('Retatrutide 20 mg', '299,80 €', '/produkt/retatrutide/?attribute_volumen=20mg', ''),
+             ('GHK-Cu 100 mg', '149,80 €', '/produkt/ghk-cu/?attribute_volumen=100mg', ''), ('Cagrilintid 10 mg', '209,80 €', '/produkt/cagrilintid/', 'NEU'),
+             ('GLOW 70 mg', '279,80 €', '/produkt/glow/', 'NEU'), ('MT-2 10 mg', '59,80 €', '/produkt/melanotan-2/', 'NEU'), ('BPC-157 10 mg', '79,80 €', '/produkt/bpc-157/', 'WIEDER DA')]
+    rows = ''
+    for i, (n, pr, path, tag) in enumerate(items):
+        tg = f' <span style="font-size:10px;font-weight:800;letter-spacing:.12em;color:{PU};border:1px solid {PUB};border-radius:99px;padding:2px 7px;vertical-align:2px;">{tag}</span>' if tag else ''
+        bd = '' if i == len(items) - 1 else f'border-bottom:1px solid {PUB};'
+        rows += (f'<tr><td style="padding:13px 0;{bd}font-family:{F};"><a href="{utm(path, c)}" style="text-decoration:none;font-size:15px;font-weight:700;color:#fff;">{n}</a>{tg}</td>'
+                 f'<td align="right" style="padding:13px 0;{bd}font-family:{F};white-space:nowrap;"><a href="{utm(path, c)}" style="text-decoration:none;font-size:15px;font-weight:800;color:{OR2};">{pr}</a> <span style="color:{MU};">›</span></td></tr>')
+    return (f'<div style="background:{PUBG};border:1px solid {PUB};border-radius:18px;padding:4px 18px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">{rows}</table></div>'
+            f'<div style="font-size:12px;color:{MU};text-align:center;margin-top:8px;font-family:{F};">Preis für 3 Flaschen – du zahlst nur 2. Auch gemischt.</div>')
+def icons3():
+    it = [('🎃', 'Kein Code', 'wird automatisch abgezogen'), ('💳', 'Vorkasse ok', 'es zählt deine Bestellung'), ('📦', 'In 2 Werktagen', 'diskret verpackt')]
+    cells = ''.join(f'<td width="33%" valign="top" style="width:33%;padding:6px 4px;text-align:center;font-family:{F};"><div style="font-size:24px;">{e}</div><div style="font-size:13px;font-weight:800;color:#fff;margin-top:6px;">{t}</div><div style="font-size:12px;color:{MU};margin-top:3px;line-height:1.35;">{s}</div></td>' for e, t, s in it)
+    return f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>{cells}</tr></table>'
+def btnw(t, u): return (f'<a href="{u}" style="display:block;background:#FFFFFF;color:#0D0F12;text-align:center;text-decoration:none;font-family:{F};font-size:16px;font-weight:800;padding:16px 18px;border-radius:14px;">{t} &rarr;</a>')
 def jetzt():
-    """Reminder Fr 30.10. (2026-10-30, Nutzer: Reminder an alle Mail-Abos) - Aktion fuer alle live bis So 23:59."""
+    """Reminder Fr 30.10. (2026-10-30). Eigener Look (Nutzer: 'anderes Bild, anderer Look'): Nachthimmel-Hero mit Mond + Neuheiten,
+    lila Akzente, Tages-Leiste Fr/Sa/So, Rechenbeispiel, kompakte Preisliste statt Karten, weisser Button."""
     c = 'halloween-jetzt'
-    return wrap(row(logo(), '26px 20px 6px', align='center') + heroimg('jetzt', utm('/alle-produkte/', c))
-        + row(h1('Jetzt für alle:', 'jede 3. Flasche gratis.', 'Unser Halloween-Special läuft – nur noch bis <b style="color:#fff;">Sonntag 23:59</b>. Die günstigste Flasche geht automatisch aufs Haus.'), '22px 22px 6px')
-        + row(btn('Jetzt Flaschen wählen', utm('/alle-produkte/', c)), '18px 22px 6px')
-        + row(label('DEIN PREIS FÜR 3 FLASCHEN') + prods(c), '20px 16px 4px')
-        + row(label('NEU IM SHOP') + f'<div style="font-size:14px;color:{LT};line-height:1.5;margin-bottom:8px;">Cagrilintid, MT-2 und GLOW sind da – und BPC-157 ist zurück. Alle zählen mit, auch gemischt.</div>' + newgrid(c, True), '20px 16px 4px')
-        + row(ticks([TK_MIX, TK_CODE, TK_VK, TK_VORRAT]), '12px 16px 4px')
-        + row(box(label('DER ABLAUF') + timeline(1)), '12px 16px 4px')
-        + row(btn('Zum Shop', utm('/alle-produkte/', c)), '18px 22px 26px'))
+    shop = utm('/alle-produkte/', c)
+    return wrap(row(logo(), '26px 20px 6px', align='center')
+        + f'<tr><td style="padding:0;line-height:0;background:{BG};"><a href="{shop}" style="display:block;line-height:0;"><img src="{E}nl-hw5-jetzt.jpg" width="600" alt="Bis Sonntag: 3 für 2" style="display:block;width:100%;height:auto;border:0;"></a></td></tr>'
+        + row(f'<div style="font-size:30px;line-height:1.15;font-weight:800;color:#fff;letter-spacing:-.02em;text-align:center;">Es läuft – für alle.</div>'
+              f'<div style="font-size:15px;line-height:1.55;color:{LT};text-align:center;margin-top:10px;">Leg 3 Flaschen in den Warenkorb, die günstigste geht aufs Haus. Noch drei Tage.</div>', '24px 22px 4px', align='center')
+        + row(days3(), '14px 12px 4px')
+        + row(btnw('Jetzt 3 für 2 sichern', shop), '16px 22px 6px')
+        + row(label('SO RECHNET SICH DAS') + calc(), '22px 16px 4px')
+        + row(label('DEIN PREIS FÜR 3 FLASCHEN') + plist(c), '22px 16px 4px')
+        + row(icons3(), '18px 12px 4px')
+        + row(btnw('Zum Shop', shop) + f'<div style="font-size:12px;color:{MU};text-align:center;margin-top:10px;">Solange der Vorrat reicht · nicht für Pens und Zubehör</div>', '18px 22px 26px'))
 
 SUBJ = {
     'teaser': ('Donnerstag 18 Uhr: du bist früher dran 🎃', 'Jede 3. Flasche gratis – plus 3 neue Produkte.'),
