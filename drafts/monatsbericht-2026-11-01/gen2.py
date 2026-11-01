@@ -78,7 +78,7 @@ gw = T([head2(),
  fixrow,
  r2('= Gewinn', eur(o['res']), eur(s['res']), f"{marge:.0f} % vom Umsatz (Sep. {s['res']/s['rev']*100:.0f} %)", bold=True, col=GRN, top=True)])
 parts=[(o['cogs'],'#8E959E','Ware'),(o['comm'],'#C98A2B','Provision'),(o['own'],'#B9BEC5','Versand'),(o['res'],GRN,'Gewinn')]
-bar='<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>'+''.join(f'<td width="{de(v/o["rev"]*100)}%" style="height:12px;background:{c};font-size:0;">&nbsp;</td>' for v,c,_ in parts)+'</tr></table>'
+bar='<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>'+''.join(f'<td width="{v/o["rev"]*100:.1f}%" style="height:12px;background:{c};font-size:0;">&nbsp;</td>' for v,c,_ in parts)+'</tr></table>'
 leg=f'<div style="font-size:11px;color:{MUT};margin-top:6px;">'+' &nbsp; '.join(f'<span style="white-space:nowrap;"><span style="color:{c};">■</span> {n} {v/o["rev"]*100:.0f} %</span>' for v,c,n in parts)+'</div>'
 c_gew = card('Vom Umsatz zum Gewinn', gw + '<div style="height:10px"></div>' + bar + leg)
 
