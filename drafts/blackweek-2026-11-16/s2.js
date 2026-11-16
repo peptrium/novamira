@@ -1,0 +1,18 @@
+const L=require('./lib.js');const fs=require('fs');const bw=fs.readFileSync('bw.js','utf8'),bw2=fs.readFileSync('bw2.js','utf8');
+(async()=>{const {b,c}=await L.open(2);const p=await c.newPage();p.on('pageerror',e=>console.log('ERR',e.message));
+await L.go(p,'https://peptrium.com/?bw=1');await p.evaluate(()=>{window.BWP='bw';window.BWNOW='2026-11-17T09:12:33+01:00';});await p.addScriptTag({content:bw});await p.waitForTimeout(600);
+await p.screenshot({path:'01-start-bw.png'});
+await p.evaluate(()=>{window.BWP='bf';window.BWNOW='2026-11-27T12:47:08+01:00';});await L.go(p,'https://peptrium.com/?bw=2');await p.evaluate(()=>{window.BWP='bf';window.BWNOW='2026-11-27T12:47:08+01:00';});await p.addScriptTag({content:bw});await p.waitForTimeout(600);
+await p.screenshot({path:'01-start-bf.png'});
+await L.go(p,'https://peptrium.com/produkt/retatrutide/?bw=1');
+await p.evaluate(async()=>{const add=async(id,q)=>{const f=new FormData();f.append('product_id',id);f.append('quantity',q);await fetch('/?wc-ajax=add_to_cart',{method:'POST',body:f,credentials:'same-origin'});};await add(555,3);await add(1011,1);await add(74,1);});
+await L.go(p,'https://peptrium.com/produkt/retatrutide/?bw=3');
+await p.evaluate(()=>{window.BWP='bw';window.BWNOW='2026-11-17T09:12:33+01:00';});await p.addScriptTag({content:bw});
+await p.evaluate(()=>{document.getElementById('sp-cart-fab').click();});await p.waitForTimeout(3500);
+await p.addScriptTag({content:bw2});await p.waitForTimeout(500);
+await p.screenshot({path:'05-warenkorb.png'});
+await L.go(p,'https://peptrium.com/kasse/?bw=1');await p.waitForTimeout(3000);
+console.log(await p.evaluate(()=>{const x=document.querySelector('.wp-block-woocommerce-checkout-order-summary-block');return x?x.innerText.slice(0,1500):'none'}));
+fs.writeFileSync('co.html',await p.evaluate(()=>{const x=document.querySelector('.wp-block-woocommerce-checkout-order-summary-block');return x?x.outerHTML:''}));
+await p.screenshot({path:'co0.png',fullPage:true});
+await b.close();})();
