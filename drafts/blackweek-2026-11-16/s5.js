@@ -1,0 +1,12 @@
+const L=require('./lib.js');const fs=require('fs');const bw=fs.readFileSync('bwm.js','utf8');
+const run=async(p)=>{await p.evaluate(()=>{window.BWP='bw';});await p.addScriptTag({content:bw});await p.waitForTimeout(600);};
+(async()=>{const {b,c}=await L.open(2);const p=await c.newPage();p.on('pageerror',e=>console.log('ERR',e.message));
+await L.go(p,'https://peptrium.com/alle-produkte/?bw=1');await run(p);
+let y=await p.evaluate(()=>document.querySelector('.bw-strip').getBoundingClientRect().top+scrollY-120);await p.evaluate(y=>scrollTo(0,y),y);await p.waitForTimeout(900);await p.screenshot({path:'m-03-kategorie.png'});
+await L.go(p,'https://peptrium.com/produkt/retatrutide/?bw=1');await run(p);
+y=await p.evaluate(()=>document.getElementById('rx-buybox').getBoundingClientRect().top+scrollY-120);await p.evaluate(y=>scrollTo(0,y),y);await p.waitForTimeout(900);await p.screenshot({path:'m-04-produkt.png'});
+await p.evaluate(async()=>{const add=async(id,q)=>{const f=new FormData();f.append('product_id',id);f.append('quantity',q);await fetch('/?wc-ajax=add_to_cart',{method:'POST',body:f,credentials:'same-origin'});};await add(555,3);await add(1011,1);await add(74,1);});
+await L.go(p,'https://peptrium.com/produkt/retatrutide/?bw=2');await p.evaluate(()=>document.getElementById('sp-cart-fab').click());await p.waitForTimeout(3500);await run(p);await p.screenshot({path:'m-05-warenkorb.png'});
+await L.go(p,'https://peptrium.com/kasse/?bw=1');await p.waitForTimeout(3000);await run(p);
+y=await p.evaluate(()=>document.querySelector('.wp-block-woocommerce-checkout-order-summary-cart-items-block').getBoundingClientRect().top+scrollY+60);await p.evaluate(y=>scrollTo(0,y),y);await p.waitForTimeout(800);await p.screenshot({path:'m-06-kasse.png'});
+await b.close();})();
