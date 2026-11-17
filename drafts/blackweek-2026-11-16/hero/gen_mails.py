@@ -62,10 +62,20 @@ def sets(f):
        ('GHK-Cu Komplett','GHK-Cu 50 mg, Bac Water, Spritzen',59.70,'<img src="ghk.png">')]
     return '<div class="cards">'+''.join(f'<div class="card"><div class="im">{im}</div><b>{n}</b><span>{d}</span><div class="pp">{eur(p*f)}<s>{eur(p)}</s></div></div>' for n,d,p,im in S)+'</div>'
 def cd(d,h,m,s): return '<div class="cd">'+''.join(f'<div><b>{v}</b><span>{l}</span></div>' for v,l in [(d,'TAGE'),(h,'STD'),(m,'MIN'),(s,'SEK')])+'</div>'
+def hero_pen(ey,big,l1,l2):
+    return f'<div class="sc2" style="height:520px"><div class="beam" style="transform:translateX(-50%)"></div><div class="pool" style="top:420px;transform:translateX(-50%)"></div><div class="hz" style="top:470px"></div><div class="txt"><div class="ey">{ey}</div><div class="big2 chrome">{big}</div><div class="l1">{l1}</div><div class="l2">{l2}</div></div><img src="pen.png" style="position:absolute;left:50%;top:300px;width:300px;margin-left:-150px;transform:rotate(-26deg);filter:drop-shadow(0 26px 22px rgba(0,0,0,.85));z-index:5"><img src="pen.png" style="position:absolute;left:50%;top:452px;width:300px;margin-left:-150px;transform:scaleY(-1) rotate(26deg);opacity:.12;filter:blur(2px);-webkit-mask-image:linear-gradient(0deg,transparent 40%,#000 85%);z-index:4"><div class="grain"></div></div>'
+def penlist(f):
+    rows=[('Peptrium-Pen Retatrutide','20 mg',264.90),('Peptrium-Pen Retatrutide','30 mg',None),('Peptrium-Pen GHK-Cu','50 mg',None),('Peptrium-Pen MOTS-c','20 mg',None)]
+    return ''
 M={}
 M['1-start']=mail('Black Week: −30 % auf alles','Peptide, Pens und Zubehör – automatisch reduziert.',
  hero_scene('BLACK WEEK',30,'auf das gesamte Sortiment.','Bis Donnerstag, 26. November'),
  '<p>Ab heute ist <b>jedes Produkt 30 % günstiger</b>. Ohne Code, direkt im Preis. Die Geschenke ab 200 € gibt es weiterhin dazu.</p>'+plist(.7)+'<p class="ps">Und Freitag? Wird es noch besser. Du erfährst es zuerst.</p>','Zum Shop','00:05')
+M['1b-pen']=mail('Halbzeit: der Pen, jetzt −30 %','Fertig gemischt, kein Anmischen – noch bis Donnerstag.',
+ hero_pen('BLACK WEEK · HALBZEIT','Der Pen.','Fertig gemischt. Jetzt −30 %.','Noch bis Donnerstag, 26. November'),
+ '<p>Kein Bac Water, kein Anmischen: <b>der Peptrium-Pen kommt fertig gemischt</b>. In der Black Week ist auch er <b>30 % günstiger</b>.</p><div class="pl"></div>'
+ +''.join(f'<div class="pr"><div>{n}<br><span>{v}</span></div><div><s>{eur(p)}</s><b>{eur(p*.7)}</b></div></div>' for n,v,p in [('Pen Retatrutide','20 mg',264.90),('Pen Retatrutide','40 mg',339.90),('Pen GHK-Cu','50 mg',169.90),('Pen MOTS-c','20 mg',189.90)])
+ +'<div class="ck" style="margin-top:20px"><div>Pen Nadeln gleich mitbestellen – auch −30 %</div><div>Ab 200 € gibt es das Injektionskit gratis dazu</div><div>Versand in 2 Werktagen, diskret verpackt</div></div>','Pens ansehen','18:00')
 M['2-favoriten']=mail('Die Favoriten, jetzt 30 % günstiger','Starter-Set, Pen-Set und GLOW – fertig zusammengestellt.',
  hero_text('BLACK WEEK · SAMSTAG','Die Favoriten.','Fertig zusammengestellt, jetzt −30 %.','Noch bis Donnerstag, 26. November'),
  '<p>Die meisten bestellen nicht einzeln, sondern <b>alles, was zusammengehört</b>. Hier die beliebtesten Kombinationen, schon reduziert.</p>'+sets(.7)+'<p>Ab 150 € versandkostenfrei, ab 200 € gibt es das Injektionskit gratis dazu.</p>','Sets ansehen','11:00')
