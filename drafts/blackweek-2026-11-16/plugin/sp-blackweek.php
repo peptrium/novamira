@@ -68,12 +68,16 @@ add_action('woocommerce_before_calculate_totals', function ($cart) {
         if (!sp_bw_item_ok($item)) continue;
         $cart->cart_contents[$key]['data']->set_price(round(sp_bw_regular($item['data']) * $f, 2));
         $cart->cart_contents[$key]['sp_bw'] = sp_bw_pct();
+        $cart->cart_contents[$key]['sp_bw_reg'] = sp_bw_regular($item['data']);
     }
     $run = false;
 }, 26);
 
 add_action('woocommerce_checkout_create_order_line_item', function ($li, $key, $values) {
-    if (!empty($values['sp_bw']) && sp_bw_active()) $li->add_meta_data('Black-Week-Rabatt', '−' . (int) $values['sp_bw'] . ' %', true);
+    if (!empty($values['sp_bw']) && sp_bw_active()) {
+        $li->add_meta_data('Black-Week-Rabatt', '−' . (int) $values['sp_bw'] . ' %', true);
+        if (!empty($values['sp_bw_reg'])) $li->add_meta_data('_sp_bw_reg', round((float) $values['sp_bw_reg'] * (int) $values['quantity'], 2), true);
+    }
 }, 20, 3);
 function sp_bw_set_order_meta($order) {
     if (!sp_bw_active()) return;
@@ -145,3 +149,51 @@ add_action('sp_bw_purge', function ($k = '') {
     $log[] = [time(), 'cache geleert: ' . $k];
     update_option('sp_bw_log', array_slice($log, -50), false);
 });
+
+/* ---------------------------------------------------------------------
+ * Ersparnis auf Danke-Seite + in Bestellmails (2026-11-17)
+ * ------------------------------------------------------------------- */
+function sp_bw_order_saving($order) {
+    if (!$order || !(int) $order->get_meta('_sp_bw')) return null;
+    $save = 0.0;
+    foreach ($order->get_items() as $it) {
+        $reg = (float) $it->get_meta('_sp_bw_reg');
+        if ($reg > 0) $save += $reg - (float) $it->get_total();
+    }
+    if ($save <= 0.005) return null;
+    $bf = $order->get_meta('_sp_bw_phase') === 'bf';
+    return ['save' => round($save, 2), 'pct' => (int) $order->get_meta('_sp_bw'), 'name' => $bf ? 'Black Friday' : 'Black Week'];
+}
+add_action('woocommerce_thankyou', function ($order_id) {
+    $sv = sp_bw_order_saving(wc_get_order($order_id));
+    if (!$sv) return;
+    echo '<div id="sp-bw-ty"><div class="e">' . esc_html(strtoupper($sv['name'])) . ' · −' . (int) $sv['pct'] . ' %</div><div class="r"><span>Du hast gespart</span><strong>' . wp_kses_post(wc_price($sv['save'])) . '</strong></div></div>';
+    echo '<style>#sp-bw-ty{margin:0 0 18px;background:radial-gradient(90% 140% at 50% 0%,#1E2024,#050506 72%);border-radius:16px;padding:16px 18px;color:#fff;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}#sp-bw-ty .e{font-size:10.5px;font-weight:600;letter-spacing:.38em;color:#9AA0A8}#sp-bw-ty .r{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin-top:8px}#sp-bw-ty .r span{font-size:15px;font-weight:600}#sp-bw-ty strong{font-size:26px;font-weight:800;letter-spacing:-.03em;background:linear-gradient(180deg,#fff 0%,#F1F3F5 26%,#A3A9B1 48%,#5F656D 53%,#D9DDE1 68%,#fff 82%,#9AA0A8 100%);-webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap}#sp-bw-ty strong *{color:inherit!important;-webkit-text-fill-color:transparent}</style>';
+    echo "<script>(function(){var b=document.getElementById('sp-bw-ty'),t=0,i=setInterval(function(){var h=document.getElementById('sp-ty-hero');if(h){clearInterval(i);var bank=h.nextElementSibling&&/bacs|bank|ueberweisung/i.test(h.nextElementSibling.className)?h.nextElementSibling:h;bank.insertAdjacentElement('afterend',b);}else if(++t>30){clearInterval(i);var w=document.querySelector('.woocommerce-order');if(w)w.insertAdjacentElement('afterbegin',b);}},150);})();</script>";
+}, 1);
+add_action('woocommerce_email_before_order_table', function ($order, $sent_to_admin, $plain, $email = null) {
+    if ($sent_to_admin || $plain || !$email) return;
+    if (!in_array($email->id, ['customer_on_hold_order', 'customer_processing_order'], true)) return;
+    $sv = sp_bw_order_saving($order);
+    if (!$sv) return;
+    echo '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 18px;border-collapse:separate"><tr><td style="background:#0B0C0E;border-radius:14px;padding:16px 18px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Inter,Arial,sans-serif;color:#FFFFFF;font-size:15px;line-height:1.45">'
+        . '<span style="font-size:11px;letter-spacing:.3em;font-weight:700;color:#9AA0A8">' . esc_html(strtoupper($sv['name'])) . ' · −' . (int) $sv['pct'] . ' %</span><br>'
+        . '<b style="color:#FFFFFF;font-size:18px">Du hast ' . wp_kses_post(wc_price($sv['save'])) . ' gespart</b>'
+        . '</td></tr></table>';
+}, 5, 4);
+
+/* ---------------------------------------------------------------------
+ * Texte für Omnisend-Mails (Warenkorb-Erinnerung, Willkommen) – leer außerhalb der Aktion
+ * ------------------------------------------------------------------- */
+function sp_bw_mail_props() {
+    $o = sp_bw_opt();
+    $t = time();
+    $on = empty($o['off']) && $t >= (int) $o['start'] && $t <= (int) $o['end'];
+    if (!$on) return ['bw_show' => 'none', 'bw_text' => '', 'bw_code_text' => ''];
+    $bf = $t >= (int) $o['bf'];
+    return [
+        'bw_show' => 'block',
+        'bw_text' => $bf ? '⚡ Black Friday: −35 % auf alles – nur bis Mo 30.11., 23:59' : '🖤 Black Week: −30 % auf alles – nur noch bis Do 26.11.',
+        'bw_code_text' => 'Tipp: Bis 30.11. läuft unsere Black Week mit bis zu −35 % auf alles – ganz ohne Code. Deinen Code nutzt du einfach danach.',
+    ];
+}
