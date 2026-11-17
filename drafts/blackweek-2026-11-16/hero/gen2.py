@@ -116,7 +116,7 @@ P['5-insider']=page('Für dich schon heute: −35 % 🖤','Black Friday startet 
 P['6-bf']=page('Black Friday: −35 % auf alles','Der größte Rabatt des Jahres. Bis Montag.','08:00','''
 .m{background:#E9EAEC;color:#07080A}
 .hd{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;font:700 10px/1 Inter;letter-spacing:.3em}.hd img{width:26px;filter:brightness(.1)}
-.p1{font:800 150px/.78 Sora;letter-spacing:-.075em;margin:6px 0 0 10px}
+.p1{font:800 132px/.8 Sora;letter-spacing:-.07em;margin:6px 0 0 12px}
 .p2{font:800 64px/.9 Sora;letter-spacing:-.05em;margin:0 0 0 14px}
 .p2 em{font-style:normal;color:#9AA0A8}
 .stg{position:relative;height:340px;margin-top:14px}
@@ -130,7 +130,7 @@ P['6-bf']=page('Black Friday: −35 % auf alles','Der größte Rabatt des Jahres
 .cta{padding:18px 20px 0}.ft{color:#7A8088}
 ''','<div class="hd"><img src="logo.png"><span>BLACK FRIDAY · 27.–30.11.</span></div><div class="p1 steel">−35%</div><div class="p2">auf alles.<em><br>Bis Montag.</em></div><div class="stg"><div class="fl"></div>'
  +v('bpc.png',8,96,62,'filter:brightness(.92)','left','255,255,255')+v('mt2.png',320,96,62,'filter:brightness(.92)','right','255,255,255')+v('ghk.png',62,64,80,'','left','255,255,255')+v('glow.png',248,64,80,'','right','255,255,255')+v('reta.png',138,20,114,'','both','255,255,255',True)
- +'</div><div class="sub"><span>KEIN CODE NÖTIG</span><b>Peptide · Pens · Zubehör</b></div><div class="g">'
+ +'</div><div class="sub"><span>KEIN CODE NÖTIG</span><b>Alles im Shop</b></div><div class="g">'
  +''.join(f'<div class="c"><span>{n}</span><small>{x}</small><div><s>{eur(p)}</s><b>{eur(p*.65)}</b></div></div>' for n,x,p in [('Retatrutide','10 mg',79.90),('GHK-Cu','50 mg',39.90),('GLOW','70 mg',139.90),('Pen Retatrutide','20 mg',264.90)])
  +'</div><div class="ck">✓ Versand in 2 Werktagen, diskret verpackt<br>✓ Geschenke ab 200 € bleiben<br>✓ Bei Vorkasse zählt das Bestelldatum</div><div class="cta"><div class="btn bb">Zum Black Friday'+ARW+'</div></div><div class="ft">Alle Produkte ausschließlich für Laborforschungszwecke.<br>Abmelden · Impressum</div>')
 # ---------- Mail 7: Sonntag – Flip-Countdown ----------
@@ -148,7 +148,7 @@ P['7-so']=page('Noch bis Montag: −35 %','Falls du noch überlegst – hier das
 .cr{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:baseline;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.06)}.cr:last-child{border:0}
 .cr span{font:500 13.5px Inter}.cr s{font:400 12px Inter;color:#6E747B}.cr b{font:700 15px Sora}
 .cta{padding:22px 20px 0}.ps{text-align:center;font:400 12.5px/1.5 Inter;color:#7B8188;margin:16px 26px 0}.ft{color:#5F656C}
-''','<div class="lg"><img src="logo.png"></div><div class="k">BLACK FRIDAY ENDET IN</div><div class="fl"><div class="d">36</div><div class="col">:</div><div class="d">47</div></div><div class="lb"><span>STUNDEN</span><span>MINUTEN</span></div><div class="h"><h1>Noch bis Montag.</h1><p>−35 % auf alles, danach gelten wieder die normalen Preise. Das sparst du im Vergleich zu sonst:</p></div><div class="cmp">'
+''','<div class="lg"><img src="logo.png"></div><div class="k">BLACK FRIDAY ENDET IN</div><div class="fl"><div class="d">36</div><div class="col">:</div><div class="d">59</div></div><div class="lb"><span>STUNDEN</span><span>MINUTEN</span></div><div class="h"><h1>Noch bis Montag.</h1><p>−35 % auf alles, danach gelten wieder die normalen Preise. Das sparst du im Vergleich zu sonst:</p></div><div class="cmp">'
  +''.join(f'<div class="cr"><span>{n}</span><s>{eur(p)}</s><b>{eur(p*.65)}</b></div>' for n,p in [('Retatrutide 10 mg',79.90),('Retatrutide 20 mg',149.90),('GHK-Cu 50 mg',39.90),('GLOW 70 mg',139.90),('Pen Retatrutide 20 mg',264.90)])
  +'</div><div class="cta"><div class="btn bw">Jetzt bestellen'+ARW+'</div></div><div class="ps">Fragen vor der Bestellung? Schreib uns auf Telegram, wir antworten schnell.</div><div class="ft">Alle Produkte ausschließlich für Laborforschungszwecke.<br>Abmelden · Impressum</div>')
 # ---------- Mail 8: Letzter Tag – weiß, große Typo ----------

@@ -64,7 +64,7 @@ def m_pen():
       +R(btn('Pens ansehen',L,th),'18px 22px 28px',th),th)
 def m_fav():
     th=T('dark','#16181C');L=utm('/alle-produkte/','blackweek-favoriten')
-    return wrap2(img('nl-bw-3-fav.jpg',L,'Die Favoriten −30 %',th)+R(btn('Alle Sets ansehen',L,th),'14px 20px 28px',th),th)
+    return wrap2(img('nl-bw-3-fav-v2.jpg',L,'Die Favoriten −30 %',th)+R(btn('Alle Sets ansehen',L,th),'14px 20px 28px',th),th)
 def m_teaser():
     th=T('dark','#000000');L=utm('/alle-produkte/','blackweek-teaser')
     return wrap2(img('nl-bw-4-teaser.jpg',L,'Freitag wird größer',th)
@@ -78,19 +78,19 @@ def m_insider():
       +R(P('Bestseller sind am Freitagmorgen erfahrungsgemäß zuerst weg.',th,12.5,c=th['mu']),'12px 26px 26px',th),th)
 def m_bf():
     th=T('light','#E9EAEC');L=utm('/alle-produkte/','blackweek-blackfriday')
-    return wrap2(img('nl-bw-6-bf.jpg',L,'Black Friday −35 %',th)
+    return wrap2(img('nl-bw-6-bf-v2.jpg',L,'Black Friday −35 %',th)
       +R(grid([('Retatrutide','10 mg',79.90),('GHK-Cu','50 mg',39.90),('GLOW','70 mg',139.90),('Pen Retatrutide','20 mg',264.90)],.65,th),'16px 20px 4px',th)
       +R(checks(['Versand in 2 Werktagen, diskret verpackt','Geschenke ab 200 € bleiben','Bei Vorkasse zählt das Bestelldatum'],th),'12px 20px 4px',th)
       +R(btn('Zum Black Friday',L,th),'18px 20px 28px',th),th)
 def m_so():
     th=T('dark','#0B0C0E');L=utm('/alle-produkte/','blackweek-sonntag')
-    return wrap2(img('nl-bw-7-so.jpg',L,'Noch bis Montag −35 %',th)
+    return wrap2(img('nl-bw-7-so-v2.jpg',L,'Noch bis Montag −35 %',th)
       +R(rows(PR65,.65,th),'10px 22px 6px',th)
       +R(btn('Jetzt bestellen',L,th),'20px 22px 6px',th)
       +R(P('Fragen vor der Bestellung? Schreib uns auf Telegram, wir antworten schnell.',th,12.5,c=th['mu']),'12px 26px 26px',th),th)
 def m_last():
     th=T('light','#FFFFFF');L=utm('/alle-produkte/','blackweek-letzte')
-    return wrap2(img('nl-bw-8-last.jpg',L,'Heute ist Schluss',th)
+    return wrap2(img('nl-bw-8-last-v2.jpg',L,'Heute ist Schluss',th)
       +R(btn('Letzte Chance nutzen',L,th),'18px 22px 10px',th)
       +R(P('Es zählt deine Bestellung, nicht der Zahlungseingang.',th,12.5,c=th['mu']),'4px 26px 26px',th),th)
 MAILS={'pen':(m_pen,'Halbzeit: der Pen, jetzt −30 %','Fertig gemischt, kein Anmischen – noch bis Donnerstag.','2026-11-19T17:00:00Z','nb','Black Week 2 – Pen (Do 19.11. 18 Uhr)'),
