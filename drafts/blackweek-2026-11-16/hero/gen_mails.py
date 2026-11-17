@@ -67,32 +67,47 @@ def hero_pen(ey,big,l1,l2):
 def penlist(f):
     rows=[('Peptrium-Pen Retatrutide','20 mg',264.90),('Peptrium-Pen Retatrutide','30 mg',None),('Peptrium-Pen GHK-Cu','50 mg',None),('Peptrium-Pen MOTS-c','20 mg',None)]
     return ''
+def vial(src,l,top,w,dim=False,rim='both',topl=False):
+    f='filter:brightness(.62) blur(.4px);' if dim else ''
+    return f'<div class="vw" data-src="{src}" data-rim="{rim}" data-color="215,225,240" {"data-top=1" if topl else ""} style="left:{l}px;top:{top}px;width:{w}px;{f}"></div>'
+def stage(h,beam=True,bright=False,floor=None):
+    fl=floor if floor is not None else h-90
+    b=f'<div class="beam" style="transform:translateX(-50%);{"background:linear-gradient(180deg,rgba(240,244,252,.30),rgba(220,228,240,.07) 70%,transparent)" if bright else ""}"></div>' if beam else ''
+    return b+f'<div class="pool" style="top:{fl-50}px;transform:translateX(-50%)"></div><div class="floor" style="top:{fl}px"></div><div class="hz" style="top:{fl}px"></div>'
+def hero_sets(ey,big,l1,l2):
+    return f'<div class="sc2" style="height:600px">{stage(600,floor=500)}<div class="txt"><div class="ey">{ey}</div><div class="big2 chrome">{big}</div><div class="l1">{l1}</div><div class="l2">{l2}</div></div>'+vial('ghk.png',36,344,62,True,'left')+vial('glow.png',292,344,62,True,'right')+vial('reta.png',112,304,80,False,'left')+vial('mt2.png',198,304,80,False,'right')+'<img src="pen.png" style="position:absolute;left:50%;top:446px;width:250px;margin-left:-125px;transform:rotate(-31deg);filter:drop-shadow(0 18px 16px rgba(0,0,0,.85));z-index:6"><div class="grain"></div></div>'
+def hero_teaser():
+    return f'<div class="sc2" style="height:520px">{stage(520,floor=450)}<div class="txt" style="top:40px"><div class="ey">NUR FÜR INSIDER</div><div class="big chrome" style="font-size:120px">−3?<sup>%</sup></div><div class="l1">Freitag wird größer.</div><div class="l2">Und du bist einen Abend früher dran.</div></div>'+vial('reta.png',150,300,90,False,'both',True)+'<div class="grain"></div></div>'
+def hero_bf():
+    return f'<div class="sc2" style="height:600px">{stage(600,bright=True,floor=520)}<div class="txt"><div class="ey">BLACK FRIDAY · CYBER MONDAY</div><div class="big chrome">−35<sup>%</sup></div><div class="l1">Der Höhepunkt der Black Week.</div><div class="l2">Nur bis Montag, 30. November · 23:59</div></div>'+vial('bpc.png',6,372,64,True,'left')+vial('mt2.png',320,372,64,True,'right')+vial('ghk.png',62,336,80,False,'left')+vial('glow.png',248,336,80,False,'right')+vial('reta.png',140,296,110,False,'both',True)+'<div class="grain"></div></div>'
+def hero_last():
+    return f'<div class="sc2" style="height:500px">{stage(500,floor=430)}<div class="txt" style="top:34px"><div class="ey">CYBER MONDAY · LETZTER TAG</div><div class="big chrome" style="font-size:112px;letter-spacing:-.04em">23:59</div><div class="l1">Heute endet die Black Week.</div><div class="l2">Danach gelten wieder die normalen Preise.</div></div>'+vial('ghk.png',70,316,66,True,'left')+vial('glow.png',254,316,66,True,'right')+vial('reta.png',148,276,94,False,'both',True)+'<div class="grain"></div></div>'
 M={}
-M['1-start']=mail('Black Week: −30 % auf alles','Peptide, Pens und Zubehör – automatisch reduziert.',
+M['1-start']=mail('Black Week: −30 % auf alles 🖤','Ab jetzt: Peptide, Pens und Zubehör – automatisch reduziert.',
  hero_scene('BLACK WEEK',30,'auf das gesamte Sortiment.','Bis Donnerstag, 26. November'),
- '<p>Ab heute ist <b>jedes Produkt 30 % günstiger</b>. Ohne Code, direkt im Preis. Die Geschenke ab 200 € gibt es weiterhin dazu.</p>'+plist(.7)+'<p class="ps">Und Freitag? Wird es noch besser. Du erfährst es zuerst.</p>','Zum Shop','00:05')
+ '<p>Ab sofort ist <b>jedes Produkt 30 % günstiger</b> – bis Donnerstag, 26. November. Ohne Code, direkt im Preis. Die Geschenke ab 200 € gibt es weiterhin dazu.</p>'+plist(.7)+'<p class="ps">Und Freitag? Wird es noch besser. Du erfährst es zuerst.</p>','Zum Shop','20:00')
 M['1b-pen']=mail('Halbzeit: der Pen, jetzt −30 %','Fertig gemischt, kein Anmischen – noch bis Donnerstag.',
  hero_pen('BLACK WEEK · HALBZEIT','Der Pen.','Fertig gemischt. Jetzt −30 %.','Noch bis Donnerstag, 26. November'),
  '<p>Kein Bac Water, kein Anmischen: <b>der Peptrium-Pen kommt fertig gemischt</b>. In der Black Week ist auch er <b>30 % günstiger</b>.</p><div class="pl"></div>'
  +''.join(f'<div class="pr"><div>{n}<br><span>{v}</span></div><div><s>{eur(p)}</s><b>{eur(p*.7)}</b></div></div>' for n,v,p in [('Pen Retatrutide','20 mg',264.90),('Pen Retatrutide','40 mg',339.90),('Pen GHK-Cu','50 mg',169.90),('Pen MOTS-c','20 mg',189.90)])
  +'<div class="ck" style="margin-top:20px"><div>Pen Nadeln gleich mitbestellen – auch −30 %</div><div>Ab 200 € gibt es das Injektionskit gratis dazu</div><div>Versand in 2 Werktagen, diskret verpackt</div></div>','Pens ansehen','18:00')
 M['2-favoriten']=mail('Die Favoriten, jetzt 30 % günstiger','Starter-Set, Pen-Set und GLOW – fertig zusammengestellt.',
- hero_text('BLACK WEEK · SAMSTAG','Die Favoriten.','Fertig zusammengestellt, jetzt −30 %.','Noch bis Donnerstag, 26. November'),
+ hero_sets('BLACK WEEK · SAMSTAG','Die Favoriten.','Fertig zusammengestellt, jetzt −30 %.','Noch bis Donnerstag, 26. November'),
  '<p>Die meisten bestellen nicht einzeln, sondern <b>alles, was zusammengehört</b>. Hier die beliebtesten Kombinationen, schon reduziert.</p>'+sets(.7)+'<p>Ab 150 € versandkostenfrei, ab 200 € gibt es das Injektionskit gratis dazu.</p>','Sets ansehen','11:00')
 M['3-teaser']=mail('Morgen 18 Uhr: dein früher Zugang','Black Friday startet für dich einen Abend vor allen anderen.',
- hero_text('NUR FÜR INSIDER','Morgen, 18 Uhr.','Black Friday – für dich zuerst.','Donnerstag, 26. November'),
- '<p>Freitag steigt der Rabatt. <b>Du bekommst ihn schon Donnerstag um 18 Uhr</b> – per Mail, mit deinem persönlichen Link.</p><div class="tl"><div class="on"><b>Bis Do</b>−30 % für alle</div><div class="on"><b>Do 18 Uhr</b>du zuerst</div><div><b>Fr–Mo</b>für alle</div></div><p>Tipp: Leg dir heute schon in den Warenkorb, was du willst. Dann geht es morgen in einer Minute.</p>','Warenkorb vorbereiten','18:00')
+ hero_teaser(),
+ '<p>Am Freitag steigt der Rabatt. Wie hoch, verraten wir morgen. <b>Du bekommst ihn schon Donnerstag um 18 Uhr</b> – per Mail, mit deinem persönlichen Link.</p><div class="tl"><div class="on"><b>Bis Do</b>−30 % für alle</div><div class="on"><b>Do 18 Uhr</b>du zuerst</div><div><b>Fr–Mo</b>für alle</div></div><p>Tipp: Leg dir heute schon in den Warenkorb, was du willst. Dann geht es morgen in einer Minute.</p>','Warenkorb vorbereiten','18:00')
 M['4-insider']=mail('Für dich schon heute: −35 % 🖤','Black Friday startet für alle erst morgen.',
  hero_scene('NUR FÜR INSIDER',35,'Black Friday – einen Abend früher.','Ab heute 18 Uhr · bis Cyber Monday, 30.11.',True),
  '<p>Du bist im Newsletter, also bist du <b>einen Abend früher dran</b>. Ab sofort gilt für dich <b>−35 % auf alles</b>.</p>'+plist(.65)+'<p class="ps">Bestseller sind am Freitagmorgen erfahrungsgemäß zuerst weg.</p>','Jetzt −35 % sichern','18:00')
 M['5-blackfriday']=mail('Black Friday: −35 % auf alles','Der größte Rabatt des Jahres. Bis Montag.',
- hero_scene('BLACK FRIDAY',35,'Der Höhepunkt der Black Week.','Nur bis Cyber Monday, 30. November · 23:59',True),
+ hero_bf(),
  '<p>Ab jetzt <b>−35 % auf das gesamte Sortiment</b> – Peptide, Pens und Zubehör. Ohne Code, direkt im Preis.</p>'+sets(.65)+'<div class="ck"><div>Versand in 2 Werktagen, diskret verpackt</div><div>Geschenke ab 200 € bleiben</div><div>Bei Vorkasse zählt das Bestelldatum</div></div>','Zum Black Friday','08:00')
 M['6-sonntag']=mail('Noch bis Montag: −35 %','Falls du noch überlegst – hier das Wichtigste auf einen Blick.',
  hero_text('BLACK FRIDAY · SONNTAG','Noch 1 Tag.','−35 % auf alles, bis Montag 23:59.','Danach gelten wieder die normalen Preise.'),
  cd('01','12','47','08')+'<p>Ein kurzer Überblick, was du <b>im Vergleich zu sonst</b> sparst:</p>'+plist(.65)+'<p class="ps">Fragen vor der Bestellung? Schreib uns auf Telegram, wir antworten schnell.</p>','Jetzt bestellen','11:00')
 M['7-letzte']=mail('Heute 23:59 ist Schluss','Letzter Tag: −35 % auf alles.',
- hero_text('CYBER MONDAY · LETZTER TAG','Letzter Tag.','−35 % nur noch bis 23:59.','Danach gelten wieder die normalen Preise.'),
+ hero_last(),
  cd('00','13','59','12')+'<p>Das war die Black Week 2026. Wenn du noch etwas brauchst: <b>heute ist der letzte Tag</b>.</p>'+sets(.65)+'<div class="ck"><div>Es zählt deine Bestellung, nicht der Zahlungseingang</div><div>Versand in 2 Werktagen</div></div>','Letzte Chance nutzen','10:00')
 for k,v in M.items(): open(f'mail-{k}.html','w').write(v)
 print(list(M))
