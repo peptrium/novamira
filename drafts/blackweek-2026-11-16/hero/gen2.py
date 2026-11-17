@@ -37,9 +37,9 @@ P['2-pen']=page('Halbzeit: der Pen, jetzt −30 %','Fertig gemischt, kein Anmisc
 .h{padding:30px 22px 0}.h .k{font:600 11px/1 Inter;letter-spacing:.3em;color:#7A8088}
 .h h1{font:800 76px/.86 Sora;letter-spacing:-.06em;margin:14px 0 0;color:#0B0C0E}
 .h h1 em{font-style:normal;color:#9AA0A8}
-.stg{position:relative;height:300px;margin-top:-6px}
-.stg .sh{position:absolute;left:40px;right:40px;top:232px;height:26px;background:radial-gradient(50% 50% at 50% 50%,rgba(0,0,0,.28),transparent 70%)}
-.stg img{position:absolute;left:-26px;top:30px;width:372px;transform:rotate(-22deg);filter:drop-shadow(0 26px 24px rgba(0,0,0,.28))}
+.stg{position:relative;height:250px;margin-top:10px}
+.stg .sh{position:absolute;left:30px;right:30px;top:178px;height:30px;background:radial-gradient(50% 50% at 50% 50%,rgba(0,0,0,.28),transparent 70%)}
+.stg img{position:absolute;left:22px;top:92px;width:346px;transform:rotate(-9deg);filter:drop-shadow(0 26px 24px rgba(0,0,0,.28))}
 .tag{position:absolute;right:22px;top:20px;width:92px;height:92px;border-radius:50%;background:#0B0C0E;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font:800 26px/1 Sora;letter-spacing:-.04em;transform:rotate(8deg)}
 .tag small{font:600 8.5px/1 Inter;letter-spacing:.2em;margin-top:4px;color:#9AA0A8}
 .tx{padding:6px 22px 0;font:400 15px/1.6 Inter;color:#3A3F46}.tx b{color:#0B0C0E}
@@ -47,10 +47,10 @@ P['2-pen']=page('Halbzeit: der Pen, jetzt −30 %','Fertig gemischt, kein Anmisc
 .r{display:grid;grid-template-columns:1fr auto;padding:14px 0;border-bottom:1px solid #DADBD8;align-items:baseline}
 .r b{font:600 15px Inter}.r span{display:block;font:400 12.5px Inter;color:#7A8088}.r s{font:400 12px Inter;color:#9AA0A8;margin-right:8px}.r i{font:800 18px Sora;font-style:normal}
 .cta{padding:24px 22px 0}.ft{color:#8A9098}
-''','<div class="hd"><img src="logo.png"><span>BLACK WEEK · HALBZEIT</span></div><div class="h"><div class="k">FERTIG GEMISCHT</div><h1>Der<br>Pen.<em> −30%</em></h1></div><div class="stg"><div class="sh"></div><img src="pen.png"></div><div class="tx">Kein Bac Water, kein Anmischen: <b>der Peptrium-Pen kommt fertig gemischt</b>. Diese Woche 30 % günstiger.</div><div class="rows">'+''.join(f'<div class="r"><div><b>{n}</b><span>{x}</span></div><div><s>{eur(p)}</s><i>{eur(p*.7)}</i></div></div>' for n,x,p in [('Pen Retatrutide','20 mg',264.90),('Pen Retatrutide','40 mg',339.90),('Pen GHK-Cu','50 mg',169.90),('Pen MOTS-c','20 mg',189.90)])+'</div><div class="cta"><div class="btn bb">Pens ansehen'+ARW+'</div></div><div class="ft">Alle Produkte ausschließlich für Laborforschungszwecke.<br>Abmelden · Impressum</div>')
+''','<div class="hd"><img src="logo.png"><span>BLACK WEEK · HALBZEIT</span></div><div class="h"><div class="k">FERTIG GEMISCHT</div><h1>Der<br>Pen.<em> −30%</em></h1></div><div class="stg"><div class="sh"></div><img src="pen-h.png"></div><div class="tx">Kein Bac Water, kein Anmischen: <b>der Peptrium-Pen kommt fertig gemischt</b>. Diese Woche 30 % günstiger.</div><div class="rows">'+''.join(f'<div class="r"><div><b>{n}</b><span>{x}</span></div><div><s>{eur(p)}</s><i>{eur(p*.7)}</i></div></div>' for n,x,p in [('Pen Retatrutide','20 mg',264.90),('Pen Retatrutide','40 mg',339.90),('Pen GHK-Cu','50 mg',169.90),('Pen MOTS-c','20 mg',189.90)])+'</div><div class="cta"><div class="btn bb">Pens ansehen'+ARW+'</div></div><div class="ft">Alle Produkte ausschließlich für Laborforschungszwecke.<br>Abmelden · Impressum</div>')
 # ---------- Mail 3: Favoriten – Katalog/Lookbook ----------
 def tile(img,n,d,p,f,big=False,pen=False):
-    im=f'<img src="{img}" style="{"width:118%;transform:rotate(-22deg);margin:30px 0 0 -9%" if pen else "height:100%"}">'
+    im=f'<img src="{img}" style="{"width:96%;height:auto;align-self:center;transform:rotate(-12deg)" if pen else "height:100%"}">'
     return f'<div class="t{" big" if big else ""}"><div class="im">{im}</div><div class="nf"><span>{n}</span><small>{d}</small></div><div class="pp"><s>{eur(p)}</s><b>{eur(p*f)}</b></div></div>'
 P['3-fav']=page('Die Favoriten, jetzt 30 % günstiger','Starter-Set, Pen-Set und GLOW – fertig zusammengestellt.','11:00','''
 .m{background:#16181C;color:#fff}
@@ -71,7 +71,7 @@ P['3-fav']=page('Die Favoriten, jetzt 30 % günstiger','Starter-Set, Pen-Set und
 .cta{padding:20px 20px 0}.ft{color:#5F656C}
 ''','<div class="hd"><h1>Die<br>Favoriten.</h1><div class="r">BLACK WEEK<b>−30%</b>BIS DO 26.11.</div></div><div class="in">Die meisten bestellen nicht einzeln, sondern alles, was zusammengehört. Hier die beliebtesten Kombinationen – schon reduziert.</div><div class="g">'
  +tile('reta.png','Retatrutide Starter-Set','Retatrutide 10 mg · Bac Water · Spritzen',99.70,.7,True)
- +tile('pen.png','Retatrutide Pen-Set','Pen 20 mg + Pen Nadeln',274.80,.7,pen=True)
+ +tile('pen-h.png','Retatrutide Pen-Set','Pen 20 mg + Pen Nadeln',274.80,.7,pen=True)
  +tile('glow.png','GLOW','GHK-Cu · BPC-157 · TB-500',139.90,.7)
  +tile('ghk.png','GHK-Cu Komplett','GHK-Cu 50 mg · Bac Water · Spritzen',59.70,.7)
  +tile('mt2.png','Melanotan II','10 mg',29.90,.7)
