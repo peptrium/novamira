@@ -14,6 +14,7 @@ function sp_bwv_token() {
     return $t;
 }
 function sp_bwv_phase() {
+    if (function_exists('sp_bw_phase')) return sp_bw_phase();
     $c = isset($_COOKIE['sp_bw_pv']) ? (string) $_COOKIE['sp_bw_pv'] : '';
     if ($c === 'bw' || $c === 'bf') return $c;
     return '';
@@ -36,7 +37,7 @@ add_action('init', function () {
 }, 1);
 
 add_action('template_redirect', function () {
-    if (sp_bwv_phase() && !defined('DONOTCACHEPAGE')) define('DONOTCACHEPAGE', true);
+    if (isset($_COOKIE['sp_bw_pv']) && !defined('DONOTCACHEPAGE')) define('DONOTCACHEPAGE', true);
 }, 0);
 
 add_filter('body_class', function ($c) { if (sp_bwv_phase()) $c[] = 'sp-bwv'; return $c; });
@@ -52,6 +53,9 @@ add_action('wp_footer', function () {
         'scene' => content_url('uploads/sp-bw/scene-' . ($bf ? 'bf' : 'bw') . '.webp'),
         'home'  => is_front_page(),
         'off'   => home_url('/?sp_bw=aus'),
+        'live'  => function_exists('sp_bw_active') && sp_bw_active(),
+        'pv'    => isset($_COOKIE['sp_bw_pv']),
+        'insider' => (function_exists('sp_bw_opt') && time() >= (int) sp_bw_opt()['insider']),
     ];
     ?>
 <style id="sp-bwv-css">
@@ -97,7 +101,7 @@ add_action('wp_footer', function () {
 .bw-bb .h .r{text-align:right;font:600 13.5px/1.25 Inter,sans-serif}.bw-bb .h .r span{display:block;font:400 11.5px/1.3 Inter,sans-serif;color:#8A9098}
 .bw-bb .ln{height:1px;background:linear-gradient(90deg,rgba(255,255,255,.3),rgba(255,255,255,.04))}
 .bw-bb .c{display:flex;justify-content:space-between;font:500 12px/1 Inter,sans-serif;color:#8A9098}.bw-bb .c b{font:600 13.5px/1 Sora,sans-serif;color:#fff;letter-spacing:.06em;font-variant-numeric:tabular-nums}
-.sp-bwv #sp-abo-toggle,.sp-bwv .rx-tier__flag,.sp-bwv #sp-fsh-box,.sp-bwv .sp-fsh-box{display:none!important}
+.sp-bwv #sp-cd-total-savings-row,.sp-bwv #sp-abo-toggle,.sp-bwv .rx-tier__flag,.sp-bwv #sp-fsh-box,.sp-bwv .sp-fsh-box{display:none!important}
 /* Warenkorb + Kasse */
 .bw-dbar{margin:10px 14px 6px;background:radial-gradient(90% 140% at 50% 0%,#1E2024,#050506 72%);color:#fff;border-radius:16px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px}
 .bw-dbar .bw-ey{display:block;margin-bottom:6px}.bw-dbar b{display:block;font:600 14px/1.2 Inter,sans-serif}.bw-dbar .t{font:400 11.5px/1.3 Inter,sans-serif;color:#8A9098}
@@ -114,7 +118,7 @@ var C=<?php echo wp_json_encode($cfg); ?>,BF=C.bf,PCT=C.pct,F=1-PCT/100,NAME=BF?
 function fm(n){return n.toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.')+' €';}
 function num(s){return parseFloat(String(s).replace(/[^\d,]/g,'').replace(',','.'))||0;}
 function cd(){var s=Math.max(0,(END-new Date())/1000);return [Math.floor(s/86400),Math.floor(s%86400/3600),Math.floor(s%3600/60),Math.floor(s%60)].map(function(x){return (x<10?'0':'')+x;});}
-var pill=document.createElement('a');pill.id='sp-bwv-pill';pill.href=C.off;pill.textContent='Vorschau beenden ✕';document.body.appendChild(pill);
+if(C.pv){var pill=document.createElement('a');pill.id='sp-bwv-pill';pill.href=C.off;pill.textContent='Vorschau beenden ✕';document.body.appendChild(pill);}
 function banner(){var tb=document.getElementById('sp-top-banner');if(!tb)return;tb.classList.add('bw');var d=tb.querySelector('.bw-tb');if(!d){d=document.createElement('div');d.className='bw-tb';tb.appendChild(d);}var c=cd();d.innerHTML='<b>'+NAME+'</b><span>·</span>−'+PCT+' % auf alles<span>·</span><i>'+c[0]+' : '+c[1]+' : '+c[2]+'</i>';}
 function heroD(){var hb=document.getElementById('sp-hero-banner');if(!hb||innerWidth<768)return;var x=document.querySelector('.bwh.bwd');if(!x){x=document.createElement('div');x.className='bwh bwd';x.style.backgroundImage='url('+C.scene+')';hb.parentNode.insertBefore(x,hb);hb.style.display='none';fill(x);}var c=cd();x.querySelector('.cdn').innerHTML='<span><b>'+c[0]+'</b>T</span><span><b>'+c[1]+'</b>STD</span><span><b>'+c[2]+'</b>MIN</span><span><b>'+c[3]+'</b>SEK</span>';}
 function fill(x){x.innerHTML='<div class="t"><div class="ey2">'+NAME.toUpperCase()+'</div><div class="big"><span class="bw-chrome">−'+PCT+'</span><span class="bw-chrome bw-pc">%</span></div><div class="l1">'+(BF?'Der Höhepunkt der Black Week.':'auf das gesamte Sortiment.')+'</div><div class="l2">'+(BF?'Nur bis Cyber Monday, 30. November · 23:59':'Nur bis Donnerstag, 26. November')+'</div></div><div class="b"><div class="cdn"></div><a class="cta" href="/alle-produkte/">'+(BF?'Jetzt −35 % sichern':'Jetzt sparen')+' →</a><div class="lnk">'+(BF?'Solange der Vorrat reicht · Versand in 2 Werktagen':'Black Friday wird größer. <a href="#sp-nlh">Als Insider zuerst erfahren</a>')+'</div></div>';}
@@ -144,13 +148,15 @@ function buybox(){var rp=document.getElementById('rx-price');if(!rp)return;
  var sh=document.querySelector('#rx-shiphint .rx-amt-shine');if(sh&&sh.dataset.bwSet!==sh.textContent){var v=Math.max(0,150-p*F);sh.textContent=fm(v);sh.dataset.bwSet=sh.textContent;}}
 function drawer(){var dr=document.getElementById('sp-cart-drawer');if(!dr)return;var items=document.getElementById('sp-cd-items');if(!items)return;var reg=0;
  items.querySelectorAll('.sp-cd-item').forEach(function(it){var pe=it.querySelector('.sp-cd-item-price:not(.sp-cd-item-price-free)');if(!pe)return;
-  if(pe.dataset.bwSet!==pe.innerHTML){var sv0=it.querySelector('.sp-cd-item-save');var o=num(pe.textContent)+(sv0?num(sv0.textContent):0);pe.dataset.bwo=o;pe.innerHTML=fm(o*F)+'<span class="bw-old">'+fm(o)+'</span>';pe.dataset.bwSet=pe.innerHTML;}
+  if(pe.dataset.bwSet!==pe.innerHTML){var sv0=it.querySelector('.sp-cd-item-save');var o=C.live?Math.round(num(pe.textContent)/F*100)/100:num(pe.textContent)+(sv0?num(sv0.textContent):0);pe.dataset.bwo=o;pe.innerHTML=fm(o*F)+'<span class="bw-old">'+fm(o)+'</span>';pe.dataset.bwSet=pe.innerHTML;}
   reg+=+pe.dataset.bwo;var bd=it.querySelector('.sp-cd-item-bundle:not(.sp-cd-item-gift-badge)');if(bd)bd.remove();var sv=it.querySelector('.sp-cd-item-save');if(sv&&!it.querySelector('.sp-cd-item-price-free'))sv.remove();
   if(!it.querySelector('.bw-badge')){var n=it.querySelector('.sp-cd-item-name');if(n){var b=document.createElement('span');b.className='bw-badge';b.textContent='−'+PCT+' %';n.parentNode.insertBefore(b,n);}}});
  var sc=document.getElementById('sp-cd-scroll');var bar=document.querySelector('.bw-dbar');
  if(reg>0&&sc){if(!bar){bar=document.createElement('div');bar.className='bw-dbar';sc.insertBefore(bar,sc.firstChild);}var c=cd();bar.innerHTML='<div><span class="bw-ey">'+NAME.toUpperCase()+'</span><b>−'+PCT+' % auf alles</b><span class="t">Endet in '+c[0]+' T '+c[1]+' Std</span></div><em class="bw-chrome">−'+fm(reg*(1-F))+'</em>';}else if(bar)bar.remove();
- var sv2=document.getElementById('sp-cd-subtotal-val');if(sv2&&sv2.dataset.bwSet!==sv2.textContent&&reg>0){sv2.textContent=fm(reg*F);sv2.dataset.bwSet=sv2.textContent;}}
-function checkout(){var blocks=document.querySelectorAll('.wp-block-woocommerce-checkout-order-summary-block');blocks.forEach(function(bl){var reg=0;
+ var sv2=document.getElementById('sp-cd-subtotal-val');if(!C.live&&sv2&&sv2.dataset.bwSet!==sv2.textContent&&reg>0){sv2.textContent=fm(reg*F);sv2.dataset.bwSet=sv2.textContent;}}
+function checkoutLive(){var bl=document.querySelectorAll('.wp-block-woocommerce-checkout-order-summary-block');if(!bl.length)return;var s=0;try{var d=wp.data.select('wc/store/cart').getCartData();(d.items||[]).forEach(function(i){var p=i.prices||{},m=Math.pow(10,p.currency_minor_unit||2);var r=(+p.regular_price)/m,c=(+p.price)/m;if(c>0&&r>c)s+=(r-c)*i.quantity;});}catch(e){return;}
+ bl.forEach(function(b){var ft=b.querySelector('.wc-block-components-totals-footer-item');if(!ft)return;var w=ft.closest('.wc-block-components-totals-wrapper');var row=b.querySelector('.bw-co');if(!row&&w){row=document.createElement('div');row.className='bw-co';w.parentNode.insertBefore(row,w);}if(!row)return;if(s<=0){row.style.display='none';return;}row.style.display='';var h='<div><b>'+NAME+' −'+PCT+' %</b><small>Schon in den Preisen abgezogen. Bei Vorkasse zählt das Bestelldatum.</small></div><em class="bw-chrome">−'+fm(s)+'</em>';if(row.innerHTML!==h)row.innerHTML=h;});}
+function checkout(){if(C.live)return checkoutLive();var blocks=document.querySelectorAll('.wp-block-woocommerce-checkout-order-summary-block');blocks.forEach(function(bl){var reg=0;
   bl.querySelectorAll('.wc-block-components-order-summary-item').forEach(function(it){var tp=it.querySelector('.wc-block-components-order-summary-item__total-price');if(!tp)return;
    if(/Geschenk/.test(it.textContent)){tp.dataset.bwo=0;return;}
    if(tp.dataset.bwSet!==tp.innerHTML){var ru=it.querySelector('.wc-block-components-order-summary-item__regular-individual-price');var qn=it.querySelector('.wc-block-components-order-summary-item__quantity');var qq=qn&&qn.firstChild?parseInt(qn.firstChild.textContent)||1:1;var o=ru?num(ru.textContent)*qq:num(tp.textContent);if(!o){tp.dataset.bwo=0;return;}tp.dataset.bwo=o;tp.innerHTML='<div style="text-align:right;white-space:nowrap"><div style="font-weight:700">'+fm(o*F)+'</div><span class="bw-old">'+fm(o)+'</span></div>';tp.dataset.bwSet=tp.innerHTML;}
@@ -159,7 +165,13 @@ function checkout(){var blocks=document.querySelectorAll('.wp-block-woocommerce-
   if(tv&&tv.dataset.bwSet!==tv.textContent){var t0=num(tv.textContent);tv.textContent=fm(t0-reg*(1-F));tv.dataset.bwSet=tv.textContent;}
   var w=ft.closest('.wc-block-components-totals-wrapper');var row=bl.querySelector('.bw-co');if(!row&&w){row=document.createElement('div');row.className='bw-co';w.parentNode.insertBefore(row,w);}
   if(row)row.innerHTML='<div><b>'+NAME+' −'+PCT+' %</b><small>Vorschau: nur Anzeige, bestellt wird zum Normalpreis.</small></div><em class="bw-chrome">−'+fm(reg*(1-F))+'</em>';});}
-function run(){try{banner();if(C.home)heroD();hero();cards();buybox();drawer();checkout();}catch(e){}}
+var nlpDone=0;function nlp(){if(nlpDone)return;var pp=document.getElementById('sp-nlp');if(!pp)return;nlpDone=1;
+ var h=pp.querySelectorAll('.st[data-s="1"] h2,.st[data-s="2"] h2'),p1=pp.querySelector('.st[data-s="1"] p'),b1=pp.querySelector('.st[data-s="1"] [data-yes]');
+ if(!BF&&!C.insider){h.forEach(function(e){e.innerHTML='Freitag wird <em>noch größer</em>';});if(p1)p1.textContent='Newsletter-Insider bekommen den Black-Friday-Preis einen Abend früher – Donnerstag ab 18 Uhr. Plus dein 10-%-Code für die Zeit danach.';if(b1)b1.textContent='Ja, Insider werden';}
+ else{h.forEach(function(e){e.innerHTML='Sichere dir <em>10 % Rabatt</em><br>für deine nächste Bestellung';});if(p1)p1.textContent='Dein Code gilt nach der Black Week noch 30 Tage – dazu Neuheiten und neue Chargen zuerst.';}
+ }
+function nlh(){var nl=document.getElementById('sp-nlh');if(!nl||nl.dataset.bw||!nl.querySelector('h2'))return;nl.dataset.bw=1;if(!BF&&!C.insider){var ey=nl.querySelector('.ey'),h2=nl.querySelector('h2'),ld=nl.querySelector('.lead');if(ey)ey.innerHTML='<i></i>Black-Friday-Insider';if(h2)h2.innerHTML='Freitag <span>früher</span>.';if(ld)ld.textContent='Insider bekommen den Black-Friday-Preis schon Donnerstag ab 18 Uhr. Plus dein 10-%-Code für danach.';}}
+function run(){try{nlp();nlh();banner();if(C.home)heroD();hero();cards();buybox();drawer();checkout();}catch(e){}}
 run();document.addEventListener('DOMContentLoaded',run);setInterval(run,800);
 })();
 </script>

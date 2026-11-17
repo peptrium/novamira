@@ -1,0 +1,21 @@
+const {chromium}=require('playwright');const TK='zc96rgpowe';
+(async()=>{const u=new URL(process.env.https_proxy);const b=await chromium.launch({proxy:{server:u.protocol+'//'+u.host,username:decodeURIComponent(u.username),password:decodeURIComponent(u.password)}});
+const c=await b.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148'});
+await c.addCookies([{name:'sp_age_gate',value:'1',domain:'peptrium.com',path:'/'},{name:'sp_nlp_closed',value:'1',domain:'peptrium.com',path:'/'}]);
+const p=await c.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
+const go=async u=>{await p.goto('https://peptrium.com'+u,{waitUntil:'load',timeout:90000});await p.waitForTimeout(2500);await p.evaluate(()=>document.querySelectorAll('[consent-skip-blocker],dialog,#sp-checkout-info-overlay').forEach(e=>e.remove()));};
+await go('/?sp_bw=vorschau&k='+TK);
+await go('/produkt/retatrutide/');
+const r=await p.evaluate(async()=>{const add=async(id,q)=>{const f=new FormData();f.append('product_id',id);f.append('quantity',q);await fetch('/?wc-ajax=add_to_cart',{method:'POST',body:f,credentials:'same-origin'});};
+ await add(555,3);await add(1011,1);await add(74,1);await add(547,1);
+ const ca=await (await fetch('/wp-json/wc/store/v1/cart',{credentials:'same-origin'})).json();
+ return {items:ca.items.map(i=>[i.name,i.quantity,i.prices.price,i.prices.regular_price,i.totals.line_total]),totals:ca.totals,coupons:ca.coupons};});
+console.log(JSON.stringify(r,null,0));
+// Code testen
+const r2=await p.evaluate(async()=>{const n=await fetch('/wp-json/wc/store/v1/cart',{credentials:'same-origin'});const nonce=n.headers.get('Nonce');
+ const a=await fetch('/wp-json/wc/store/v1/cart/apply-coupon',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','Nonce':nonce},body:JSON.stringify({code:'SCHLANK10'})});const j=await a.json();return {st:a.status,tot:j.totals?j.totals.total_price:null,disc:j.totals?j.totals.total_discount:null,msg:j.message||''};});
+console.log('Code:',JSON.stringify(r2));
+await go('/produkt/retatrutide/');await p.evaluate(()=>document.getElementById('sp-cart-fab').click());await p.waitForTimeout(4000);await p.screenshot({path:'live-drawer.png'});
+await go('/kasse/');await p.waitForTimeout(3000);await p.evaluate(()=>{const x=document.querySelector('.wc-block-components-totals-footer-item');scrollTo(0,x.getBoundingClientRect().top+scrollY-560)});await p.waitForTimeout(1200);await p.screenshot({path:'live-kasse.png'});
+console.log('JS:',errs.filter(e=>!/Failed to fetch/.test(e)));
+await b.close();})();
