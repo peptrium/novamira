@@ -1,0 +1,51 @@
+{
+ "pen": {
+  "subject": "Halbzeit: der Pen, jetzt −30 %",
+  "preheader": "Fertig gemischt, kein Anmischen – noch bis Donnerstag.",
+  "at": "2026-11-19T17:00:00Z",
+  "aud": "nb",
+  "name": "Black Week 2 – Pen (Do 19.11. 18 Uhr)"
+ },
+ "favoriten": {
+  "subject": "Die Favoriten, jetzt 30 % günstiger",
+  "preheader": "Starter-Set, Pen-Set und GLOW – fertig zusammengestellt.",
+  "at": "2026-11-21T10:00:00Z",
+  "aud": "nb",
+  "name": "Black Week 3 – Favoriten (Sa 21.11. 11 Uhr)"
+ },
+ "teaser": {
+  "subject": "Morgen 18 Uhr: dein früher Zugang",
+  "preheader": "Freitag wird größer. Du erfährst es zuerst.",
+  "at": "2026-11-25T17:00:00Z",
+  "aud": "all",
+  "name": "Black Week 4 – Teaser (Mi 25.11. 18 Uhr)"
+ },
+ "insider": {
+  "subject": "Für dich schon heute: −35 % 🖤",
+  "preheader": "Black Friday startet für alle erst morgen.",
+  "at": "2026-11-26T17:00:00Z",
+  "aud": "all",
+  "name": "Black Week 5 – Insider −35 % (Do 26.11. 18 Uhr)"
+ },
+ "blackfriday": {
+  "subject": "Black Friday: −35 % auf alles",
+  "preheader": "Der größte Rabatt des Jahres. Bis Montag.",
+  "at": "2026-11-27T07:00:00Z",
+  "aud": "all",
+  "name": "Black Week 6 – Black Friday (Fr 27.11. 8 Uhr)"
+ },
+ "sonntag": {
+  "subject": "Noch bis Montag: −35 %",
+  "preheader": "Falls du noch überlegst – hier das Wichtigste auf einen Blick.",
+  "at": "2026-11-29T10:00:00Z",
+  "aud": "nb",
+  "name": "Black Week 7 – Erinnerung (So 29.11. 11 Uhr)"
+ },
+ "letzte": {
+  "subject": "Heute 23:59 ist Schluss",
+  "preheader": "Letzter Tag: −35 % auf alles.",
+  "at": "2026-11-30T09:00:00Z",
+  "aud": "all",
+  "name": "Black Week 8 – Letzte Chance (Mo 30.11. 10 Uhr)"
+ }
+}
