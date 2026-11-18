@@ -6,7 +6,10 @@
  *   Phasen: vor start = aus · start..bf = 30 % · insider..bf mit Insider-Cookie = 35 % · bf..end = 35 % · danach aus.
  *   Vorschau-Cookie sp_bw_pv (sp-blackweek-vorschau.php) schaltet die Preise für diesen Browser auch vorher ein.
  *   Katalogpreise bleiben unverändert (Anzeige rechnet sp-blackweek-vorschau.php), Rabatt wird im Warenkorb gesetzt.
- *   Codes: werden angenommen (Zuordnung), geben aber 0 € – außer Gutschrift-Codes (_sp_gutschrift). Mengenrabatt + Empfehlungs-Rabatt aus.
+ *   2026-11-18: Rabatt NUR noch mit Code BLACK30 (bis Do) / BLACK35 (ab Insider-Zeit Do 18 Uhr bzw. Fr) – echte WC-Gutscheine
+ *   (Prozent, Betrag je Phase per Filter; BLACK30 gibt ab Freitag automatisch 35 %). Ohne Code gelten die normalen Shop-Regeln.
+ *   Mit Code: Mengenrabatt + Empfehlungs-Rabatt aus, andere Codes 0 € (außer Gutschriften), Partner +bonus %.
+ *   Auto-Einlösen: Cookie sp_bw_code (gesetzt per ?bw=1 / Mail-Links utm_campaign=blackweek-* / Pop-up), angewendet sobald etwas im Warenkorb liegt.
  */
 if (!defined('ABSPATH')) exit;
 
@@ -40,6 +43,30 @@ function sp_bw_phase() {
     if ($t >= (int) $o['insider'] && $o['ea'] !== '' && hash_equals(substr(hash_hmac('sha256', 'ea', $o['ea']), 0, 16), $ea)) return $ph = 'bf';
     return $ph = 'bw';
 }
+function sp_bw_codes() { return ['black30', 'black35']; }
+function sp_bw_is_code($c) { $c = is_object($c) ? $c->get_code() : (string) $c; return in_array(wc_strtolower($c), sp_bw_codes(), true); }
+/** Code, den die Aktion gerade bewirbt / automatisch einlöst. */
+function sp_bw_current_code() { return sp_bw_phase() === 'bf' ? 'BLACK35' : 'BLACK30'; }
+/** Prozent eines BW-Codes jetzt (0 = gerade nicht gültig). */
+function sp_bw_code_pct($code) {
+    $code = wc_strtolower((string) $code);
+    $ph = sp_bw_phase();
+    if (!$ph) return 0;
+    if ($code === 'black35') {
+        $o = sp_bw_opt();
+        return ($ph === 'bf' || time() >= (int) $o['insider']) ? 35 : 0;
+    }
+    if ($code === 'black30') return $ph === 'bf' ? 35 : 30;
+    return 0;
+}
+/** Prozent des BW-Codes im Warenkorb (0 = kein Code drin). */
+function sp_bw_cart_pct($cart = null) {
+    if (!$cart && function_exists('WC') && WC()->cart) $cart = WC()->cart;
+    if (!$cart) return 0;
+    $best = 0;
+    foreach ($cart->get_applied_coupons() as $c) if (sp_bw_is_code($c)) $best = max($best, sp_bw_code_pct($c));
+    return $best;
+}
 function sp_bw_pct() { $p = sp_bw_phase(); return $p === 'bf' ? 35 : ($p === 'bw' ? 30 : 0); }
 function sp_bw_active() { return sp_bw_pct() > 0; }
 
@@ -62,26 +89,29 @@ function sp_bw_regular($p) {
 add_action('woocommerce_before_calculate_totals', function ($cart) {
     static $run = false;
     if ($run || !sp_bw_active()) return;
+    $pct = sp_bw_cart_pct($cart);
+    if (!$pct) return;
     $run = true;
-    $f = 1 - sp_bw_pct() / 100;
+    // Mit Code: Normalpreis (Mengenrabatt aus), der Gutschein zieht dann die % ab.
     foreach ($cart->get_cart() as $key => $item) {
         if (!sp_bw_item_ok($item)) continue;
-        $cart->cart_contents[$key]['data']->set_price(round(sp_bw_regular($item['data']) * $f, 2));
-        $cart->cart_contents[$key]['sp_bw'] = sp_bw_pct();
+        $cart->cart_contents[$key]['data']->set_price(sp_bw_regular($item['data']));
+        $cart->cart_contents[$key]['sp_bw'] = $pct;
         $cart->cart_contents[$key]['sp_bw_reg'] = sp_bw_regular($item['data']);
     }
     $run = false;
 }, 26);
 
 add_action('woocommerce_checkout_create_order_line_item', function ($li, $key, $values) {
-    if (!empty($values['sp_bw']) && sp_bw_active()) {
+    if (!empty($values['sp_bw']) && sp_bw_cart_pct()) {
         $li->add_meta_data('Black-Week-Rabatt', '−' . (int) $values['sp_bw'] . ' %', true);
         if (!empty($values['sp_bw_reg'])) $li->add_meta_data('_sp_bw_reg', round((float) $values['sp_bw_reg'] * (int) $values['quantity'], 2), true);
     }
 }, 20, 3);
 function sp_bw_set_order_meta($order) {
-    if (!sp_bw_active()) return;
-    $order->update_meta_data('_sp_bw', sp_bw_pct());
+    $pct = sp_bw_cart_pct();
+    if (!$pct) return;
+    $order->update_meta_data('_sp_bw', $pct);
     $order->update_meta_data('_sp_bw_phase', sp_bw_phase());
 }
 add_action('woocommerce_checkout_create_order', 'sp_bw_set_order_meta', 20);
@@ -93,18 +123,76 @@ function sp_bw_is_credit($coupon) {
     return $id && get_post_meta($id, '_sp_gutschrift', true);
 }
 add_filter('woocommerce_coupon_get_discount_amount', function ($amount, $discounting, $cart_item, $single, $coupon) {
-    return (sp_bw_active() && is_array($cart_item) && sp_bw_item_ok($cart_item) && !sp_bw_is_credit($coupon)) ? 0 : $amount;
+    if (!is_array($cart_item)) return $amount;
+    if (sp_bw_is_code($coupon)) return sp_bw_item_ok($cart_item) ? $amount : 0;   // BW-Code nicht auf Geschenke/Abo
+    return (sp_bw_cart_pct() && sp_bw_item_ok($cart_item) && !sp_bw_is_credit($coupon)) ? 0 : $amount;
 }, 60, 5);
-add_filter('woocommerce_coupon_message', function ($msg, $code, $coupon) {
-    if ($code === WC_Coupon::WC_COUPON_SUCCESS && sp_bw_active() && $coupon && !sp_bw_is_credit($coupon)) {
-        return 'Code gespeichert ✓ – in der ' . (sp_bw_phase() === 'bf' ? 'Black-Friday-Aktion' : 'Black Week') . ' gilt stattdessen −' . sp_bw_pct() . ' % auf alles.';
+/* BW-Codes: Prozent je Phase, Gültigkeit */
+add_filter('woocommerce_coupon_get_amount', function ($amount, $coupon) {
+    if (!sp_bw_is_code($coupon)) return $amount;
+    $p = sp_bw_code_pct($coupon->get_code());
+    return $p ?: $amount;
+}, 20, 2);
+add_filter('woocommerce_coupon_is_valid', function ($valid, $coupon) {
+    if (!$valid || !sp_bw_is_code($coupon)) return $valid;
+    if (!sp_bw_phase()) throw new Exception('Die Black-Week-Codes gelten nur vom 17. bis 30. November.');
+    if (!sp_bw_code_pct($coupon->get_code())) throw new Exception('Dieser Code ist noch nicht aktiv. Aktuell gilt BLACK30.');
+    return $valid;
+}, 20, 2);
+/* BW-Code mit Partner-/Einzel-Codes kombinierbar (Zuordnung bleibt erhalten) */
+add_filter('woocommerce_apply_individual_use_coupon', function ($keep) {
+    if (!sp_bw_active() || !WC()->cart) return $keep;
+    foreach (WC()->cart->get_applied_coupons() as $c) if (sp_bw_is_code($c)) $keep[] = $c;
+    return $keep;
+}, 20);
+add_filter('woocommerce_apply_with_individual_use_coupon', function ($allow, $the_coupon) {
+    return (sp_bw_active() && sp_bw_is_code($the_coupon)) ? true : $allow;
+}, 20, 2);
+/* Nur ein BW-Code gleichzeitig; Entfernen merken (dann nicht automatisch wieder einlösen) */
+add_action('woocommerce_applied_coupon', function ($code) {
+    if (!sp_bw_is_code($code) || !WC()->cart) return;
+    if (WC()->session) WC()->session->set('sp_bw_rm', 0);
+    foreach (WC()->cart->get_applied_coupons() as $c) {
+        if ($c !== wc_strtolower($code) && sp_bw_is_code($c)) { $GLOBALS['sp_bw_swap'] = 1; WC()->cart->remove_coupon($c); unset($GLOBALS['sp_bw_swap']); }
     }
+});
+add_action('woocommerce_removed_coupon', function ($code) {
+    if (sp_bw_is_code($code) && empty($GLOBALS['sp_bw_swap']) && WC()->session) WC()->session->set('sp_bw_rm', 1);
+});
+add_filter('woocommerce_coupon_message', function ($msg, $code, $coupon) {
+    if ($code !== WC_Coupon::WC_COUPON_SUCCESS || !$coupon) return $msg;
+    if (!empty($GLOBALS['sp_bw_quiet'])) return '';
+    if (sp_bw_is_code($coupon)) return strtoupper($coupon->get_code()) . ' aktiv ✓ – −' . sp_bw_code_pct($coupon->get_code()) . ' % auf alles im Warenkorb.';
+    if (sp_bw_cart_pct() && !sp_bw_is_credit($coupon)) return 'Code gespeichert ✓ – mit dem Black-Week-Code gilt schon −' . sp_bw_cart_pct() . ' %, andere Codes zählen nicht zusätzlich.';
     return $msg;
 }, 60, 3);
 
+/* Auto-Einlösen: Cookie sp_bw_code */
+function sp_bw_set_code_cookie($code) {
+    $o = sp_bw_opt();
+    setcookie('sp_bw_code', $code, ['expires' => (int) $o['end'] + 86400, 'path' => '/', 'secure' => true, 'httponly' => false, 'samesite' => 'Lax']);
+    $_COOKIE['sp_bw_code'] = $code;
+}
+add_action('init', function () {
+    if (!sp_bw_active() || is_admin()) return;
+    $g = $_GET;
+    $want = !empty($g['bw']) || (!empty($g['utm_campaign']) && (strpos((string) $g['utm_campaign'], 'blackweek') === 0 || $g['utm_campaign'] === 'wieder-da-cagri'));
+    if ($want && empty($_COOKIE['sp_bw_code'])) sp_bw_set_code_cookie(sp_bw_current_code());
+}, 3);
+function sp_bw_maybe_apply() {
+    if (!sp_bw_active() || empty($_COOKIE['sp_bw_code']) || !function_exists('WC') || !WC()->cart || WC()->cart->is_empty()) return;
+    if (WC()->session && WC()->session->get('sp_bw_rm')) return;
+    if (sp_bw_cart_pct()) return;
+    $GLOBALS['sp_bw_quiet'] = 1;
+    WC()->cart->apply_coupon(sp_bw_current_code());
+    unset($GLOBALS['sp_bw_quiet']);
+}
+add_action('woocommerce_add_to_cart', function () { sp_bw_maybe_apply(); }, 30);
+add_action('wp_loaded', function () { if (!is_admin() || wp_doing_ajax()) sp_bw_maybe_apply(); }, 30);
+
 /* Empfehlungs-Rabatt (Partner-Link) entfällt – die Aktion ist besser */
 add_action('woocommerce_cart_calculate_fees', function ($cart) {
-    if (!sp_bw_active()) return;
+    if (!sp_bw_cart_pct($cart)) return;
     $fees = $cart->fees_api()->get_fees();
     $ch = false;
     foreach ($fees as $k => $fee) {
@@ -115,7 +203,7 @@ add_action('woocommerce_cart_calculate_fees', function ($cart) {
 
 /* Partner: Bonus-Prozentpunkte */
 add_filter('slicewp_calculate_commission_amount', function ($commission, $amount, $args) {
-    if (!sp_bw_active() || empty($args['affiliate_id']) || ($args['type'] ?? '') !== 'sale') return $commission;
+    if (!sp_bw_cart_pct() || empty($args['affiliate_id']) || ($args['type'] ?? '') !== 'sale') return $commission;
     $o = sp_bw_opt();
     return round((float) $commission + (float) $amount * (float) $o['bonus'] / 100, 2);
 }, 31, 3);
@@ -128,6 +216,7 @@ add_action('init', function () {
     if ($o['ea'] === '' || $k === '' || !hash_equals($o['ea'], $k)) return;
     $v = substr(hash_hmac('sha256', 'ea', $o['ea']), 0, 16);
     setcookie('sp_bw_ea', $v, ['expires' => (int) $o['end'] + 86400, 'path' => '/', 'secure' => true, 'httponly' => false, 'samesite' => 'Lax']);
+    sp_bw_set_code_cookie('BLACK35');
     $keep = [];
     foreach (['utm_source', 'utm_medium', 'utm_campaign', 'utm_content'] as $u) if (!empty($_GET[$u])) $keep[$u] = sanitize_text_field(wp_unslash($_GET[$u]));
     nocache_headers();
@@ -193,7 +282,7 @@ function sp_bw_mail_props() {
     $bf = $t >= (int) $o['bf'];
     return [
         'bw_show' => 'block',
-        'bw_text' => $bf ? '⚡ Black Friday: −35 % auf alles – nur bis Mo 30.11., 23:59' : '🖤 Black Week: −30 % auf alles – nur noch bis Do 26.11.',
-        'bw_code_text' => 'Tipp: Bis 30.11. läuft unsere Black Week mit bis zu −35 % auf alles – ganz ohne Code. Deinen Code nutzt du einfach danach.',
+        'bw_text' => $bf ? '⚡ Black Friday: −35 % auf alles mit Code BLACK35 – nur bis Mo 30.11., 23:59' : '🖤 Black Week: −30 % auf alles mit Code BLACK30 – nur bis Do 26.11.',
+        'bw_code_text' => $bf ? 'Tipp: Bis 30.11. bekommst du mit Code BLACK35 sogar −35 % auf alles. Deinen eigenen Code nutzt du einfach danach.' : 'Tipp: Bis Do 26.11. bekommst du mit Code BLACK30 sogar −30 % auf alles. Deinen eigenen Code nutzt du einfach danach.',
     ];
 }

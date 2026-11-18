@@ -69,7 +69,7 @@ P['3-fav']=page('Die Favoriten, jetzt 30 % günstiger','Starter-Set, Pen-Set und
 .t.big .pp b{font-size:24px}
 .nb{display:flex;gap:8px;padding:18px 20px 0}.nb div{flex:1;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px;font:500 11.5px/1.35 Inter;color:#AEB4BB}.nb b{display:block;color:#fff;font-size:13px}
 .cta{padding:20px 20px 0}.ft{color:#5F656C}
-''','<div class="hd"><h1>Die<br>Favoriten.</h1><div class="r">BLACK WEEK<b>−30%</b>BIS DO 26.11.</div></div><div class="in">Die meisten bestellen nicht einzeln, sondern alles, was zusammengehört. Hier die beliebtesten Kombinationen – schon reduziert.</div><div class="g">'
+''','<div class="hd"><h1>Die<br>Favoriten.</h1><div class="r">BLACK WEEK<b>−30%</b>BIS DO 26.11.</div></div><div class="in">Die meisten bestellen nicht einzeln, sondern alles, was zusammengehört. Hier die beliebtesten Kombinationen – mit Code BLACK30 reduziert.</div><div class="g">'
  +tile('reta.png','Retatrutide Starter-Set','Retatrutide 10 mg · Bac Water · Spritzen',99.70,.7,True)
  +tile('pen-h.png','Retatrutide Pen-Set','Pen 20 mg + Pen Nadeln',274.80,.7,pen=True)
  +tile('glow.png','GLOW','GHK-Cu · BPC-157 · TB-500',139.90,.7)
@@ -130,7 +130,7 @@ P['6-bf']=page('Black Friday: −35 % auf alles','Der größte Rabatt des Jahres
 .cta{padding:18px 20px 0}.ft{color:#7A8088}
 ''','<div class="hd"><img src="logo.png"><span>BLACK FRIDAY · 27.–30.11.</span></div><div class="p1 steel">−35%</div><div class="p2">auf alles.<em><br>Bis Montag.</em></div><div class="stg"><div class="fl"></div>'
  +v('bpc.png',8,96,62,'filter:brightness(.92)','left','255,255,255')+v('mt2.png',320,96,62,'filter:brightness(.92)','right','255,255,255')+v('ghk.png',62,64,80,'','left','255,255,255')+v('glow.png',248,64,80,'','right','255,255,255')+v('reta.png',138,20,114,'','both','255,255,255',True)
- +'</div><div class="sub"><span>KEIN CODE NÖTIG</span><b>Alles im Shop</b></div><div class="g">'
+ +'</div><div class="sub"><span>MIT CODE BLACK35</span><b>Alles im Shop</b></div><div class="g">'
  +''.join(f'<div class="c"><span>{n}</span><small>{x}</small><div><s>{eur(p)}</s><b>{eur(p*.65)}</b></div></div>' for n,x,p in [('Retatrutide','10 mg',79.90),('GHK-Cu','50 mg',39.90),('GLOW','70 mg',139.90),('Pen Retatrutide','20 mg',264.90)])
  +'</div><div class="ck">✓ Versand in 2 Werktagen, diskret verpackt<br>✓ Geschenke ab 200 € bleiben<br>✓ Bei Vorkasse zählt das Bestelldatum</div><div class="cta"><div class="btn bb">Zum Black Friday'+ARW+'</div></div><div class="ft">Alle Produkte ausschließlich für Laborforschungszwecke.<br>Abmelden · Impressum</div>')
 # ---------- Mail 7: Sonntag – Flip-Countdown ----------

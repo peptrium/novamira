@@ -55,47 +55,61 @@ def wrap2(rows_,th,extra=''):
       +R(foot2(th,extra),'14px 22px 30px',th,'center')+'</table></td></tr></table>')
 def img(name,link,alt,th): return f'<tr><td style="padding:0;line-height:0;background:{th["bg"]};"><a href="{link}" style="display:block;line-height:0;"><img src="{E}{name}" width="600" alt="{alt}" style="display:block;width:100%;max-width:600px;height:auto;border:0;"></a></td></tr>'
 PR65=[('Retatrutide','10 mg',79.90),('Retatrutide','20 mg',149.90),('GHK-Cu','50 mg',39.90),('GLOW','70 mg',139.90),('Peptrium-Pen Retatrutide','20 mg',264.90)]
+def codeblock(code,th,hint='Tippe auf den Button – dann ist der Code schon im Warenkorb.'):
+    dk=th['btn']=='w'
+    bg='#0E1013' if dk else '#FFFFFF'; bd='rgba(255,255,255,.18)' if dk else '#D2D4D7'; fg='#FFFFFF' if dk else '#07080A'; dash='rgba(255,255,255,.55)' if dk else '#9AA0A8'
+    return (f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;"><tr><td align="center" style="background:{bg};border:1px solid {bd};border-radius:16px;padding:18px 16px;font-family:{F};">'
+      f'<div style="font-size:10px;font-weight:700;letter-spacing:.26em;color:{th["mu"]};">DEIN CODE</div>'
+      f'<div style="display:inline-block;margin-top:10px;border:2px dashed {dash};border-radius:12px;padding:10px 22px;font-size:32px;font-weight:800;letter-spacing:.08em;color:{fg};">{code}</div>'
+      f'<div style="font-size:12.5px;line-height:1.5;color:{th["mu"]};margin-top:10px;">{hint}</div></td></tr></table>')
 def m_pen():
     th=T('light','#F3F3F1');L=utm('/alle-peptrium-pens/','blackweek-pen')
     return wrap2(img('nl-bw-2-pen.jpg',L,'Der Pen −30 %',th)
-      +R(P('Kein Bac Water, kein Anmischen: <b style="color:#0B0C0E;">der Peptrium-Pen kommt fertig gemischt</b>. Diese Woche 30 % günstiger.',th,15,'left'),'4px 22px 6px',th)
+      +R(P('Kein Bac Water, kein Anmischen: <b style="color:#0B0C0E;">der Peptrium-Pen kommt fertig gemischt</b>. Mit Code BLACK30 jetzt 30 % günstiger – nur bis Donnerstag.',th,15,'left'),'4px 22px 6px',th)
+      +R(codeblock('BLACK30',th),'14px 22px 0',th)
       +R(rows([('Pen Retatrutide','20 mg',264.90),('Pen Retatrutide','40 mg',339.90),('Pen GHK-Cu','50 mg',169.90),('Pen MOTS-c','20 mg',189.90)],.7,th),'14px 22px 6px',th)
       +R(checks(['Pen Nadeln gleich mitbestellen – auch −30 %','Ab 200 € gibt es das Injektionskit gratis dazu','Versand in 2 Werktagen, diskret verpackt'],th),'12px 22px 4px',th)
-      +R(btn('Pens ansehen',L,th),'18px 22px 28px',th),th)
+      +R(btn('Code einlösen &amp; Pens ansehen',L,th),'18px 22px 28px',th),th)
 def m_fav():
     th=T('dark','#16181C');L=utm('/alle-produkte/','blackweek-favoriten')
-    return wrap2(img('nl-bw-3-fav-v2.jpg',L,'Die Favoriten −30 %',th)+R(btn('Alle Sets ansehen',L,th),'14px 20px 28px',th),th)
+    return wrap2(img('nl-bw-3-fav-v3.jpg',L,'Die Favoriten −30 %',th)+R(codeblock('BLACK30',th),'16px 20px 0',th)+R(btn('Code einlösen &amp; Sets ansehen',L,th),'14px 20px 28px',th),th)
 def m_teaser():
     th=T('dark','#000000');L=utm('/alle-produkte/','blackweek-teaser')
-    return wrap2(img('nl-bw-4-teaser.jpg',L,'Freitag wird größer',th)
-      +R(P('Tipp: Leg heute schon in den Warenkorb, was du willst. <b style="color:#FFFFFF;">Dann geht es morgen in einer Minute.</b>',th,14),'8px 26px 4px',th)
-      +R(btn('Warenkorb vorbereiten',L,th),'18px 22px 28px',th),th)
+    return wrap2(img('nl-bw-4-ablauf.jpg',L,'BLACK30 läuft morgen ab',th)
+      +R(P('Morgen, Donnerstag um 23:59, endet dein Code. <b style="color:#FFFFFF;">Bis dahin: −30 % auf alles</b> – Peptide, Pens und Zubehör.',th,15),'8px 26px 4px',th)
+      +R(codeblock('BLACK30',th),'14px 22px 0',th)
+      +R(rows(PR65,.7,th),'14px 22px 6px',th)
+      +R(btn('Jetzt noch −30 % sichern',L,th),'18px 22px 28px',th),th)
 def m_insider():
     th=T('dark','#050506');L=utm(f'/?sp_bw=frueh&k={EA}','blackweek-insider')
     return wrap2(img('nl-bw-5-insider.jpg',L,'Insider −35 %',th)
+      +R(codeblock('BLACK35',th,'Dein Insider-Code – tippe auf den Button, dann ist er schon im Warenkorb.'),'14px 22px 0',th)
       +R(rows(PR65,.65,th),'14px 22px 6px',th)
       +R(btn('Jetzt −35 % sichern',L,th),'20px 22px 6px',th)
       +R(P('Bestseller sind am Freitagmorgen erfahrungsgemäß zuerst weg.',th,12.5,c=th['mu']),'12px 26px 26px',th),th)
 def m_bf():
     th=T('light','#E9EAEC');L=utm('/alle-produkte/','blackweek-blackfriday')
-    return wrap2(img('nl-bw-6-bf-v2.jpg',L,'Black Friday −35 %',th)
+    return wrap2(img('nl-bw-6-bf-v3.jpg',L,'Black Friday −35 %',th)
+      +R(codeblock('BLACK35',th),'16px 20px 0',th)
       +R(grid([('Retatrutide','10 mg',79.90),('GHK-Cu','50 mg',39.90),('GLOW','70 mg',139.90),('Pen Retatrutide','20 mg',264.90)],.65,th),'16px 20px 4px',th)
       +R(checks(['Versand in 2 Werktagen, diskret verpackt','Geschenke ab 200 € bleiben','Bei Vorkasse zählt das Bestelldatum'],th),'12px 20px 4px',th)
       +R(btn('Zum Black Friday',L,th),'18px 20px 28px',th),th)
 def m_so():
     th=T('dark','#0B0C0E');L=utm('/alle-produkte/','blackweek-sonntag')
     return wrap2(img('nl-bw-7-so-v2.jpg',L,'Noch bis Montag −35 %',th)
+      +R(codeblock('BLACK35',th),'10px 22px 0',th)
       +R(rows(PR65,.65,th),'10px 22px 6px',th)
-      +R(btn('Jetzt bestellen',L,th),'20px 22px 6px',th)
+      +R(btn('Code einlösen &amp; bestellen',L,th),'20px 22px 6px',th)
       +R(P('Fragen vor der Bestellung? Schreib uns auf Telegram, wir antworten schnell.',th,12.5,c=th['mu']),'12px 26px 26px',th),th)
 def m_last():
     th=T('light','#FFFFFF');L=utm('/alle-produkte/','blackweek-letzte')
     return wrap2(img('nl-bw-8-last-v2.jpg',L,'Heute ist Schluss',th)
+      +R(codeblock('BLACK35',th),'16px 22px 0',th)
       +R(btn('Letzte Chance nutzen',L,th),'18px 22px 10px',th)
       +R(P('Es zählt deine Bestellung, nicht der Zahlungseingang.',th,12.5,c=th['mu']),'4px 26px 26px',th),th)
 MAILS={'pen':(m_pen,'Halbzeit: der Pen, jetzt −30 %','Fertig gemischt, kein Anmischen – noch bis Donnerstag.','2026-11-19T17:00:00Z','nb','Black Week 2 – Pen (Do 19.11. 18 Uhr)'),
  'favoriten':(m_fav,'Die Favoriten, jetzt 30 % günstiger','Starter-Set, Pen-Set und GLOW – fertig zusammengestellt.','2026-11-21T10:00:00Z','nb','Black Week 3 – Favoriten (Sa 21.11. 11 Uhr)'),
- 'teaser':(m_teaser,'Morgen 18 Uhr: dein früher Zugang','Freitag wird größer. Du erfährst es zuerst.','2026-11-25T17:00:00Z','all','Black Week 4 – Teaser (Mi 25.11. 18 Uhr)'),
+ 'teaser':(m_teaser,'Morgen läuft BLACK30 ab','Nur noch bis Donnerstag, 23:59: −30 % auf alles.','2026-11-25T17:00:00Z','all','Black Week 4 – BLACK30 läuft ab (Mi 25.11. 18 Uhr)'),
  'insider':(m_insider,'Für dich schon heute: −35 % 🖤','Black Friday startet für alle erst morgen.','2026-11-26T17:00:00Z','all','Black Week 5 – Insider −35 % (Do 26.11. 18 Uhr)'),
  'blackfriday':(m_bf,'Black Friday: −35 % auf alles','Der größte Rabatt des Jahres. Bis Montag.','2026-11-27T07:00:00Z','all','Black Week 6 – Black Friday (Fr 27.11. 8 Uhr)'),
  'sonntag':(m_so,'Noch bis Montag: −35 %','Falls du noch überlegst – hier das Wichtigste auf einen Blick.','2026-11-29T10:00:00Z','nb','Black Week 7 – Erinnerung (So 29.11. 11 Uhr)'),

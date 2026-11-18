@@ -3,7 +3,7 @@
  * Plugin Name: SP Black Week – Vorschau
  * Description: (2026-11-17) Nur-Ansicht-Vorschau des Black-Week-/Black-Friday-Looks (Spotlight-Stil) für den Betreiber.
  *   Aktiv nur mit Vorschau-Cookie: /?sp_bw=vorschau&k=<token> (Black Week) bzw. &p=bf (Black Friday); /?sp_bw=aus beendet.
- *   Rein optisch: Preise werden im Browser um 30/35 % reduziert angezeigt, Warenkorb/Bestellung rechnen weiter mit Normalpreisen.
+ *   Seit 2026-11-18 auch die LIVE-Anzeige der Aktion (Code BLACK30/BLACK35): Leiste, Hero, Karten, Kaufbox, Pop-up, Warenkorb-/Kassen-Hinweis.
  *   Normale Besucher sehen nichts (Cookie umgeht den Seiten-Cache).
  */
 if (!defined('ABSPATH')) exit;
@@ -56,6 +56,7 @@ add_action('wp_footer', function () {
         'live'  => function_exists('sp_bw_active') && sp_bw_active(),
         'pv'    => isset($_COOKIE['sp_bw_pv']),
         'insider' => (function_exists('sp_bw_opt') && time() >= (int) sp_bw_opt()['insider']),
+        'code'  => function_exists('sp_bw_current_code') ? sp_bw_current_code() : ($bf ? 'BLACK35' : 'BLACK30'),
     ];
     ?>
 <style id="sp-bwv-css">
@@ -110,68 +111,120 @@ add_action('wp_footer', function () {
 .bw-badge{display:inline-block;background:#07080A;color:#fff;font:700 10px/1 Inter,sans-serif;padding:4px 7px;border-radius:999px;margin-bottom:5px}
 .bw-co{display:flex;justify-content:space-between;align-items:center;gap:10px;background:radial-gradient(90% 140% at 50% 0%,#1E2024,#050506 72%);color:#fff;border-radius:14px;padding:13px 15px;margin:12px 16px 4px}
 .bw-co b{font:600 14px/1.2 Inter,sans-serif}.bw-co em{font-style:normal;font:800 20px/1 Sora,sans-serif;white-space:nowrap}.bw-co small{display:block;font:400 11px/1.35 Inter,sans-serif;color:#8A9098;margin-top:4px}
+/* Code-Variante (2026-11-18) */
+.bw-tb .bw-c{border:1px dashed rgba(255,255,255,.5);border-radius:6px;padding:4px 7px;letter-spacing:.12em;color:#fff;font-weight:800}
+.bw-tb .bw-k{background:#fff!important;color:#000!important;border:0!important;border-radius:999px!important;padding:4px 9px!important;font:800 10px/1 Inter,sans-serif!important;letter-spacing:.04em!important;text-transform:none!important;box-shadow:none!important;cursor:pointer;min-height:0!important}
+.bw-tk{display:inline-flex;align-items:center;gap:8px;border:1.5px dashed rgba(255,255,255,.55);border-radius:12px;padding:6px 6px 6px 12px;background:rgba(0,0,0,.35)}
+.bw-tk b{font:800 18px/1 Sora,sans-serif;letter-spacing:.08em;color:#fff}
+.bw-tk .bw-k{background:#fff!important;color:#000!important;border:0!important;border-radius:999px!important;padding:7px 11px!important;font:800 11.5px/1 Inter,sans-serif!important;text-transform:none!important;letter-spacing:0!important;box-shadow:none!important;cursor:pointer;min-height:0!important}
+.bwh .l2{margin-top:12px}
+.sp-pc .qd.bw-qd{letter-spacing:.02em!important;text-transform:none!important;font:600 11px/1.3 Inter,sans-serif!important;margin-top:4px}
+.sp-pc .qd.bw-qd b{border:1px dashed #9AA0A8;border-radius:5px;padding:1px 5px;letter-spacing:.06em;color:#07080A}
+.bw-strip .s .bw-tk{margin-left:6px;vertical-align:middle}
+.bw-bb .bw-bbc{display:flex}.bw-bb .r b.sv{display:block;font:600 13.5px/1.25 Inter,sans-serif;color:#fff}
+.bw-cbox{margin:10px 14px 4px}
+.bw-cb{border-radius:14px;padding:12px 13px;display:flex;align-items:center;gap:11px}
+.bw-cb.ok{background:#0D0F12;color:#fff}.bw-cb .ck{width:28px;height:28px;flex:0 0 28px;border-radius:50%;background:#3DDC84;color:#000;display:flex;align-items:center;justify-content:center;font:900 14px/1 Inter,sans-serif}
+.bw-cb .tx{flex:1;font:700 13.5px/1.35 Inter,sans-serif}.bw-cb .tx small{display:block;font:500 12px/1.35 Inter,sans-serif;color:#9AA0A8}
+.bw-cb.miss{background:#FFF6E0;border:1px solid #F2C94C;color:#3A2E00}.bw-cb.miss .tx small{color:#7A6418}
+.bw-cb .ap,.bw-co .ap{background:#0D0F12!important;color:#fff!important;border:0!important;font:800 12.5px/1 Inter,sans-serif!important;padding:10px 13px!important;border-radius:999px!important;white-space:nowrap;cursor:pointer;box-shadow:none!important;text-transform:none!important;letter-spacing:0!important;min-height:0!important}
+.bw-co{background:#FFF6E0!important;color:#3A2E00!important;border:1px solid #F2C94C}.bw-co small{color:#7A6418!important}
+#bw-toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);opacity:0;z-index:2147483000;background:#fff;color:#000;font:700 13px/1 Inter,sans-serif;padding:12px 16px;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.35);transition:.25s;pointer-events:none;white-space:nowrap}#bw-toast.on{opacity:1;transform:translate(-50%,0)}
+#sp-nlp.bw-on .st[data-s="1"]>h2,#sp-nlp.bw-on .st[data-s="1"]>p,#sp-nlp.bw-on .st[data-s="1"]>.no{display:none!important}
+#sp-nlp .bwp{text-align:center;color:#fff}
+#sp-nlp .bwp .h{font:800 40px/1 Sora,sans-serif;letter-spacing:-.045em;margin-top:4px}
+#sp-nlp .bwp .sb{font:500 14px/1.45 Inter,sans-serif;color:#C9CDD2;margin-top:10px}
+#sp-nlp .bwp .tk2{margin-top:18px;display:flex;align-items:stretch;border-radius:16px;overflow:hidden;background:#fff;color:#000;text-align:left}
+#sp-nlp .bwp .tk2 .l{flex:1;padding:12px 16px;border-right:2px dashed #C9CDD2}#sp-nlp .bwp .tk2 small{display:block;font:700 9.5px/1 Inter,sans-serif;letter-spacing:.24em;color:#6B7076}
+#sp-nlp .bwp .tk2 b{display:block;font:800 28px/1.15 Sora,sans-serif;letter-spacing:.06em;margin-top:4px;color:#000}
+#sp-nlp .bwp .tk2 .r{width:104px;display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:4px;font:800 13px/1 Inter,sans-serif!important;background:#F1F2F4!important;color:#000!important;border:0!important;border-radius:0!important;padding:0!important;box-shadow:none!important;text-transform:none!important;letter-spacing:0!important;cursor:pointer}
+#sp-nlp .bwp .tk2 .r svg{width:20px;height:20px;stroke:#000;fill:none;stroke-width:2}
+#sp-nlp .bwp .go{display:block;margin-top:12px;background:#fff;color:#000!important;border-radius:999px;font:800 15.5px/1 Inter,sans-serif;padding:17px;text-decoration:none!important}
+#sp-nlp .bwp .nt{font:500 12px/1.5 Inter,sans-serif;color:#8D939A;margin-top:12px}
+#sp-nlp .bwp .cnt{display:flex;justify-content:center;gap:8px;margin-top:6px}#sp-nlp .bwp .cnt div{width:56px;padding:8px 0;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);font:800 19px/1 Sora,sans-serif;color:#fff}#sp-nlp .bwp .cnt small{display:block;font:600 8.5px/1 Inter,sans-serif;letter-spacing:.18em;color:#9AA0A8;margin-top:5px}
+#sp-nlp .bwp .cnt+.nt{margin-top:6px}
+#sp-nlp.bw-on [data-yes].bw-alt{background:transparent!important;color:#C9CDD2!important;border:1px solid rgba(255,255,255,.25)!important;box-shadow:none!important;margin-top:12px;font-size:13.5px!important}
 #sp-bwv-pill{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:99999;background:#fff;color:#000;font:700 11px/1 Inter,sans-serif;letter-spacing:.06em;padding:9px 13px;border-radius:999px;box-shadow:0 6px 20px rgba(0,0,0,.35);text-decoration:none!important;white-space:nowrap}
 </style>
 <script id="sp-bwv-js">
 (function(){
-var C=<?php echo wp_json_encode($cfg); ?>,BF=C.bf,PCT=C.pct,F=1-PCT/100,NAME=BF?'Black Friday':'Black Week',END=new Date(C.end);
+var C=<?php echo wp_json_encode($cfg); ?>,BF=C.bf,PCT=C.pct,F=1-PCT/100,NAME=BF?'Black Friday':'Black Week',END=new Date(C.end),CODE=C.code;
 function fm(n){return n.toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.')+' €';}
 function num(s){return parseFloat(String(s).replace(/[^\d,]/g,'').replace(',','.'))||0;}
 function cd(){var s=Math.max(0,(END-new Date())/1000);return [Math.floor(s/86400),Math.floor(s%86400/3600),Math.floor(s%3600/60),Math.floor(s%60)].map(function(x){return (x<10?'0':'')+x;});}
 if(C.pv){var pill=document.createElement('a');pill.id='sp-bwv-pill';pill.href=C.off;pill.textContent='Vorschau beenden ✕';document.body.appendChild(pill);}
-function banner(){var tb=document.getElementById('sp-top-banner');if(!tb)return;tb.classList.add('bw');var d=tb.querySelector('.bw-tb');if(!d){d=document.createElement('div');d.className='bw-tb';tb.appendChild(d);}var c=cd();d.innerHTML='<b>'+NAME+'</b><span>·</span>−'+PCT+' % auf alles<span>·</span><i>'+c[0]+' : '+c[1]+' : '+c[2]+'</i>';}
-function heroD(){var hb=document.getElementById('sp-hero-banner');if(!hb||innerWidth<768)return;var x=document.querySelector('.bwh.bwd');if(!x){x=document.createElement('div');x.className='bwh bwd';x.style.backgroundImage='url('+C.scene+')';hb.parentNode.insertBefore(x,hb);hb.style.display='none';fill(x);}var c=cd();x.querySelector('.cdn').innerHTML='<span><b>'+c[0]+'</b>T</span><span><b>'+c[1]+'</b>STD</span><span><b>'+c[2]+'</b>MIN</span><span><b>'+c[3]+'</b>SEK</span>';}
-function fill(x){x.innerHTML='<div class="t"><div class="ey2">'+NAME.toUpperCase()+'</div><div class="big"><span class="bw-chrome">−'+PCT+'</span><span class="bw-chrome bw-pc">%</span></div><div class="l1">'+(BF?'Der Höhepunkt der Black Week.':'auf das gesamte Sortiment.')+'</div><div class="l2">'+(BF?'Nur bis Cyber Monday, 30. November · 23:59':'Nur bis Donnerstag, 26. November')+'</div></div><div class="b"><div class="cdn"></div><a class="cta" href="/alle-produkte/">'+(BF?'Jetzt −35 % sichern':'Jetzt sparen')+' →</a><div class="lnk">'+(BF?'Solange der Vorrat reicht · Versand in 2 Werktagen':'Black Friday wird größer. <a href="#sp-nlh">Als Insider zuerst erfahren</a>')+'</div></div>';}
+/* --- Code: kopieren, merken, einlösen --- */
+function toast(m){var t=document.getElementById('bw-toast');if(!t){t=document.createElement('div');t.id='bw-toast';document.body.appendChild(t);}t.textContent=m;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('on');},2200);}
+function copyCode(){function ok(){toast('✓ '+CODE+' kopiert');}function fb(){var a=document.createElement('textarea');a.value=CODE;a.style.cssText='position:fixed;opacity:0;top:0';document.body.appendChild(a);a.select();try{document.execCommand('copy');ok();}catch(e){}a.remove();}
+ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(CODE).then(ok,fb);}else fb();}
+function setCk(){document.cookie='sp_bw_code='+CODE+';path=/;max-age=1209600;SameSite=Lax;Secure';}
+var CART=null,NONCE='';
+(function(){var of=window.fetch;if(!of||of._bw)return;var nf=function(u){var p=of.apply(this,arguments);return p.then(function(r){try{var s=typeof u==='string'?u:(u&&u.url)||'';if(/\/wc\/store\/v1\/cart/.test(s)&&!/\/batch/.test(s)){var n=r.headers.get('Nonce');if(n)NONCE=n;r.clone().json().then(function(d){if(d&&d.items&&d.totals)CART=d;}).catch(function(){});}}catch(e){}return r;});};nf._bw=1;window.fetch=nf;})();
+function isCode(c){return /^black3[05]$/i.test(c||'');}
+function codeIn(cart){var r='';((cart&&cart.coupons)||[]).forEach(function(c){if(isCode(c.code))r=String(c.code).toUpperCase();});return r;}
+function applyCode(){setCk();function go(){return fetch('/wp-json/wc/store/v1/cart/apply-coupon',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json','Nonce':NONCE},body:JSON.stringify({code:CODE})}).then(function(r){return r.json();}).then(function(){toast('✓ '+CODE+' ist aktiv');if(window.jQuery)jQuery(document.body).trigger('added_to_cart',[null,null,null]);}).catch(function(){});}
+ if(NONCE)go();else fetch('/wp-json/wc/store/v1/cart',{credentials:'include'}).then(go);}
+document.addEventListener('click',function(e){var k=e.target.closest&&e.target.closest('.bw-k');if(k){e.preventDefault();e.stopPropagation();copyCode();}
+ var g=e.target.closest&&e.target.closest('.bw-go');if(g){setCk();if(!C.home&&g.hasAttribute('data-stay')){e.preventDefault();var cl=document.querySelector('#sp-nlp [data-close]');if(cl)cl.click();if(CART&&CART.items&&CART.items.length&&!codeIn(CART))applyCode();else toast('✓ '+CODE+' wird im Warenkorb automatisch eingelöst');}}},true);
+function tk(){return '<span class="bw-tk"><b>'+CODE+'</b><button type="button" class="bw-k">Kopieren</button></span>';}
+/* --- Leiste oben --- */
+function banner(){var tb=document.getElementById('sp-top-banner');if(!tb)return;tb.classList.add('bw');var d=tb.querySelector('.bw-tb');if(!d){d=document.createElement('div');d.className='bw-tb';tb.appendChild(d);}
+ var h='<b>'+NAME+'</b><span>·</span>−'+PCT+' %<span>·</span><span class="bw-c">'+CODE+'</span><button type="button" class="bw-k">Kopieren</button>';if(d.dataset.h!==h){d.innerHTML=h;d.dataset.h=h;}}
+/* --- Startseite --- */
+function heroHtml(){return '<div class="t"><div class="ey2">'+NAME.toUpperCase()+'</div><div class="big"><span class="bw-chrome">−'+PCT+'</span><span class="bw-chrome bw-pc">%</span></div><div class="l1">auf alles – mit Code</div><div class="l2">'+tk()+'</div></div><div class="b"><div class="cdn"></div><a class="cta bw-go" href="/alle-produkte/?bw=1">Code aktivieren &amp; shoppen →</a><div class="lnk">'+(BF?'Nur bis Cyber Monday, 30.11. · 23:59':'Code gilt nur bis Donnerstag, 26.11. · 23:59')+'</div></div>';}
+function cdnHtml(){var c=cd();return '<span><b>'+c[0]+'</b>T</span><span><b>'+c[1]+'</b>STD</span><span><b>'+c[2]+'</b>MIN</span><span><b>'+c[3]+'</b>SEK</span>';}
+function heroD(){var hb=document.getElementById('sp-hero-banner');if(!hb||innerWidth<768)return;var x=document.querySelector('.bwh.bwd');if(!x){x=document.createElement('div');x.className='bwh bwd';x.style.backgroundImage='url('+C.scene+')';hb.parentNode.insertBefore(x,hb);hb.style.display='none';x.innerHTML=heroHtml();}x.querySelector('.cdn').innerHTML=cdnHtml();}
 function hero(){if(!C.home)return;var h=document.querySelector('.sp-hero2');if(!h||h.offsetParent===null)return;var w=h.querySelector('.sp-hero2-img-wrap');if(!w)return;h.classList.add('bw');var x=w.querySelector('.bwh');
- if(!x){x=document.createElement('div');x.className='bwh';x.style.backgroundImage='url('+C.scene+')';
-  x.innerHTML='<div class="t"><div class="ey2">'+NAME.toUpperCase()+'</div><div class="big"><span class="bw-chrome">−'+PCT+'</span><span class="bw-chrome bw-pc">%</span></div><div class="l1">'+(BF?'Der Höhepunkt der Black Week.':'auf das gesamte Sortiment.')+'</div><div class="l2">'+(BF?'Nur bis Cyber Monday, 30. November · 23:59':'Nur bis Donnerstag, 26. November')+'</div></div><div class="b"><div class="cdn"></div><a class="cta" href="/alle-produkte/">'+(BF?'Jetzt −35 % sichern':'Jetzt sparen')+' →</a><div class="lnk">'+(BF?'Solange der Vorrat reicht · Versand in 2 Werktagen':'Black Friday wird größer. <a href="#sp-nlh">Als Insider zuerst erfahren</a>')+'</div></div>';
-  w.insertBefore(x,w.firstChild);
-  var hd=document.querySelector('.sp-hero2');var top=hd.getBoundingClientRect().top+scrollY;var tb=document.getElementById('sp-top-banner');var tbh=tb?tb.offsetHeight:32;x.style.marginTop=(tbh-top)+'px';}
- var c=cd();x.querySelector('.cdn').innerHTML='<span><b>'+c[0]+'</b>T</span><span><b>'+c[1]+'</b>STD</span><span><b>'+c[2]+'</b>MIN</span><span><b>'+c[3]+'</b>SEK</span>';}
+ if(!x){x=document.createElement('div');x.className='bwh';x.style.backgroundImage='url('+C.scene+')';x.innerHTML=heroHtml();w.insertBefore(x,w.firstChild);
+  var top=h.getBoundingClientRect().top+scrollY;var tb=document.getElementById('sp-top-banner');var tbh=tb?tb.offsetHeight:32;x.style.marginTop=(tbh-top)+'px';}
+ x.querySelector('.cdn').innerHTML=cdnHtml();}
+/* --- Produktkarten + Kategorie --- */
 function cards(){document.querySelectorAll('.sp-pc[data-id]').forEach(function(cd){var pr=cd.querySelector('.pr');if(!pr)return;var on=cd.querySelector('.vo button.on')||cd.querySelector('.vo button');
   var p=on?(parseFloat(on.getAttribute('data-r'))||parseFloat(on.getAttribute('data-p'))||0):0;if(!p){if(pr.dataset.bwo)p=+pr.dataset.bwo;else p=num((pr.querySelector('s')||pr.querySelector('strong')||pr).textContent);}if(!p)return;
-  if(pr.dataset.bwo==String(p)&&pr.querySelector('s'))return;pr.dataset.bwo=p;pr.classList.add('bw-pr');pr.innerHTML='<strong>'+fm(p*F)+'</strong><s>'+fm(p)+'</s>';
-  var bd=cd.querySelector('a.im .bd');if(!bd){bd=document.createElement('span');var im=cd.querySelector('a.im');if(im)im.appendChild(bd);}if(bd&&!/Ausverkauft/.test(bd.textContent)){bd.className='bd bw-bd';bd.textContent='−'+PCT+' %';}
-  var q=cd.querySelector('.qd');if(!q){q=document.createElement('div');q.className='qd';pr.parentNode.insertBefore(q,pr);}q.classList.add('bw-qd');q.textContent=NAME;});
+  if(!(pr.dataset.bwo==String(p)&&pr.querySelector('s'))){pr.dataset.bwo=p;pr.classList.add('bw-pr');pr.innerHTML='<strong>'+fm(p*F)+'</strong><s>'+fm(p)+'</s>';}
+  var bd=cd.querySelector('a.im .bd');if(!bd){bd=document.createElement('span');var im=cd.querySelector('a.im');if(im)im.appendChild(bd);}if(bd&&!/Ausverkauft/.test(bd.textContent)){bd.className='bd bw-bd';bd.textContent='−'+PCT+' % mit Code';}
+  var q=cd.querySelector('.qd');if(!q){q=document.createElement('div');q.className='qd';pr.parentNode.insertBefore(q,pr.nextSibling);}q.classList.add('bw-qd');var qh='mit Code <b>'+CODE+'</b>';if(q.innerHTML!==qh)q.innerHTML=qh;});
  var cat=document.querySelector('#sp-cat .body');if(cat&&!document.querySelector('.bw-strip')){var s=document.createElement('div');s.className='bw-strip';cat.insertBefore(s,cat.firstChild);}
- var st=document.querySelector('.bw-strip');if(st){var c=cd();st.innerHTML='<div class="bw-ey">'+NAME.toUpperCase()+'</div><div class="bg bw-chrome">−'+PCT+' % auf alles</div><div class="s">Preise bereits reduziert. Kein Code nötig.</div><div class="c">Endet in <b>'+c[0]+'T · '+c[1]+':'+c[2]+':'+c[3]+'</b></div>';}}
-function setOnce(el,orig,html){if(!el)return;if(el.dataset.bwSet===el.innerHTML)return;el.dataset.bwo=orig;el.innerHTML=html;el.dataset.bwSet=el.innerHTML;}
+ var st=document.querySelector('.bw-strip');if(st){var c=cd();if(!st.querySelector('.bw-tk'))st.innerHTML='<div class="bw-ey">'+NAME.toUpperCase()+'</div><div class="bg bw-chrome">−'+PCT+' % auf alles</div><div class="s">Mit Code im Warenkorb: '+tk()+'</div><div class="c"></div>';st.querySelector('.c').innerHTML=(BF?'Endet in ':'Code gilt noch ')+'<b>'+c[0]+'T · '+c[1]+':'+c[2]+':'+c[3]+'</b>';}}
+/* --- Kaufbox --- */
 function buybox(){var rp=document.getElementById('rx-price');if(!rp)return;
  var po=document.querySelector('#rx-buybox .rx-price-old');if(po){po.style.display='none';var dc=document.querySelector('#rx-buybox .rx-discount-chip');if(dc)dc.style.display='none';}
  if(rp.dataset.bwSet!==rp.innerHTML){var p0=po?num(po.textContent):num(rp.textContent);if(!p0)return;rp.dataset.bwo=p0;rp.innerHTML=fm(p0*F)+' <s style="font-size:.5em;color:#8A9098;font-weight:500">'+fm(p0)+'</s> <span class="bw-tag">−'+PCT+' %</span>';rp.dataset.bwSet=rp.innerHTML;}
  var p=+rp.dataset.bwo;
- var tt=document.getElementById('rx-total');if(tt&&tt.dataset.bwSet!==tt.innerHTML){var t0=num(tt.textContent);var q=+((document.getElementById('rx-qtyfield')||{}).value||1);tt.innerHTML=fm(p*F*q);tt.dataset.bwSet=tt.innerHTML;}
+ var tt=document.getElementById('rx-total');if(tt&&tt.dataset.bwSet!==tt.innerHTML){var q=+((document.getElementById('rx-qtyfield')||{}).value||1);tt.innerHTML=fm(p*F*q);tt.dataset.bwSet=tt.innerHTML;}
  document.querySelectorAll('#rx-vol-tiers .rx-tier__disc').forEach(function(e){if(e.dataset.bwSet===e.innerHTML)return;e.innerHTML=fm(num(e.textContent)*F);e.dataset.bwSet=e.innerHTML;});
  document.querySelectorAll('#rx-tiers .rx-tier').forEach(function(t){var q=+t.getAttribute('data-q');var e=t.querySelector('.rx-tier__disc');if(!e)return;var v=q===1?'Einzeln':fm(p*F*q);if(e.textContent!==v)e.textContent=v;});
  var bb=document.querySelector('#rx-buybox .bw-bb');if(!bb){bb=document.createElement('div');bb.className='bw-bb';var prr=document.querySelector('#rx-buybox .rx-price-row');if(prr)prr.parentNode.insertBefore(bb,prr.nextSibling);}
- var c=cd();bb.innerHTML='<div class="bw-ey">'+NAME.toUpperCase()+'</div><div class="h"><div class="bg bw-chrome">−'+PCT+' %</div><div class="r">Du sparst '+fm(p*(1-F))+'<span>automatisch, ohne Code</span></div></div><div class="ln"></div><div class="c"><span>Endet in</span><b>'+c[0]+'T · '+c[1]+' : '+c[2]+' : '+c[3]+'</b></div>';
+ if(!bb.querySelector('.bw-tk'))bb.innerHTML='<div class="bw-ey">'+NAME.toUpperCase()+'</div><div class="h"><div class="bg bw-chrome">−'+PCT+' %</div><div class="r"><b class="sv"></b><span>mit Code im Warenkorb</span></div></div><div class="bw-bbc">'+tk()+'</div><div class="ln"></div><div class="c"><span>'+(BF?'Endet in':'Code gilt noch')+'</span><b class="cc"></b></div>';
+ var c=cd();bb.querySelector('.sv').textContent='Du sparst '+fm(p*(1-F));bb.querySelector('.cc').textContent=c[0]+'T · '+c[1]+' : '+c[2]+' : '+c[3];
  var sh=document.querySelector('#rx-shiphint .rx-amt-shine');if(sh&&sh.dataset.bwSet!==sh.textContent){var v=Math.max(0,150-p*F);sh.textContent=fm(v);sh.dataset.bwSet=sh.textContent;}}
-function drawer(){var dr=document.getElementById('sp-cart-drawer');if(!dr)return;var items=document.getElementById('sp-cd-items');if(!items)return;var reg=0;
- items.querySelectorAll('.sp-cd-item').forEach(function(it){var pe=it.querySelector('.sp-cd-item-price:not(.sp-cd-item-price-free)');if(!pe)return;
-  if(pe.dataset.bwSet!==pe.innerHTML){var sv0=it.querySelector('.sp-cd-item-save');var o=C.live?Math.round(num(pe.textContent)/F*100)/100:num(pe.textContent)+(sv0?num(sv0.textContent):0);pe.dataset.bwo=o;pe.innerHTML=fm(o*F)+'<span class="bw-old">'+fm(o)+'</span>';pe.dataset.bwSet=pe.innerHTML;}
-  reg+=+pe.dataset.bwo;var bd=it.querySelector('.sp-cd-item-bundle:not(.sp-cd-item-gift-badge)');if(bd)bd.remove();var sv=it.querySelector('.sp-cd-item-save');if(sv&&!it.querySelector('.sp-cd-item-price-free'))sv.remove();
-  if(!it.querySelector('.bw-badge')){var n=it.querySelector('.sp-cd-item-name');if(n){var b=document.createElement('span');b.className='bw-badge';b.textContent='−'+PCT+' %';n.parentNode.insertBefore(b,n);}}});
- var sc=document.getElementById('sp-cd-scroll');var bar=document.querySelector('.bw-dbar');
- if(reg>0&&sc){if(!bar){bar=document.createElement('div');bar.className='bw-dbar';sc.insertBefore(bar,sc.firstChild);}var c=cd();bar.innerHTML='<div><span class="bw-ey">'+NAME.toUpperCase()+'</span><b>−'+PCT+' % auf alles</b><span class="t">Endet in '+c[0]+' T '+c[1]+' Std</span></div><em class="bw-chrome">−'+fm(reg*(1-F))+'</em>';}else if(bar)bar.remove();
- var sv2=document.getElementById('sp-cd-subtotal-val');if(!C.live&&sv2&&sv2.dataset.bwSet!==sv2.textContent&&reg>0){sv2.textContent=fm(reg*F);sv2.dataset.bwSet=sv2.textContent;}}
-function checkoutLive(){var bl=document.querySelectorAll('.wp-block-woocommerce-checkout-order-summary-block');if(!bl.length)return;var s=0;try{var d=wp.data.select('wc/store/cart').getCartData();(d.items||[]).forEach(function(i){var p=i.prices||{},m=Math.pow(10,p.currency_minor_unit||2);var r=(+p.regular_price)/m,c=(+p.price)/m;if(c>0&&r>c)s+=(r-c)*i.quantity;});}catch(e){return;}
- bl.forEach(function(b){var ft=b.querySelector('.wc-block-components-totals-footer-item');if(!ft)return;var w=ft.closest('.wc-block-components-totals-wrapper');var row=b.querySelector('.bw-co');if(!row&&w){row=document.createElement('div');row.className='bw-co';w.parentNode.insertBefore(row,w);}if(!row)return;if(s<=0){row.style.display='none';return;}row.style.display='';var h='<div><b>'+NAME+' −'+PCT+' %</b><small>Schon in den Preisen abgezogen. Bei Vorkasse zählt das Bestelldatum.</small></div><em class="bw-chrome">−'+fm(s)+'</em>';if(row.innerHTML!==h)row.innerHTML=h;});}
-function checkout(){if(C.live)return checkoutLive();var blocks=document.querySelectorAll('.wp-block-woocommerce-checkout-order-summary-block');blocks.forEach(function(bl){var reg=0;
-  bl.querySelectorAll('.wc-block-components-order-summary-item').forEach(function(it){var tp=it.querySelector('.wc-block-components-order-summary-item__total-price');if(!tp)return;
-   if(/Geschenk/.test(it.textContent)){tp.dataset.bwo=0;return;}
-   if(tp.dataset.bwSet!==tp.innerHTML){var ru=it.querySelector('.wc-block-components-order-summary-item__regular-individual-price');var qn=it.querySelector('.wc-block-components-order-summary-item__quantity');var qq=qn&&qn.firstChild?parseInt(qn.firstChild.textContent)||1:1;var o=ru?num(ru.textContent)*qq:num(tp.textContent);if(!o){tp.dataset.bwo=0;return;}tp.dataset.bwo=o;tp.innerHTML='<div style="text-align:right;white-space:nowrap"><div style="font-weight:700">'+fm(o*F)+'</div><span class="bw-old">'+fm(o)+'</span></div>';tp.dataset.bwSet=tp.innerHTML;}
-   reg+=+tp.dataset.bwo||0;var ip=it.querySelector('.wc-block-components-order-summary-item__individual-prices');if(ip&&+tp.dataset.bwo&&!ip.querySelector('.bw-badge'))ip.innerHTML='<span class="bw-badge" style="margin:0">−'+PCT+' %</span>';});
-  var ft=bl.querySelector('.wc-block-components-totals-footer-item');if(!ft||!reg)return;var tv=ft.querySelector('.wc-block-components-totals-item__value');
-  if(tv&&tv.dataset.bwSet!==tv.textContent){var t0=num(tv.textContent);tv.textContent=fm(t0-reg*(1-F));tv.dataset.bwSet=tv.textContent;}
-  var w=ft.closest('.wc-block-components-totals-wrapper');var row=bl.querySelector('.bw-co');if(!row&&w){row=document.createElement('div');row.className='bw-co';w.parentNode.insertBefore(row,w);}
-  if(row)row.innerHTML='<div><b>'+NAME+' −'+PCT+' %</b><small>Vorschau: nur Anzeige, bestellt wird zum Normalpreis.</small></div><em class="bw-chrome">−'+fm(reg*(1-F))+'</em>';});}
-var nlpDone=0;function nlp(){if(nlpDone)return;var pp=document.getElementById('sp-nlp');if(!pp)return;nlpDone=1;
- var h=pp.querySelectorAll('.st[data-s="1"] h2,.st[data-s="2"] h2'),p1=pp.querySelector('.st[data-s="1"] p'),b1=pp.querySelector('.st[data-s="1"] [data-yes]');
- if(!BF&&!C.insider){h.forEach(function(e){e.innerHTML='Freitag wird <em>noch größer</em>';});if(p1)p1.textContent='Newsletter-Insider bekommen den Black-Friday-Preis einen Abend früher – Donnerstag ab 18 Uhr. Plus dein 10-%-Code für die Zeit danach.';if(b1)b1.textContent='Ja, Insider werden';}
- else{h.forEach(function(e){e.innerHTML='Sichere dir <em>10 % Rabatt</em><br>für deine nächste Bestellung';});if(p1)p1.textContent='Dein Code gilt nach der Black Week noch 30 Tage – dazu Neuheiten und neue Chargen zuerst.';}
- }
-function nlh(){var nl=document.getElementById('sp-nlh');if(!nl||nl.dataset.bw||!nl.querySelector('h2'))return;nl.dataset.bw=1;if(!BF&&!C.insider){var ey=nl.querySelector('.ey'),h2=nl.querySelector('h2'),ld=nl.querySelector('.lead');if(ey)ey.innerHTML='<i></i>Black-Friday-Insider';if(h2)h2.innerHTML='Freitag <span>früher</span>.';if(ld)ld.textContent='Insider bekommen den Black-Friday-Preis schon Donnerstag ab 18 Uhr. Plus dein 10-%-Code für danach.';}}
-function run(){try{nlp();nlh();banner();if(C.home)heroD();hero();cards();buybox();drawer();checkout();}catch(e){}}
+/* --- Warenkorb: Code aktiv / vergessen --- */
+function drawer(){var dr=document.getElementById('sp-cart-drawer');if(!dr)return;var it=document.getElementById('sp-cd-items');if(!it)return;var box=dr.querySelector('.bw-cbox');
+ if(!CART){if(document.body.classList.contains('sp-cd-on')&&!drawer._f){drawer._f=1;fetch('/wp-json/wc/store/v1/cart',{credentials:'include'});}return;}
+ var m=Math.pow(10,(CART.totals||{}).currency_minor_unit||2),r=0,n=0;(CART.items||[]).forEach(function(i){if(+i.prices.price>0){r+=(+i.prices.regular_price)/m*i.quantity;n++;}});
+ if(!n){if(box)box.remove();return;}
+ if(!box){box=document.createElement('div');box.className='bw-cbox';it.parentNode.insertBefore(box,it.nextSibling);}
+ var h,code=codeIn(CART);
+ if(code){var d=(+CART.totals.total_discount+(+CART.totals.total_discount_tax||0))/m;h='<div class="bw-cb ok"><span class="ck">✓</span><div class="tx">'+code+' ist aktiv<small>−'+PCT+' % auf alles'+(d>0?' · du sparst '+fm(d):'')+'</small></div></div>';}
+ else h='<div class="bw-cb miss"><div class="tx">Code vergessen?<small>Mit '+CODE+' sparst du '+fm(r*PCT/100)+'</small></div><button type="button" class="ap">Jetzt anwenden</button></div>';
+ if(box.dataset.h!==h){box.innerHTML=h;box.dataset.h=h;var b=box.querySelector('.ap');if(b)b.onclick=function(){b.disabled=true;b.textContent='…';applyCode();};}}
+/* --- Kasse: Hinweis, falls kein Code --- */
+function checkout(){var bl=document.querySelectorAll('.wp-block-woocommerce-checkout-order-summary-block');if(!bl.length||!window.wp||!wp.data)return;var d;try{d=wp.data.select('wc/store/cart').getCartData();}catch(e){return;}if(!d||!d.items)return;
+ var has=!!codeIn(d),m=Math.pow(10,(d.totals||{}).currency_minor_unit||2),r=0;(d.items||[]).forEach(function(i){if(+i.prices.price>0)r+=(+i.prices.regular_price)/m*i.quantity;});
+ bl.forEach(function(b){var ft=b.querySelector('.wc-block-components-totals-footer-item');if(!ft)return;var w=ft.closest('.wc-block-components-totals-wrapper');var row=b.querySelector('.bw-co');if(!row&&w){row=document.createElement('div');row.className='bw-co';w.parentNode.insertBefore(row,w);}if(!row)return;
+  if(has||r<=0){row.style.display='none';return;}row.style.display='';
+  var h='<div><b>Code '+CODE+' vergessen?</b><small>Damit sparst du '+fm(r*PCT/100)+'.</small></div><button type="button" class="ap">Anwenden</button>';
+  if(row.dataset.h!==h){row.innerHTML=h;row.dataset.h=h;row.querySelector('.ap').onclick=function(){this.textContent='…';setCk();try{wp.data.dispatch('wc/store/cart').applyCoupon(CODE);}catch(e){}};}});}
+/* --- Pop-up: zeigt während der Aktion den Code (Newsletter bleibt als 2. Option) --- */
+var nlpDone=0;function nlp(){var pp=document.getElementById('sp-nlp');if(!pp)return;var s1=pp.querySelector('.st[data-s="1"]');if(!s1)return;
+ if(!nlpDone){nlpDone=1;pp.classList.add('bw-on');var hd=pp.querySelector('.hd span');if(hd)hd.textContent=NAME.toUpperCase();
+  var y=s1.querySelector('[data-yes]');if(y){y.textContent='Lieber 10 % für später per Newsletter';y.classList.add('bw-alt');}
+  var bx=document.createElement('div');bx.className='bwp';bx.innerHTML='<div class="h bw-chrome">−'+PCT+' % auf alles.</div><div class="sb">Peptide, Pens und Zubehör.<br>Einfach den Code im Warenkorb eingeben.</div><div class="tk2"><div class="l"><small>DEIN CODE</small><b>'+CODE+'</b></div><button type="button" class="r bw-k"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>Kopieren</button></div><a class="go bw-go" data-stay href="/alle-produkte/?bw=1">Code aktivieren &amp; shoppen →</a><div class="nt">'+(BF?'Nur noch':CODE+' gilt nur noch')+'</div><div class="cnt"></div><div class="nt">'+(BF?'bis Cyber Monday, 30.11. · 23:59 Uhr':'bis Donnerstag, 26.11. · 23:59 Uhr')+'</div>';
+  s1.insertBefore(bx,s1.firstChild);
+  pp.querySelectorAll('.st[data-s="2"] h2').forEach(function(e){e.innerHTML='Sichere dir <em>10 % Rabatt</em><br>für deine nächste Bestellung';});
+  var p2=pp.querySelector('.st[data-s="2"] p');if(p2)p2.textContent='Dein Code gilt nach der Black Week noch 30 Tage. Wohin dürfen wir ihn schicken?';}
+ var cn=s1.querySelector('.bwp .cnt');if(cn){var c=cd();var h='<div>'+c[0]+'<small>TAGE</small></div><div>'+c[1]+'<small>STD</small></div><div>'+c[2]+'<small>MIN</small></div>';if(cn.innerHTML!==h)cn.innerHTML=h;}}
+function run(){try{nlp();banner();if(C.home)heroD();hero();cards();buybox();drawer();checkout();}catch(e){}}
 run();document.addEventListener('DOMContentLoaded',run);setInterval(run,800);
 })();
 </script>
