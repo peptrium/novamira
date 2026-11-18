@@ -175,7 +175,7 @@ add_action('woocommerce_applied_coupon', function ($code) {
     }
 });
 add_action('woocommerce_removed_coupon', function ($code) {
-    if (sp_bw_is_code($code) && empty($GLOBALS['sp_bw_swap']) && WC()->session) WC()->session->set('sp_bw_rm', 1);
+    if ((sp_bw_is_code($code) || (sp_bw_active() && sp_bw_is_partner_code($code))) && empty($GLOBALS['sp_bw_swap']) && WC()->session) WC()->session->set('sp_bw_rm', 1);
 });
 add_filter('woocommerce_coupon_message', function ($msg, $code, $coupon) {
     if ($code !== WC_Coupon::WC_COUPON_SUCCESS || !$coupon) return $msg;
@@ -198,12 +198,26 @@ add_action('init', function () {
     if ($want && empty($_COOKIE['sp_bw_code'])) sp_bw_set_code_cookie(sp_bw_current_code());
 }, 3);
 function sp_bw_maybe_apply() {
-    return; // 2026-11-18 (user): Kunden sollen den Code selbst eingeben – kein automatisches Einlösen.
-    if (!sp_bw_active() || empty($_COOKIE['sp_bw_code']) || !function_exists('WC') || !WC()->cart || WC()->cart->is_empty()) return;
+    // 2026-11-18 (user): Kunden geben den Code selbst ein – AUSNAHME Partner-Link (SliceWP-Cookie slicewp_aff):
+    // dann wird in der Aktionszeit automatisch der Code dieses Partners gesetzt (Fallback BLACK30, z. B. unter Mindestbestellwert).
+    if (!sp_bw_active() || !function_exists('WC') || !WC()->cart || WC()->cart->is_empty()) return;
     if (WC()->session && WC()->session->get('sp_bw_rm')) return;
     if (sp_bw_cart_pct()) return;
+    $aff = isset($_COOKIE['slicewp_aff']) ? absint($_COOKIE['slicewp_aff']) : 0;
+    if (!$aff) return;
+    if (function_exists('slicewp_get_affiliate')) {
+        $a = slicewp_get_affiliate($aff);
+        if (!$a || $a->get('status') !== 'active') return;
+    }
+    $code = function_exists('slicewp_get_affiliate_meta') ? (string) slicewp_get_affiliate_meta($aff, 'sp_coupon_code', true) : '';
+    $use = sp_bw_current_code();
+    if ($code !== '' && sp_bw_is_partner_code($code)) {
+        $c = new WC_Coupon($code);
+        $v = (new WC_Discounts(WC()->cart))->is_coupon_valid($c);
+        if ($c->get_id() && !is_wp_error($v)) $use = $code;
+    }
     $GLOBALS['sp_bw_quiet'] = 1;
-    WC()->cart->apply_coupon(sp_bw_current_code());
+    WC()->cart->apply_coupon($use);
     unset($GLOBALS['sp_bw_quiet']);
 }
 add_action('woocommerce_add_to_cart', function () { sp_bw_maybe_apply(); }, 30);
