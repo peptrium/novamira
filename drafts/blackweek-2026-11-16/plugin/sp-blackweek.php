@@ -59,14 +59,29 @@ function sp_bw_code_pct($code) {
     if ($code === 'black30') return $ph === 'bf' ? 35 : 30;
     return 0;
 }
-/** Prozent des BW-Codes im Warenkorb (0 = kein Code drin). */
-function sp_bw_cart_pct($cart = null) {
+/** 2026-11-18 (user): Partner-Codes (Coupon-Meta _sp_affiliate_id) geben in der Aktion denselben Rabatt wie BLACK30. */
+function sp_bw_is_partner_code($c) {
+    static $m = [];
+    $code = wc_strtolower(is_object($c) ? $c->get_code() : (string) $c);
+    if (!isset($m[$code])) { $id = wc_get_coupon_id_by_code($code); $m[$code] = $id && get_post_meta($id, '_sp_affiliate_id', true) && get_post_meta($id, 'discount_type', true) === 'percent'; }
+    return $m[$code];
+}
+/** Aktions-Prozent eines Codes (BLACK30/35 oder Partner-Code), 0 = kein Aktionscode. */
+function sp_bw_type_pct($c) {
+    if (sp_bw_is_code($c)) return sp_bw_code_pct(is_object($c) ? $c->get_code() : $c);
+    if (sp_bw_is_partner_code($c)) return sp_bw_code_pct('black30');
+    return 0;
+}
+/** [Prozent, Code] des besten Aktionscodes im Warenkorb. */
+function sp_bw_cart_best($cart = null) {
     if (!$cart && function_exists('WC') && WC()->cart) $cart = WC()->cart;
-    if (!$cart) return 0;
-    $best = 0;
-    foreach ($cart->get_applied_coupons() as $c) if (sp_bw_is_code($c)) $best = max($best, sp_bw_code_pct($c));
+    $best = [0, ''];
+    if (!$cart) return $best;
+    foreach ($cart->get_applied_coupons() as $c) { $p = sp_bw_type_pct($c); if ($p > $best[0]) $best = [$p, $c]; }
     return $best;
 }
+/** Prozent des Aktionscodes im Warenkorb (0 = kein Code drin). */
+function sp_bw_cart_pct($cart = null) { return sp_bw_cart_best($cart)[0]; }
 function sp_bw_pct() { $p = sp_bw_phase(); return $p === 'bf' ? 35 : ($p === 'bw' ? 30 : 0); }
 function sp_bw_active() { return sp_bw_pct() > 0; }
 
@@ -124,13 +139,16 @@ function sp_bw_is_credit($coupon) {
 }
 add_filter('woocommerce_coupon_get_discount_amount', function ($amount, $discounting, $cart_item, $single, $coupon) {
     if (!is_array($cart_item)) return $amount;
-    if (sp_bw_is_code($coupon)) return sp_bw_item_ok($cart_item) ? $amount : 0;   // BW-Code nicht auf Geschenke/Abo
+    if (sp_bw_type_pct($coupon)) {                       // Aktionscode: nicht auf Geschenke/Abo, nur der beste zählt
+        if (!sp_bw_item_ok($cart_item)) return 0;
+        return wc_strtolower($coupon->get_code()) === wc_strtolower((string) sp_bw_cart_best()[1]) ? $amount : 0;
+    }
     return (sp_bw_cart_pct() && sp_bw_item_ok($cart_item) && !sp_bw_is_credit($coupon)) ? 0 : $amount;
 }, 60, 5);
 /* BW-Codes: Prozent je Phase, Gültigkeit */
 add_filter('woocommerce_coupon_get_amount', function ($amount, $coupon) {
-    if (!sp_bw_is_code($coupon)) return $amount;
-    $p = sp_bw_code_pct($coupon->get_code());
+    if (!sp_bw_is_code($coupon) && !sp_bw_is_partner_code($coupon)) return $amount;
+    $p = sp_bw_type_pct($coupon);
     return $p ?: $amount;
 }, 20, 2);
 add_filter('woocommerce_coupon_is_valid', function ($valid, $coupon) {
@@ -162,8 +180,8 @@ add_action('woocommerce_removed_coupon', function ($code) {
 add_filter('woocommerce_coupon_message', function ($msg, $code, $coupon) {
     if ($code !== WC_Coupon::WC_COUPON_SUCCESS || !$coupon) return $msg;
     if (!empty($GLOBALS['sp_bw_quiet'])) return '';
-    if (sp_bw_is_code($coupon)) return strtoupper($coupon->get_code()) . ' aktiv ✓ – −' . sp_bw_code_pct($coupon->get_code()) . ' % auf alles im Warenkorb.';
-    if (sp_bw_cart_pct() && !sp_bw_is_credit($coupon)) return 'Code gespeichert ✓ – mit dem Black-Week-Code gilt schon −' . sp_bw_cart_pct() . ' %, andere Codes zählen nicht zusätzlich.';
+    if (sp_bw_type_pct($coupon)) return strtoupper($coupon->get_code()) . ' aktiv ✓ – −' . sp_bw_type_pct($coupon) . ' % auf alles im Warenkorb.';
+    if (sp_bw_cart_pct() && !sp_bw_is_credit($coupon)) return 'Code gespeichert ✓ – mit dem Aktionscode gilt schon −' . sp_bw_cart_pct() . ' %, andere Codes zählen nicht zusätzlich.';
     return $msg;
 }, 60, 3);
 

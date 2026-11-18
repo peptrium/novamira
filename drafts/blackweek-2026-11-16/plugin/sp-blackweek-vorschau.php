@@ -205,13 +205,13 @@ function drawer(){var dr=document.getElementById('sp-cart-drawer');if(!dr)return
  var m=Math.pow(10,(CART.totals||{}).currency_minor_unit||2),r=0,n=0;(CART.items||[]).forEach(function(i){if(+i.prices.price>0){r+=(+i.prices.regular_price)/m*i.quantity;n++;}});
  if(!n){if(box)box.remove();return;}
  var sub=document.getElementById('sp-cd-subtotal-row');if(box&&sub&&box.nextElementSibling!==sub){box.remove();box=null;}if(!box){box=document.createElement('div');box.className='bw-cbox';if(sub)sub.parentNode.insertBefore(box,sub);else it.parentNode.insertBefore(box,it.nextSibling);}
- var h,code=codeIn(CART);
+ var h,code=codeIn(CART);if(!code&&(CART.coupons||[]).length){var dd=(+CART.totals.total_discount+(+CART.totals.total_discount_tax||0))/m;if(dd>=r*PCT/100*0.97)code=String(CART.coupons[0].code).toUpperCase();}
  if(code){var d=(+CART.totals.total_discount+(+CART.totals.total_discount_tax||0))/m;h='<div class="bw-cb ok"><span class="ck">✓</span><div class="tx">'+code+' ist aktiv<small>−'+PCT+' % auf alles'+(d>0?' · du sparst '+fm(d):'')+'</small></div></div>';}
  else{var cur=(+CART.totals.total_items+(+CART.totals.total_items_tax||0)-(+CART.totals.total_discount||0)-(+CART.totals.total_discount_tax||0))/m;h='<div class="bw-cb miss"><div class="tx">Mit Code '+CODE+': '+fm(r*F)+'<small>statt '+fm(cur)+' – Code kopieren und oben bei „Rabattcode“ einfügen</small></div><button type="button" class="ap">Kopieren</button></div>';}
  if(box.dataset.h!==h){box.innerHTML=h;box.dataset.h=h;var b=box.querySelector('.ap');if(b)b.onclick=function(){copyCode();openCouponField();};}}
 /* --- Kasse: Hinweis, falls kein Code --- */
 function checkout(){var bl=document.querySelectorAll('.wp-block-woocommerce-checkout-order-summary-block');if(!bl.length||!window.wp||!wp.data)return;var d;try{d=wp.data.select('wc/store/cart').getCartData();}catch(e){return;}if(!d||!d.items)return;
- var has=!!codeIn(d),m=Math.pow(10,(d.totals||{}).currency_minor_unit||2),r=0;(d.items||[]).forEach(function(i){if(+i.prices.price>0)r+=(+i.prices.regular_price)/m*i.quantity;});
+ var has=!!codeIn(d),m=Math.pow(10,(d.totals||{}).currency_minor_unit||2),r=0;(d.items||[]).forEach(function(i){if(+i.prices.price>0)r+=(+i.prices.regular_price)/m*i.quantity;});if(!has&&(d.coupons||[]).length){var dd=(+(d.totals||{}).total_discount+(+(d.totals||{}).total_discount_tax||0))/m;has=dd>=r*PCT/100*0.97;}
  bl.forEach(function(b){var ft=b.querySelector('.wc-block-components-totals-footer-item');if(!ft)return;var w=ft.closest('.wc-block-components-totals-wrapper');var row=b.querySelector('.bw-co');if(!row&&w){row=document.createElement('div');row.className='bw-co';w.parentNode.insertBefore(row,w);}if(!row)return;
   if(has||r<=0){row.style.display='none';return;}row.style.display='';
   var h='<div><b>Mit Code '+CODE+' nur '+fm(r*F)+'</b><small>für die Artikel statt '+fm(r)+' – Code kopieren und bei „Gutschein hinzufügen“ einfügen.</small></div><button type="button" class="ap">Kopieren</button>';
