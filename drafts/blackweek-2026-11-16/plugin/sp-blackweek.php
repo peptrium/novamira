@@ -180,6 +180,7 @@ add_action('init', function () {
     if ($want && empty($_COOKIE['sp_bw_code'])) sp_bw_set_code_cookie(sp_bw_current_code());
 }, 3);
 function sp_bw_maybe_apply() {
+    return; // 2026-11-18 (user): Kunden sollen den Code selbst eingeben – kein automatisches Einlösen.
     if (!sp_bw_active() || empty($_COOKIE['sp_bw_code']) || !function_exists('WC') || !WC()->cart || WC()->cart->is_empty()) return;
     if (WC()->session && WC()->session->get('sp_bw_rm')) return;
     if (sp_bw_cart_pct()) return;

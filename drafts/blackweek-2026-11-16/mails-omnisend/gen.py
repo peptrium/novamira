@@ -55,7 +55,7 @@ def wrap2(rows_,th,extra=''):
       +R(foot2(th,extra),'14px 22px 30px',th,'center')+'</table></td></tr></table>')
 def img(name,link,alt,th): return f'<tr><td style="padding:0;line-height:0;background:{th["bg"]};"><a href="{link}" style="display:block;line-height:0;"><img src="{E}{name}" width="600" alt="{alt}" style="display:block;width:100%;max-width:600px;height:auto;border:0;"></a></td></tr>'
 PR65=[('Retatrutide','10 mg',79.90),('Retatrutide','20 mg',149.90),('GHK-Cu','50 mg',39.90),('GLOW','70 mg',139.90),('Peptrium-Pen Retatrutide','20 mg',264.90)]
-def codeblock(code,th,hint='Tippe auf den Button – dann ist der Code schon im Warenkorb.'):
+def codeblock(code,th,hint='Kopiere den Code und füge ihn im Warenkorb bei „Rabattcode“ ein.'):
     dk=th['btn']=='w'
     bg='#0E1013' if dk else '#FFFFFF'; bd='rgba(255,255,255,.18)' if dk else '#D2D4D7'; fg='#FFFFFF' if dk else '#07080A'; dash='rgba(255,255,255,.55)' if dk else '#9AA0A8'
     return (f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;"><tr><td align="center" style="background:{bg};border:1px solid {bd};border-radius:16px;padding:18px 16px;font-family:{F};">'
@@ -69,10 +69,10 @@ def m_pen():
       +R(codeblock('BLACK30',th),'14px 22px 0',th)
       +R(rows([('Pen Retatrutide','20 mg',264.90),('Pen Retatrutide','40 mg',339.90),('Pen GHK-Cu','50 mg',169.90),('Pen MOTS-c','20 mg',189.90)],.7,th),'14px 22px 6px',th)
       +R(checks(['Pen Nadeln gleich mitbestellen – auch −30 %','Ab 200 € gibt es das Injektionskit gratis dazu','Versand in 2 Werktagen, diskret verpackt'],th),'12px 22px 4px',th)
-      +R(btn('Code einlösen &amp; Pens ansehen',L,th),'18px 22px 28px',th),th)
+      +R(btn('Pens ansehen',L,th),'18px 22px 28px',th),th)
 def m_fav():
     th=T('dark','#16181C');L=utm('/alle-produkte/','blackweek-favoriten')
-    return wrap2(img('nl-bw-3-fav-v3.jpg',L,'Die Favoriten −30 %',th)+R(codeblock('BLACK30',th),'16px 20px 0',th)+R(btn('Code einlösen &amp; Sets ansehen',L,th),'14px 20px 28px',th),th)
+    return wrap2(img('nl-bw-3-fav-v3.jpg',L,'Die Favoriten −30 %',th)+R(codeblock('BLACK30',th),'16px 20px 0',th)+R(btn('Sets ansehen',L,th),'14px 20px 28px',th),th)
 def m_teaser():
     th=T('dark','#000000');L=utm('/alle-produkte/','blackweek-teaser')
     return wrap2(img('nl-bw-4-ablauf.jpg',L,'BLACK30 läuft morgen ab',th)
@@ -83,7 +83,7 @@ def m_teaser():
 def m_insider():
     th=T('dark','#050506');L=utm(f'/?sp_bw=frueh&k={EA}','blackweek-insider')
     return wrap2(img('nl-bw-5-insider.jpg',L,'Insider −35 %',th)
-      +R(codeblock('BLACK35',th,'Dein Insider-Code – tippe auf den Button, dann ist er schon im Warenkorb.'),'14px 22px 0',th)
+      +R(codeblock('BLACK35',th,'Dein Insider-Code – kopieren und im Warenkorb bei „Rabattcode“ einfügen.'),'14px 22px 0',th)
       +R(rows(PR65,.65,th),'14px 22px 6px',th)
       +R(btn('Jetzt −35 % sichern',L,th),'20px 22px 6px',th)
       +R(P('Bestseller sind am Freitagmorgen erfahrungsgemäß zuerst weg.',th,12.5,c=th['mu']),'12px 26px 26px',th),th)
@@ -99,7 +99,7 @@ def m_so():
     return wrap2(img('nl-bw-7-so-v2.jpg',L,'Noch bis Montag −35 %',th)
       +R(codeblock('BLACK35',th),'10px 22px 0',th)
       +R(rows(PR65,.65,th),'10px 22px 6px',th)
-      +R(btn('Code einlösen &amp; bestellen',L,th),'20px 22px 6px',th)
+      +R(btn('Jetzt bestellen',L,th),'20px 22px 6px',th)
       +R(P('Fragen vor der Bestellung? Schreib uns auf Telegram, wir antworten schnell.',th,12.5,c=th['mu']),'12px 26px 26px',th),th)
 def m_last():
     th=T('light','#FFFFFF');L=utm('/alle-produkte/','blackweek-letzte')
