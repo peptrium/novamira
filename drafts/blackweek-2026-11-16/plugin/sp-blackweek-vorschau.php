@@ -122,7 +122,7 @@ add_action('wp_footer', function () {
 .sp-pc .qd.bw-qd b{border:1px dashed #9AA0A8;border-radius:5px;padding:1px 5px;letter-spacing:.06em;color:#07080A}
 .bw-strip .s .bw-tk{margin-left:6px;vertical-align:middle}
 .bw-bb .bw-bbc{display:flex}.bw-bb .r b.sv{display:block;font:600 13.5px/1.25 Inter,sans-serif;color:#fff}
-.bw-cbox{margin:10px 14px 4px}
+.bw-cbox{margin:0 0 12px}
 .bw-cb{border-radius:14px;padding:12px 13px;display:flex;align-items:center;gap:11px}
 .bw-cb.ok{background:#0D0F12;color:#fff}.bw-cb .ck{width:28px;height:28px;flex:0 0 28px;border-radius:50%;background:#3DDC84;color:#000;display:flex;align-items:center;justify-content:center;font:900 14px/1 Inter,sans-serif}
 .bw-cb .tx{flex:1;font:700 13.5px/1.35 Inter,sans-serif}.bw-cb .tx small{display:block;font:500 12px/1.35 Inter,sans-serif;color:#9AA0A8}
@@ -203,17 +203,17 @@ function drawer(){var dr=document.getElementById('sp-cart-drawer');if(!dr)return
  if(!CART){if(document.body.classList.contains('sp-cd-on')&&!drawer._f){drawer._f=1;fetch('/wp-json/wc/store/v1/cart',{credentials:'include'});}return;}
  var m=Math.pow(10,(CART.totals||{}).currency_minor_unit||2),r=0,n=0;(CART.items||[]).forEach(function(i){if(+i.prices.price>0){r+=(+i.prices.regular_price)/m*i.quantity;n++;}});
  if(!n){if(box)box.remove();return;}
- if(!box){box=document.createElement('div');box.className='bw-cbox';it.parentNode.insertBefore(box,it.nextSibling);}
+ var sub=document.getElementById('sp-cd-subtotal-row');if(box&&sub&&box.nextElementSibling!==sub){box.remove();box=null;}if(!box){box=document.createElement('div');box.className='bw-cbox';if(sub)sub.parentNode.insertBefore(box,sub);else it.parentNode.insertBefore(box,it.nextSibling);}
  var h,code=codeIn(CART);
  if(code){var d=(+CART.totals.total_discount+(+CART.totals.total_discount_tax||0))/m;h='<div class="bw-cb ok"><span class="ck">✓</span><div class="tx">'+code+' ist aktiv<small>−'+PCT+' % auf alles'+(d>0?' · du sparst '+fm(d):'')+'</small></div></div>';}
- else h='<div class="bw-cb miss"><div class="tx">Code vergessen?<small>Mit '+CODE+' sparst du '+fm(r*PCT/100)+'</small></div><button type="button" class="ap">Jetzt anwenden</button></div>';
+ else{var cur=(+CART.totals.total_items+(+CART.totals.total_items_tax||0)-(+CART.totals.total_discount||0)-(+CART.totals.total_discount_tax||0))/m;h='<div class="bw-cb miss"><div class="tx">Mit Code '+CODE+': '+fm(r*F)+'<small>statt '+fm(cur)+' – einlösen und '+PCT+' % sparen</small></div><button type="button" class="ap">Einlösen</button></div>';}
  if(box.dataset.h!==h){box.innerHTML=h;box.dataset.h=h;var b=box.querySelector('.ap');if(b)b.onclick=function(){b.disabled=true;b.textContent='…';applyCode();};}}
 /* --- Kasse: Hinweis, falls kein Code --- */
 function checkout(){var bl=document.querySelectorAll('.wp-block-woocommerce-checkout-order-summary-block');if(!bl.length||!window.wp||!wp.data)return;var d;try{d=wp.data.select('wc/store/cart').getCartData();}catch(e){return;}if(!d||!d.items)return;
  var has=!!codeIn(d),m=Math.pow(10,(d.totals||{}).currency_minor_unit||2),r=0;(d.items||[]).forEach(function(i){if(+i.prices.price>0)r+=(+i.prices.regular_price)/m*i.quantity;});
  bl.forEach(function(b){var ft=b.querySelector('.wc-block-components-totals-footer-item');if(!ft)return;var w=ft.closest('.wc-block-components-totals-wrapper');var row=b.querySelector('.bw-co');if(!row&&w){row=document.createElement('div');row.className='bw-co';w.parentNode.insertBefore(row,w);}if(!row)return;
   if(has||r<=0){row.style.display='none';return;}row.style.display='';
-  var h='<div><b>Code '+CODE+' vergessen?</b><small>Damit sparst du '+fm(r*PCT/100)+'.</small></div><button type="button" class="ap">Anwenden</button>';
+  var h='<div><b>Mit Code '+CODE+' nur '+fm(r*F)+'</b><small>für die Artikel statt '+fm(r)+' – jetzt einlösen und '+PCT+' % sparen.</small></div><button type="button" class="ap">Einlösen</button>';
   if(row.dataset.h!==h){row.innerHTML=h;row.dataset.h=h;row.querySelector('.ap').onclick=function(){this.textContent='…';setCk();try{wp.data.dispatch('wc/store/cart').applyCoupon(CODE);}catch(e){}};}});}
 /* --- Pop-up: zeigt während der Aktion den Code (Newsletter bleibt als 2. Option) --- */
 var nlpDone=0;function nlp(){var pp=document.getElementById('sp-nlp');if(!pp)return;var s1=pp.querySelector('.st[data-s="1"]');if(!s1)return;
