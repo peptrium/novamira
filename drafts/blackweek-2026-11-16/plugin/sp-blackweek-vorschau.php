@@ -192,12 +192,12 @@ function buybox(){var rp=document.getElementById('rx-price');if(!rp)return;
  var po=document.querySelector('#rx-buybox .rx-price-old');if(po){po.style.display='none';var dc=document.querySelector('#rx-buybox .rx-discount-chip');if(dc)dc.style.display='none';}
  if(rp.dataset.bwSet!==rp.innerHTML){var p0=po?num(po.textContent):num(rp.textContent);if(!p0)return;rp.dataset.bwo=p0;rp.innerHTML=fm(p0*F)+' <s style="font-size:.5em;color:#8A9098;font-weight:500">'+fm(p0)+'</s> <span class="bw-tag">−'+PCT+' %</span>';rp.dataset.bwSet=rp.innerHTML;}
  var p=+rp.dataset.bwo;
- var tt=document.getElementById('rx-total');if(tt&&tt.dataset.bwSet!==tt.innerHTML){var q=+((document.getElementById('rx-qtyfield')||{}).value||1);tt.innerHTML=fm(p*F*q);tt.dataset.bwSet=tt.innerHTML;}
+ var tt=document.getElementById('rx-total');if(tt&&tt.dataset.bwSet!==tt.innerHTML){var q=+((document.getElementById('rx-qtyfield')||{}).value||1);tt.innerHTML=fm(p*F*q)+' <small style="font-size:.55em;font-weight:600;color:#8A9098">mit Code</small>';tt.dataset.bwSet=tt.innerHTML;}
  document.querySelectorAll('#rx-vol-tiers .rx-tier__disc').forEach(function(e){if(e.dataset.bwSet===e.innerHTML)return;e.innerHTML=fm(num(e.textContent)*F);e.dataset.bwSet=e.innerHTML;});
  document.querySelectorAll('#rx-tiers .rx-tier').forEach(function(t){var q=+t.getAttribute('data-q');var e=t.querySelector('.rx-tier__disc');if(!e)return;var v=q===1?'Einzeln':fm(p*F*q);if(e.textContent!==v)e.textContent=v;});
  var bb=document.querySelector('#rx-buybox .bw-bb');if(!bb){bb=document.createElement('div');bb.className='bw-bb';var prr=document.querySelector('#rx-buybox .rx-price-row');if(prr)prr.parentNode.insertBefore(bb,prr.nextSibling);}
  if(!bb.querySelector('.bw-tk'))bb.innerHTML='<div class="bw-ey">'+NAME.toUpperCase()+'</div><div class="h"><div class="bg bw-chrome">−'+PCT+' %</div><div class="r"><b class="sv"></b><span>mit Code im Warenkorb</span></div></div><div class="bw-bbc">'+tk()+'</div><div class="ln"></div><div class="c"><span>'+(BF?'Endet in':'Code gilt noch')+'</span><b class="cc"></b></div>';
- var c=cd();bb.querySelector('.sv').textContent='Du sparst '+fm(p*(1-F));bb.querySelector('.cc').textContent=c[0]+'T · '+c[1]+' : '+c[2]+' : '+c[3];
+ var c=cd(),qq=+((document.getElementById('rx-qtyfield')||{}).value||1)||1;bb.querySelector('.sv').textContent='Du sparst '+fm(p*(1-F)*qq);bb.querySelector('.cc').textContent=c[0]+'T · '+c[1]+' : '+c[2]+' : '+c[3];
  var sh=document.querySelector('#rx-shiphint .rx-amt-shine');if(sh&&sh.dataset.bwSet!==sh.textContent){var v=Math.max(0,150-p*F);sh.textContent=fm(v);sh.dataset.bwSet=sh.textContent;}}
 /* --- Warenkorb: Code aktiv / vergessen --- */
 function drawer(){var dr=document.getElementById('sp-cart-drawer');if(!dr)return;var it=document.getElementById('sp-cd-items');if(!it)return;var box=dr.querySelector('.bw-cbox');
@@ -206,7 +206,7 @@ function drawer(){var dr=document.getElementById('sp-cart-drawer');if(!dr)return
  if(!n){if(box)box.remove();return;}
  var sub=document.getElementById('sp-cd-subtotal-row');if(box&&sub&&box.nextElementSibling!==sub){box.remove();box=null;}if(!box){box=document.createElement('div');box.className='bw-cbox';if(sub)sub.parentNode.insertBefore(box,sub);else it.parentNode.insertBefore(box,it.nextSibling);}
  var h,code=codeIn(CART);if(!code&&(CART.coupons||[]).length){var dd=(+CART.totals.total_discount+(+CART.totals.total_discount_tax||0))/m;if(dd>=r*PCT/100*0.97)code=String(CART.coupons[0].code).toUpperCase();}
- if(code){var d=(+CART.totals.total_discount+(+CART.totals.total_discount_tax||0))/m;h='<div class="bw-cb ok"><span class="ck">✓</span><div class="tx">'+code+' ist aktiv<small>−'+PCT+' % auf alles'+(d>0?' · du sparst '+fm(d):'')+'</small></div></div>';}
+ if(code){dr.querySelectorAll('.sp-cd-item-bundle:not(.sp-cd-item-gift-badge)').forEach(function(e){var t=code+' −'+PCT+'%';if(e.textContent!==t)e.textContent=t;});var d=(+CART.totals.total_discount+(+CART.totals.total_discount_tax||0))/m;h='<div class="bw-cb ok"><span class="ck">✓</span><div class="tx">'+code+' ist aktiv<small>−'+PCT+' % auf alles'+(d>0?' · du sparst '+fm(d):'')+'</small></div></div>';}
  else{box.remove();return;}
  if(box.dataset.h!==h){box.innerHTML=h;box.dataset.h=h;var b=box.querySelector('.ap');if(b)b.onclick=function(){copyCode();openCouponField();};}}
 /* --- Kasse: Hinweis, falls kein Code --- */
