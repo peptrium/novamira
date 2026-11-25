@@ -7,8 +7,9 @@ def utm(path,c): return f'https://peptrium.com{path}{"&" if "?" in path else "?"
 def row(inner,pad,bg=BG,align='left'): return f'<tr><td style="padding:{pad};background:{bg};text-align:{align};font-family:{F};">{inner}</td></tr>'
 def btnw(t,u): return f'<a href="{u}" style="display:block;background:#FFFFFF;color:#000000;text-align:center;text-decoration:none;font-family:{F};font-size:16px;font-weight:800;padding:17px 18px;border-radius:999px;">{t} &rarr;</a>'
 def logo(): return f'<img src="{U}2026/08/IMG_2644-cropped-300x300.png" width="44" height="44" alt="Peptrium" style="display:block;margin:0 auto;width:44px;height:44px;border:0;">'
+def brand(c='#FFFFFF'): return logo()+f'<div style="font-family:{F};font-size:12px;font-weight:800;letter-spacing:.32em;color:{c};margin-top:10px;padding-left:.32em;">PEPTRIUM</div>'
 def foot(extra=''):
-    return (f'<div style="height:1px;background:#1E2024;margin:0 0 22px;"></div>'+logo()
+    return (f'<div style="height:1px;background:#1E2024;margin:0 0 22px;"></div>'+brand()
       +f'<div style="font-size:11px;color:#6E747B;margin-top:12px;line-height:1.6;">Alle Produkte ausschließlich für Laborforschungszwecke.<br>Nicht für den menschlichen oder veterinärmedizinischen Gebrauch.</div>'
       +f'<div style="font-size:11px;color:#6E747B;margin-top:12px;line-height:1.6;">{extra}Du bekommst diese Mail, weil du den Peptrium-Newsletter abonniert hast.<br><a href="https://peptrium.com/impressum/" style="color:#6E747B;">Impressum</a> · <a href="[[unsubscribe_link]]" style="color:#6E747B;">Abmelden</a></div>')
 def wrap(rows,extra=''):
@@ -46,7 +47,7 @@ def grid(items,f,th):
     cells=[f'<td width="50%" valign="top" style="padding:12px;background:#F7F7F8;border:1px solid #D2D4D7;font-family:{F};"><div style="font-size:13px;font-weight:600;color:#07080A;">{n}</div><div style="font-size:11.5px;color:#6B7076;">{v}</div><div style="margin-top:8px;"><span style="font-size:11.5px;color:#9AA0A8;text-decoration:line-through;">{eur(p)}</span>&nbsp;<span style="font-size:17px;font-weight:800;color:#07080A;">{eur(p*f)}</span></div></td>' for n,v,p in items]
     return f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tr>{cells[0]}{cells[1]}</tr><tr>{cells[2]}{cells[3]}</tr></table>'
 def foot2(th,extra=''):
-    return (f'<div style="height:1px;background:{th["line"]};margin:0 0 22px;"></div>'+logo()
+    return (f'<div style="height:1px;background:{th["line"]};margin:0 0 22px;"></div>'+brand(th["fg"])
       +f'<div style="font-size:11px;color:{th["ft"]};margin-top:12px;line-height:1.6;">{extra}Alle Produkte ausschließlich für Laborforschungszwecke.<br>Nicht für den menschlichen oder veterinärmedizinischen Gebrauch.</div>'
       +f'<div style="font-size:11px;color:{th["ft"]};margin-top:12px;line-height:1.6;">Du bekommst diese Mail, weil du den Peptrium-Newsletter abonniert hast.<br><a href="https://peptrium.com/impressum/" style="color:{th["ft"]};">Impressum</a> · <a href="[[unsubscribe_link]]" style="color:{th["ft"]};">Abmelden</a></div>')
 def wrap2(rows_,th,extra=''):
@@ -89,21 +90,21 @@ def m_insider():
       +R(P('Bestseller sind am Freitagmorgen erfahrungsgemäß zuerst weg.',th,12.5,c=th['mu']),'12px 26px 26px',th),th)
 def m_bf():
     th=T('light','#E9EAEC');L=utm('/alle-produkte/','blackweek-blackfriday')
-    return wrap2(img('nl-bw-6-bf-30.jpg',L,'Black Friday −30 %',th)
+    return wrap2(img('nl-bw-6-bf-30b.jpg',L,'Black Friday −30 %',th)
       +R(codeblock('BLACK30',th),'16px 20px 0',th)
       +R(grid([('Retatrutide','10 mg',79.90),('GHK-Cu','50 mg',39.90),('GLOW','70 mg',139.90),('Pen Retatrutide','20 mg',264.90)],.7,th),'16px 20px 4px',th)
       +R(checks(['Versand in 2 Werktagen, diskret verpackt','Geschenke ab 200 € bleiben','Bei Vorkasse zählt das Bestelldatum'],th),'12px 20px 4px',th)
       +R(btn('Zum Black Friday',L,th),'18px 20px 28px',th),th)
 def m_so():
     th=T('dark','#0B0C0E');L=utm('/alle-produkte/','blackweek-sonntag')
-    return wrap2(img('nl-bw-7-so-30.jpg',L,'Noch bis Montag −30 %',th)
+    return wrap2(img('nl-bw-7-so-30b.jpg',L,'Noch bis Montag −30 %',th)
       +R(codeblock('BLACK30',th),'10px 22px 0',th)
       +R(rows(PR65,.7,th),'10px 22px 6px',th)
       +R(btn('Jetzt bestellen',L,th),'20px 22px 6px',th)
       +R(P('Fragen vor der Bestellung? Schreib uns auf Telegram, wir antworten schnell.',th,12.5,c=th['mu']),'12px 26px 26px',th),th)
 def m_last():
     th=T('light','#FFFFFF');L=utm('/alle-produkte/','blackweek-letzte')
-    return wrap2(img('nl-bw-8-last-30.jpg',L,'Heute ist Schluss',th)
+    return wrap2(img('nl-bw-8-last-30b.jpg',L,'Heute ist Schluss',th)
       +R(codeblock('BLACK30',th),'16px 22px 0',th)
       +R(btn('Letzte Chance nutzen',L,th),'18px 22px 10px',th)
       +R(P('Es zählt deine Bestellung, nicht der Zahlungseingang.',th,12.5,c=th['mu']),'4px 26px 26px',th),th)
