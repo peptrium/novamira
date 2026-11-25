@@ -21,7 +21,7 @@ def plist(rows,f):
     t=''.join(f'<tr><td style="padding:13px 0;border-bottom:1px solid #1C1E22;font-family:{F};font-size:14px;color:#FFFFFF;">{n}<br><span style="font-size:12.5px;color:{MU};">{v}</span></td><td align="right" style="padding:13px 0;border-bottom:1px solid #1C1E22;font-family:{F};white-space:nowrap;"><span style="font-size:12px;color:#6E747B;text-decoration:line-through;">{eur(p)}</span>&nbsp;&nbsp;<span style="font-size:16px;font-weight:800;color:#FFFFFF;">{eur(p*f)}</span></td></tr>' for n,v,p in rows)
     return f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #1C1E22;">{t}</table>'
 def p(t,c=LT,sz=15,al='center'): return f'<div style="font-size:{sz}px;line-height:1.6;color:{c};text-align:{al};">{t}</div>'
-PR=[('Retatrutide','10 mg',79.90),('Retatrutide','20 mg',149.90),('GHK-Cu','50 mg',39.90),('GLOW','70 mg',139.90),('Peptrium-Pen Retatrutide','20 mg',264.90)]
+PR=[('Retatrutide','10 mg',79.90),('Retatrutide','20 mg',149.90),('GHK-Cu','50 mg',39.90),('GLOW','70 mg',139.90)]
 def start():
     L=utm('/alle-produkte/','blackweek-start')
     return wrap(hero('nl-bw1-hero.jpg',L,'Black Week −30 % auf alles')
@@ -55,7 +55,7 @@ def wrap2(rows_,th,extra=''):
       f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:{th["bg"]};">'+rows_
       +R(foot2(th,extra),'14px 22px 30px',th,'center')+'</table></td></tr></table>')
 def img(name,link,alt,th): return f'<tr><td style="padding:0;line-height:0;background:{th["bg"]};"><a href="{link}" style="display:block;line-height:0;"><img src="{E}{name}" width="600" alt="{alt}" style="display:block;width:100%;max-width:600px;height:auto;border:0;"></a></td></tr>'
-PR65=[('Retatrutide','10 mg',79.90),('Retatrutide','20 mg',149.90),('GHK-Cu','50 mg',39.90),('GLOW','70 mg',139.90),('Peptrium-Pen Retatrutide','20 mg',264.90)]
+PR65=[('Retatrutide','10 mg',79.90),('Retatrutide','20 mg',149.90),('GHK-Cu','50 mg',39.90),('GLOW','70 mg',139.90)]
 def codeblock(code,th,hint='Kopiere den Code und füge ihn im Warenkorb bei „Rabattcode“ ein.'):
     dk=th['btn']=='w'
     bg='#0E1013' if dk else '#FFFFFF'; bd='rgba(255,255,255,.18)' if dk else '#D2D4D7'; fg='#FFFFFF' if dk else '#07080A'; dash='rgba(255,255,255,.55)' if dk else '#9AA0A8'
@@ -88,24 +88,44 @@ def m_insider():
       +R(rows(PR65,.65,th),'14px 22px 6px',th)
       +R(btn('Jetzt −35 % sichern',L,th),'20px 22px 6px',th)
       +R(P('Bestseller sind am Freitagmorgen erfahrungsgemäß zuerst weg.',th,12.5,c=th['mu']),'12px 26px 26px',th),th)
+
+PENS=[('reta','Peptrium-Pen Retatrutide','20 · 30 · 40 mg',264.90,'/produkt/peptrium-pen-retatrutide/'),
+      ('ghk','Peptrium-Pen GHK-Cu','50 · 100 mg',169.90,'/produkt/peptrium-pen-ghk-cu/'),
+      ('mots','Peptrium-Pen MOTS-c','20 · 40 mg',189.90,'/produkt/peptrium-pen-mots-c/')]
+def pens(th,camp):
+    card='#FFFFFF' if th['btn']=='b' else '#14161A'; bd=th['line']
+    h=(f'<div style="font-size:11px;font-weight:700;letter-spacing:.24em;color:{th["mu"]};text-align:left;margin:0 0 6px;">AUCH DIE PENS</div>'
+       f'<div style="font-size:22px;font-weight:800;line-height:1.2;color:{th["fg"]};text-align:left;">Peptrium-Pens −30 %</div>'
+       f'<div style="font-size:14px;line-height:1.5;color:{th["mu"]};text-align:left;margin:4px 0 14px;">Fertig gemischt – kein Anmischen, kein Zubehör nötig.</div>')
+    for k,n,v,p,u in PENS:
+        L=utm(u,camp)
+        h+=(f'<a href="{L}" style="display:block;text-decoration:none;margin:0 0 10px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:{card};border:1px solid {bd};border-radius:14px;">'
+            f'<tr><td width="44%" style="padding:0;line-height:0;"><img src="{E}nl-bw-pen-{k}.jpg" width="240" alt="{n}" style="display:block;width:100%;height:auto;border:0;border-radius:13px 0 0 13px;"></td>'
+            f'<td style="padding:10px 14px;font-family:{F};text-align:left;"><div style="font-size:14.5px;font-weight:700;color:{th["fg"]};line-height:1.3;">{n}</div>'
+            f'<div style="font-size:12px;color:{th["mu"]};margin-top:2px;">{v}</div>'
+            f'<div style="margin-top:6px;white-space:nowrap;"><span style="font-size:12px;color:{th["mu"]};text-decoration:line-through;">ab {eur(p)}</span>&nbsp; <span style="font-size:16px;font-weight:800;color:{th["fg"]};">{eur(p*.7)}</span></div></td></tr></table></a>')
+    return h
 def m_bf():
     th=T('light','#E9EAEC');L=utm('/alle-produkte/','blackweek-blackfriday')
-    return wrap2(img('nl-bw-6-bf-30b.jpg',L,'Black Friday −30 %',th)
+    return wrap2(img('nl-bw-6-bf-30c.jpg',L,'Black Friday −30 %',th)
       +R(codeblock('BLACK30',th),'16px 20px 0',th)
-      +R(grid([('Retatrutide','10 mg',79.90),('GHK-Cu','50 mg',39.90),('GLOW','70 mg',139.90),('Pen Retatrutide','20 mg',264.90)],.7,th),'16px 20px 4px',th)
+      +R(grid([('Retatrutide','10 mg',79.90),('GHK-Cu','50 mg',39.90),('Retatrutide','20 mg',149.90),('GLOW','70 mg',139.90)],.7,th),'16px 20px 4px',th)
+      +R(pens(th,'blackweek-blackfriday'),'18px 20px 4px',th)
       +R(checks(['Versand in 2 Werktagen, diskret verpackt','Geschenke ab 200 € bleiben','Bei Vorkasse zählt das Bestelldatum'],th),'12px 20px 4px',th)
       +R(btn('Zum Black Friday',L,th),'18px 20px 28px',th),th)
 def m_so():
     th=T('dark','#0B0C0E');L=utm('/alle-produkte/','blackweek-sonntag')
-    return wrap2(img('nl-bw-7-so-30b.jpg',L,'Noch bis Montag −30 %',th)
+    return wrap2(img('nl-bw-7-so-30c.jpg',L,'Noch bis Montag −30 %',th)
       +R(codeblock('BLACK30',th),'10px 22px 0',th)
       +R(rows(PR65,.7,th),'10px 22px 6px',th)
+      +R(pens(th,'blackweek-sonntag'),'20px 22px 4px',th)
       +R(btn('Jetzt bestellen',L,th),'20px 22px 6px',th)
       +R(P('Fragen vor der Bestellung? Schreib uns auf Telegram, wir antworten schnell.',th,12.5,c=th['mu']),'12px 26px 26px',th),th)
 def m_last():
     th=T('light','#FFFFFF');L=utm('/alle-produkte/','blackweek-letzte')
-    return wrap2(img('nl-bw-8-last-30b.jpg',L,'Heute ist Schluss',th)
+    return wrap2(img('nl-bw-8-last-30c.jpg',L,'Heute ist Schluss',th)
       +R(codeblock('BLACK30',th),'16px 22px 0',th)
+      +R(pens(th,'blackweek-letzte'),'20px 22px 4px',th)
       +R(btn('Letzte Chance nutzen',L,th),'18px 22px 10px',th)
       +R(P('Es zählt deine Bestellung, nicht der Zahlungseingang.',th,12.5,c=th['mu']),'4px 26px 26px',th),th)
 MAILS={'pen':(m_pen,'Halbzeit: der Pen, jetzt −30 %','Fertig gemischt, kein Anmischen – noch bis Donnerstag.','2026-11-19T17:00:00Z','nb','Black Week 2 – Pen (Do 19.11. 18 Uhr)'),
@@ -113,7 +133,7 @@ MAILS={'pen':(m_pen,'Halbzeit: der Pen, jetzt −30 %','Fertig gemischt, kein An
  'teaser':(m_teaser,'Morgen läuft BLACK30 ab','Nur noch bis Donnerstag, 23:59: −30 % auf alles.','2026-11-25T17:00:00Z','all','Black Week 4 – BLACK30 läuft ab (Mi 25.11. 18 Uhr)'),
  'insider':(m_insider,'Für dich schon heute: −35 % 🖤','Black Friday startet für alle erst morgen.','2026-11-26T17:00:00Z','all','Black Week 5 – Insider −35 % (Do 26.11. 18 Uhr)'),
  'blackfriday':(m_bf,'Black Friday: −30 % – verlängert bis Montag','BLACK30 gilt jetzt bis Cyber Monday, 23:59.','2026-11-27T07:00:00Z','all','Black Week 6 – Black Friday (Fr 27.11. 8 Uhr)'),
- 'sonntag':(m_so,'Noch bis Montag: −30 %','Falls du noch überlegst – hier das Wichtigste auf einen Blick.','2026-11-29T10:00:00Z','nb','Black Week 7 – Erinnerung (So 29.11. 11 Uhr)'),
+ 'sonntag':(m_so,'Nur noch 2 Tage: −30 % auf alles','Am Montag um 23:59 ist Schluss.','2026-11-29T10:00:00Z','nb','Black Week 7 – Erinnerung (So 29.11. 11 Uhr)'),
  'letzte':(m_last,'Heute 23:59 ist Schluss','Letzter Tag: −30 % auf alles.','2026-11-30T09:00:00Z','all','Black Week 8 – Letzte Chance (Mo 30.11. 10 Uhr)')}
 
 SUBJ={'start':('Black Week: −30 % auf alles 🖤','Ab jetzt: Peptide, Pens und Zubehör – automatisch reduziert.')}
