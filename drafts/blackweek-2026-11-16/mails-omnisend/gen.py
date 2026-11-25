@@ -89,31 +89,31 @@ def m_insider():
       +R(P('Bestseller sind am Freitagmorgen erfahrungsgemäß zuerst weg.',th,12.5,c=th['mu']),'12px 26px 26px',th),th)
 def m_bf():
     th=T('light','#E9EAEC');L=utm('/alle-produkte/','blackweek-blackfriday')
-    return wrap2(img('nl-bw-6-bf-v3.jpg',L,'Black Friday −35 %',th)
-      +R(codeblock('BLACK35',th),'16px 20px 0',th)
-      +R(grid([('Retatrutide','10 mg',79.90),('GHK-Cu','50 mg',39.90),('GLOW','70 mg',139.90),('Pen Retatrutide','20 mg',264.90)],.65,th),'16px 20px 4px',th)
+    return wrap2(img('nl-bw-6-bf-30.jpg',L,'Black Friday −30 %',th)
+      +R(codeblock('BLACK30',th),'16px 20px 0',th)
+      +R(grid([('Retatrutide','10 mg',79.90),('GHK-Cu','50 mg',39.90),('GLOW','70 mg',139.90),('Pen Retatrutide','20 mg',264.90)],.7,th),'16px 20px 4px',th)
       +R(checks(['Versand in 2 Werktagen, diskret verpackt','Geschenke ab 200 € bleiben','Bei Vorkasse zählt das Bestelldatum'],th),'12px 20px 4px',th)
       +R(btn('Zum Black Friday',L,th),'18px 20px 28px',th),th)
 def m_so():
     th=T('dark','#0B0C0E');L=utm('/alle-produkte/','blackweek-sonntag')
-    return wrap2(img('nl-bw-7-so-v2.jpg',L,'Noch bis Montag −35 %',th)
-      +R(codeblock('BLACK35',th),'10px 22px 0',th)
-      +R(rows(PR65,.65,th),'10px 22px 6px',th)
+    return wrap2(img('nl-bw-7-so-30.jpg',L,'Noch bis Montag −30 %',th)
+      +R(codeblock('BLACK30',th),'10px 22px 0',th)
+      +R(rows(PR65,.7,th),'10px 22px 6px',th)
       +R(btn('Jetzt bestellen',L,th),'20px 22px 6px',th)
       +R(P('Fragen vor der Bestellung? Schreib uns auf Telegram, wir antworten schnell.',th,12.5,c=th['mu']),'12px 26px 26px',th),th)
 def m_last():
     th=T('light','#FFFFFF');L=utm('/alle-produkte/','blackweek-letzte')
-    return wrap2(img('nl-bw-8-last-v2.jpg',L,'Heute ist Schluss',th)
-      +R(codeblock('BLACK35',th),'16px 22px 0',th)
+    return wrap2(img('nl-bw-8-last-30.jpg',L,'Heute ist Schluss',th)
+      +R(codeblock('BLACK30',th),'16px 22px 0',th)
       +R(btn('Letzte Chance nutzen',L,th),'18px 22px 10px',th)
       +R(P('Es zählt deine Bestellung, nicht der Zahlungseingang.',th,12.5,c=th['mu']),'4px 26px 26px',th),th)
 MAILS={'pen':(m_pen,'Halbzeit: der Pen, jetzt −30 %','Fertig gemischt, kein Anmischen – noch bis Donnerstag.','2026-11-19T17:00:00Z','nb','Black Week 2 – Pen (Do 19.11. 18 Uhr)'),
  'favoriten':(m_fav,'Die Favoriten, jetzt 30 % günstiger','Starter-Set, Pen-Set und GLOW – fertig zusammengestellt.','2026-11-21T10:00:00Z','nb','Black Week 3 – Favoriten (Sa 21.11. 11 Uhr)'),
  'teaser':(m_teaser,'Morgen läuft BLACK30 ab','Nur noch bis Donnerstag, 23:59: −30 % auf alles.','2026-11-25T17:00:00Z','all','Black Week 4 – BLACK30 läuft ab (Mi 25.11. 18 Uhr)'),
  'insider':(m_insider,'Für dich schon heute: −35 % 🖤','Black Friday startet für alle erst morgen.','2026-11-26T17:00:00Z','all','Black Week 5 – Insider −35 % (Do 26.11. 18 Uhr)'),
- 'blackfriday':(m_bf,'Black Friday: −35 % auf alles','Der größte Rabatt des Jahres. Bis Montag.','2026-11-27T07:00:00Z','all','Black Week 6 – Black Friday (Fr 27.11. 8 Uhr)'),
- 'sonntag':(m_so,'Noch bis Montag: −35 %','Falls du noch überlegst – hier das Wichtigste auf einen Blick.','2026-11-29T10:00:00Z','nb','Black Week 7 – Erinnerung (So 29.11. 11 Uhr)'),
- 'letzte':(m_last,'Heute 23:59 ist Schluss','Letzter Tag: −35 % auf alles.','2026-11-30T09:00:00Z','all','Black Week 8 – Letzte Chance (Mo 30.11. 10 Uhr)')}
+ 'blackfriday':(m_bf,'Black Friday: −30 % – verlängert bis Montag','BLACK30 gilt jetzt bis Cyber Monday, 23:59.','2026-11-27T07:00:00Z','all','Black Week 6 – Black Friday (Fr 27.11. 8 Uhr)'),
+ 'sonntag':(m_so,'Noch bis Montag: −30 %','Falls du noch überlegst – hier das Wichtigste auf einen Blick.','2026-11-29T10:00:00Z','nb','Black Week 7 – Erinnerung (So 29.11. 11 Uhr)'),
+ 'letzte':(m_last,'Heute 23:59 ist Schluss','Letzter Tag: −30 % auf alles.','2026-11-30T09:00:00Z','all','Black Week 8 – Letzte Chance (Mo 30.11. 10 Uhr)')}
 
 SUBJ={'start':('Black Week: −30 % auf alles 🖤','Ab jetzt: Peptide, Pens und Zubehör – automatisch reduziert.')}
 if __name__=='__main__':

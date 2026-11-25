@@ -28,14 +28,14 @@
   "name": "Black Week 5 – Insider −35 % (Do 26.11. 18 Uhr)"
  },
  "blackfriday": {
-  "subject": "Black Friday: −35 % auf alles",
-  "preheader": "Der größte Rabatt des Jahres. Bis Montag.",
+  "subject": "Black Friday: −30 % – verlängert bis Montag",
+  "preheader": "BLACK30 gilt jetzt bis Cyber Monday, 23:59.",
   "at": "2026-11-27T07:00:00Z",
   "aud": "all",
   "name": "Black Week 6 – Black Friday (Fr 27.11. 8 Uhr)"
  },
  "sonntag": {
-  "subject": "Noch bis Montag: −35 %",
+  "subject": "Noch bis Montag: −30 %",
   "preheader": "Falls du noch überlegst – hier das Wichtigste auf einen Blick.",
   "at": "2026-11-29T10:00:00Z",
   "aud": "nb",
@@ -43,7 +43,7 @@
  },
  "letzte": {
   "subject": "Heute 23:59 ist Schluss",
-  "preheader": "Letzter Tag: −35 % auf alles.",
+  "preheader": "Letzter Tag: −30 % auf alles.",
   "at": "2026-11-30T09:00:00Z",
   "aud": "all",
   "name": "Black Week 8 – Letzte Chance (Mo 30.11. 10 Uhr)"
