@@ -4,7 +4,7 @@ from artikel import ARTIKEL
 arts = []
 for i, x in enumerate(ARTIKEL):
     body = x['body'].replace('<table class="rg-tab">', '<div class="tw"><table class="rg-tab">').replace('</table>', '</table></div>')
-    arts.append({'slug': x['slug'], 'title': x['title'], 'excerpt': x['lead'], 'content': body.strip(), 'seo': [x['seo_title'], x['meta']], 'faq': [list(f) for f in x['faq']], 'order': i + 7})
+    arts.append({'slug': x['slug'], 'title': x['title'], 'excerpt': x['lead'], 'content': body.strip(), 'seo': [x['seo_title'], x['meta']], 'faq': [list(f) for f in x['faq']], 'order': i + 11})
 data = base64.b64encode(json.dumps(arts, ensure_ascii=False).encode()).decode()
 php = r'''
 $arts = json_decode(base64_decode('%s'), true);
